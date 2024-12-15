@@ -1,0 +1,48 @@
+.contrast-control {
+    display: flex;
+    gap: 4px;
+}
+
+.contrast-btn {
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid #003D8F;
+}
+
+.contrast-btn.normal {
+    background: #003D8F;
+    color: white;
+}
+
+.contrast-btn.white {
+    background: white;
+    color: #003D8F;
+}
+
+.contrast-btn.black {
+    background: black;
+    color: white;
+}
+
+body.contrast-white {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+body.contrast-white * {
+    background-color: #fff !important;
+    color: #000 !important;
+    border-color: #000 !important;
+}
+
+body.contrast-black {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+body.contrast-black * {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}

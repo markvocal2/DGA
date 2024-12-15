@@ -1,0 +1,46 @@
+/*
+Theme Name: WP Devs
+Theme URI: https://wpdevs.co
+Author: WP Devs
+Author URI: https://wpdevs.co
+Description: Theme สำหรับหน่วยงานราชการ รองรับการติดตั้ง Plugin อัตโนมัติ
+Version: 1.0.0
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: wp-devs
+*/
+
+/* เพิ่ม CSS พื้นฐาน */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.site-header {
+    position: relative;
+}
+
+.site-branding {
+    padding: 20px;
+    text-align: center;
+}
+
+.site-title {
+    margin: 0;
+    font-size: 24px;
+}
+
+.site-title a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.site-footer {
+    padding: 20px;
+    text-align: center;
+    background: #f5f5f5;
+}

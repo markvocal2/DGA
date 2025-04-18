@@ -5160,443 +5160,791 @@ function generate_complaint_reference($post_id) {
     return "CPL-{$year}{$month}-{$serial}";
 }
 
-// AJAX handler for form submission
-function handle_complaint_submission() {
+/**
+ * Complaint Handling System for WordPress - Security Enhanced
+ *
+ * Handles AJAX submission, CPT registration, meta boxes, admin columns,
+ * and notifications for a complaint management system.
+ */
+
+// =============================================================================
+// AJAX Handler for Complaint Submission
+// =============================================================================
+
+/**
+ * Handles the AJAX submission of the complaint form.
+ * Verifies nonce, validates input, sanitizes data, saves the complaint,
+ * and sends notifications.
+ */
+function myplugin_handle_complaint_submission() {
     // Debug log
-    if (WP_DEBUG) {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
         error_log('Complaint submission received');
     }
-    
-    // Verify nonce
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'complaint_form_nonce')) {
-        if (WP_DEBUG) {
-            error_log('Nonce verification failed: ' . $_POST['nonce']);
+
+    // 1. Verify Nonce (Security Check)
+    if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_key($_POST['nonce']), 'complaint_form_nonce')) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $nonce_received = isset($_POST['nonce']) ? sanitize_key($_POST['nonce']) : 'Not set';
+            error_log('Nonce verification failed. Nonce received: ' . $nonce_received);
         }
-        wp_send_json_error(array('message' => 'ตรวจสอบความปลอดภัยไม่ผ่าน กรุณารีเฟรชหน้าเว็บแล้วลองใหม่อีกครั้ง'));
-        return;
+        // Send generic error to user
+        wp_send_json_error(array('message' => 'การตรวจสอบความปลอดภัยล้มเหลว กรุณารีเฟรชหน้าและลองอีกครั้ง (Security check failed. Please refresh and try again.)'));
+        return; // Use return instead of wp_die() in AJAX handlers
     }
-    
-    // Get and decode the submitted data
+
+    // 2. Get and Decode Submitted Data
     if (!isset($_POST['data'])) {
-        if (WP_DEBUG) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('No data received in submission');
         }
-        wp_send_json_error(array('message' => 'ไม่พบข้อมูลที่ส่งมา'));
+        wp_send_json_error(array('message' => 'ไม่พบข้อมูลที่ส่งมา (No data received.)'));
         return;
     }
 
-    $complaint_data = json_decode(stripslashes($_POST['data']), true);
-    
-    if (empty($complaint_data)) {
-        if (WP_DEBUG) {
-            error_log('Empty complaint data after decoding');
+    // Use stripslashes only if necessary (e.g., magic quotes enabled, though deprecated)
+    $raw_data = stripslashes($_POST['data']);
+    $complaint_data = json_decode($raw_data, true);
+
+    // Check for JSON decoding errors (PHP 5.3+)
+    if (json_last_error() !== JSON_ERROR_NONE) {
+         if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('JSON Decode Error: ' . json_last_error_msg() . ' | Raw data: ' . $raw_data);
         }
-        wp_send_json_error(array('message' => 'ข้อมูลไม่ถูกต้อง'));
+        wp_send_json_error(array('message' => 'รูปแบบข้อมูลไม่ถูกต้อง (Invalid data format.)'));
         return;
     }
 
-    if (WP_DEBUG) {
-        error_log('Complaint data received: ' . print_r($complaint_data, true));
+    if (empty($complaint_data) || !is_array($complaint_data)) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Empty or invalid complaint data after decoding.');
+        }
+        wp_send_json_error(array('message' => 'ข้อมูลไม่ถูกต้อง (Invalid data.)'));
+        return;
     }
 
-    // Validate required fields
-    $required_fields = array(
-        'type' => 'ประเภทเรื่องร้องเรียน',
-        'department' => 'หน่วยงานที่ถูกร้องเรียน',
-        'details' => 'รายละเอียด'
-    );
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        // Be cautious logging potentially sensitive data even in debug mode
+        // error_log('Complaint data received: ' . print_r($complaint_data, true));
+        error_log('Complaint data received (structure check). Keys: ' . implode(', ', array_keys($complaint_data)));
+    }
 
+    // 3. Validate Input Data
     $errors = array();
-    foreach ($required_fields as $field => $label) {
-        if (empty($complaint_data[$field])) {
-            $errors[] = "กรุณากรอก{$label}";
+    $validated_data = array(); // Store validated data
+
+    // Validate Type
+    $valid_types = myplugin_get_valid_complaint_types(); // Helper function needed
+    if (empty($complaint_data['type'])) {
+        $errors[] = 'กรุณาเลือกประเภทเรื่องร้องเรียน (Please select complaint type.)';
+    } elseif (!array_key_exists($complaint_data['type'], $valid_types)) {
+        $errors[] = 'ประเภทเรื่องร้องเรียนไม่ถูกต้อง (Invalid complaint type selected.)';
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Invalid complaint type submitted: ' . $complaint_data['type']);
+        }
+    } else {
+        $validated_data['type'] = $complaint_data['type'];
+        // Validate 'other' subtype if type is 'other'
+        if ($validated_data['type'] === 'other') {
+            if (empty($complaint_data['typeOther'])) {
+                $errors[] = 'กรุณาระบุประเภทเรื่องร้องเรียนอื่นๆ (Please specify other complaint type.)';
+            } else {
+                 // Sanitize 'typeOther' here before adding to validated data if needed later
+                 $validated_data['typeOther'] = sanitize_text_field($complaint_data['typeOther']);
+            }
         }
     }
 
-    // Additional validation for "other" type
-    if (isset($complaint_data['type']) && $complaint_data['type'] === 'other' && empty($complaint_data['typeOther'])) {
-        $errors[] = 'กรุณาระบุประเภทเรื่องร้องเรียนอื่นๆ';
+    // Validate Department
+    $valid_departments = myplugin_get_valid_departments(); // Helper function needed (can return true if free text is allowed)
+    if (empty($complaint_data['department'])) {
+        $errors[] = 'กรุณาเลือกหน่วยงานที่ถูกร้องเรียน (Please select department.)';
+    } elseif ($valid_departments !== true && !in_array($complaint_data['department'], $valid_departments)) {
+         // If $valid_departments is an array and the submitted value isn't in it
+        $errors[] = 'หน่วยงานที่ถูกร้องเรียนไม่ถูกต้อง (Invalid department selected.)';
+         if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Invalid department submitted: ' . $complaint_data['department']);
+        }
+    } else {
+        // Sanitize department name even if free text
+        $validated_data['department'] = sanitize_text_field($complaint_data['department']);
     }
 
-    // Validate personal info if not anonymous
-    if (empty($complaint_data['isAnonymous'])) {
+    // Validate Details
+    if (empty($complaint_data['details'])) {
+        $errors[] = 'กรุณากรอกรายละเอียด (Please enter details.)';
+    } else {
+        // Use wp_kses_post for details to allow safe HTML
+        $validated_data['details'] = wp_kses_post($complaint_data['details']);
+    }
+
+    // Validate Anonymous Flag
+    $validated_data['isAnonymous'] = !empty($complaint_data['isAnonymous']); // Boolean
+
+    // Validate Personal Info if Not Anonymous
+    if (!$validated_data['isAnonymous']) {
         if (empty($complaint_data['name'])) {
-            $errors[] = 'กรุณากรอกชื่อ-นามสกุล';
+            $errors[] = 'กรุณากรอกชื่อ-นามสกุล (Please enter name.)';
+        } else {
+            $validated_data['name'] = sanitize_text_field($complaint_data['name']);
         }
+
+        // Validate contact info - require at least one
         if (empty($complaint_data['phone']) && empty($complaint_data['email'])) {
-            $errors[] = 'กรุณากรอกเบอร์โทรศัพท์หรืออีเมลอย่างน้อย 1 ช่องทาง';
+            $errors[] = 'กรุณากรอกเบอร์โทรศัพท์หรืออีเมลอย่างน้อย 1 ช่องทาง (Please enter phone or email.)';
+        } else {
+             // Validate and sanitize phone (basic sanitization)
+            if (!empty($complaint_data['phone'])) {
+                 // Basic validation example (allow digits, +, -, spaces)
+                 if (!preg_match('/^[0-9\s\-\+]+$/', $complaint_data['phone'])) {
+                     $errors[] = 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (Invalid phone format.)';
+                 } else {
+                    $validated_data['phone'] = sanitize_text_field($complaint_data['phone']);
+                 }
+            } else {
+                 $validated_data['phone'] = '';
+            }
+             // Validate and sanitize email
+            if (!empty($complaint_data['email'])) {
+                if (!is_email($complaint_data['email'])) {
+                     $errors[] = 'รูปแบบอีเมลไม่ถูกต้อง (Invalid email format.)';
+                } else {
+                    $validated_data['email'] = sanitize_email($complaint_data['email']);
+                }
+            } else {
+                 $validated_data['email'] = '';
+            }
         }
+         // Sanitize address
+        $validated_data['address'] = isset($complaint_data['address']) ? sanitize_textarea_field($complaint_data['address']) : '';
     }
 
-    // Return errors if any
+    // Return errors if any validation failed
     if (!empty($errors)) {
-        wp_send_json_error(array('message' => implode("\n", $errors)));
+        // Log detailed errors if debugging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+             error_log('Complaint validation errors: ' . implode(' | ', $errors));
+        }
+        // Send concatenated (or just the first) error message to user
+        wp_send_json_error(array('message' => implode("<br>", $errors))); // Use <br> for display
         return;
     }
 
-    // Prepare complaint data for saving
-    $post_title = wp_strip_all_tags($complaint_data['type'] === 'other' ? 
-        $complaint_data['typeOther'] : 
-        get_complaint_type_label($complaint_data['type']));
-        
-    // เพิ่มชื่อหน่วยงานไว้ในชื่อเรื่อง
-    $post_title .= ' - ' . wp_strip_all_tags($complaint_data['department']);
+    // 4. Prepare Complaint Data for Saving (using validated data)
+    $post_title_type = ($validated_data['type'] === 'other' && isset($validated_data['typeOther']))
+                       ? $validated_data['typeOther']
+                       : myplugin_get_complaint_type_label($validated_data['type']);
 
-    $complaint = array(
-        'post_title' => $post_title,
-        'post_content' => wp_kses_post($complaint_data['details']),
-        'post_type' => 'complaint',
-        'post_status' => 'pending',
-        'meta_input' => array(
-            '_complaint_type' => sanitize_text_field($complaint_data['type']),
-            '_complaint_department' => sanitize_text_field($complaint_data['department']),
-            '_is_anonymous' => !empty($complaint_data['isAnonymous']) ? 'yes' : 'no'
+    // Sanitize title components separately before combining
+    $post_title = wp_strip_all_tags($post_title_type);
+    $post_title .= ' - ' . wp_strip_all_tags($validated_data['department']);
+    // Trim and potentially shorten title if needed
+    $post_title = trim(mb_substr($post_title, 0, 200)); // Limit title length
+
+    $complaint_post_data = array(
+        'post_title'   => $post_title,
+        'post_content' => $validated_data['details'], // Already sanitized with wp_kses_post
+        'post_type'    => 'complaint',
+        'post_status'  => 'pending', // Default status
+        'meta_input'   => array(
+            '_complaint_type'       => $validated_data['type'], // Already validated
+            '_complaint_department' => $validated_data['department'], // Already sanitized
+            '_is_anonymous'         => $validated_data['isAnonymous'] ? 'yes' : 'no',
         )
     );
 
-    // Add personal info if not anonymous
-    if (empty($complaint_data['isAnonymous'])) {
-        $complaint['meta_input']['_complainant_name'] = sanitize_text_field($complaint_data['name']);
-        $complaint['meta_input']['_complainant_address'] = sanitize_textarea_field($complaint_data['address']);
-        $complaint['meta_input']['_complainant_phone'] = sanitize_text_field($complaint_data['phone']);
-        $complaint['meta_input']['_complainant_email'] = sanitize_email($complaint_data['email']);
+    // Add personal info meta if not anonymous
+    if (!$validated_data['isAnonymous']) {
+        $complaint_post_data['meta_input']['_complainant_name']    = $validated_data['name']; // Already sanitized
+        $complaint_post_data['meta_input']['_complainant_address'] = $validated_data['address']; // Already sanitized
+        $complaint_post_data['meta_input']['_complainant_phone']   = $validated_data['phone']; // Already sanitized
+        $complaint_post_data['meta_input']['_complainant_email']   = $validated_data['email']; // Already sanitized
     }
 
-    // Insert the complaint with error handling ที่ดีขึ้น
-    $post_id = wp_insert_post($complaint, true);
+    // 5. Insert the Complaint Post
+    $post_id = wp_insert_post($complaint_post_data, true); // Pass true to return WP_Error on failure
 
     if (is_wp_error($post_id)) {
-        if (WP_DEBUG) {
+        // Log the detailed error
+        if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('Error inserting complaint: ' . $post_id->get_error_message());
         }
-        wp_send_json_error(array('message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' . $post_id->get_error_message()));
+        // Send a generic error message to the user
+        wp_send_json_error(array('message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง (Error saving data. Please try again.)'));
         return;
     }
 
-    // สร้างและบันทึกเลขอ้างอิงเรื่องร้องเรียน
-    $ref_number = generate_complaint_reference($post_id);
-    update_post_meta($post_id, '_complaint_ref', $ref_number);
-    
-    // บันทึกวันที่รับเรื่อง
-    update_post_meta($post_id, '_complaint_date', current_time('mysql'));
-    
-    // กำหนดวันที่ครบกำหนดตอบ (30 วัน)
-    $due_date = date('Y-m-d H:i:s', strtotime('+30 days'));
+    // 6. Save Additional Meta (Reference, Dates)
+    // Ensure generate_complaint_reference is secure and generates unique refs
+    $ref_number = myplugin_generate_complaint_reference($post_id);
+    update_post_meta($post_id, '_complaint_ref', sanitize_text_field($ref_number)); // Sanitize ref just in case
+
+    // Save received date using WordPress current time
+    update_post_meta($post_id, '_complaint_date', current_time('mysql', 1)); // Use GMT time
+
+    // Set due date (30 days from now)
+    $due_date_timestamp = strtotime('+30 days', current_time('timestamp', 1));
+    $due_date = gmdate('Y-m-d H:i:s', $due_date_timestamp); // Store GMT
     update_post_meta($post_id, '_response_due_date', $due_date);
 
-    // Send notification email to admin
-    send_complaint_notification($post_id, $complaint_data);
+    // 7. Send Notification Email
+    // Pass validated data to notification function
+    myplugin_send_complaint_notification($post_id, $validated_data);
 
-    // Return success response
+    // 8. Return Success Response
     wp_send_json_success(array(
-        'message' => 'บันทึกข้อมูลเรียบร้อยแล้ว',
-        'post_id' => $post_id,
-        'ref_number' => $ref_number
+        'message'    => 'บันทึกข้อมูลเรียบร้อยแล้ว (Complaint submitted successfully.)',
+        'post_id'    => $post_id,
+        'ref_number' => $ref_number // Already sanitized
     ));
-}
-add_action('wp_ajax_submit_complaint', 'handle_complaint_submission');
-add_action('wp_ajax_nopriv_submit_complaint', 'handle_complaint_submission');
 
-// Helper function to get complaint type label
-function get_complaint_type_label($type) {
-    $types = array(
+    // wp_die(); // Not needed after wp_send_json_*
+}
+// Hook for logged-in users
+add_action('wp_ajax_submit_complaint', 'myplugin_handle_complaint_submission');
+// Hook for logged-out users (remove if form is not public)
+add_action('wp_ajax_nopriv_submit_complaint', 'myplugin_handle_complaint_submission');
+
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Returns an array of valid complaint types.
+ * Replace with dynamic retrieval if types are managed elsewhere.
+ * @return array Associative array of type slugs => labels.
+ */
+function myplugin_get_valid_complaint_types() {
+    // Consider making this filterable or pulling from options/taxonomy
+     return array(
         'corruption' => 'การทุจริตประพฤติมิชอบ',
         'negligence' => 'การละเลยการปฏิบัติหน้าที่',
         'misconduct' => 'การปฏิบัติหน้าที่โดยมิชอบ',
-        'rights' => 'การละเมิดสิทธิ',
-        'other' => 'อื่นๆ'
+        'rights'     => 'การละเมิดสิทธิ',
+        'other'      => 'อื่นๆ'
     );
-    return isset($types[$type]) ? $types[$type] : 'อื่นๆ';
 }
 
-// Send notification email to admin
-function send_complaint_notification($post_id, $complaint_data) {
+/**
+ * Returns an array of valid departments or true if free text is allowed.
+ * Replace with dynamic retrieval if departments are managed elsewhere.
+ * @return array|true Array of valid department names or true.
+ */
+function myplugin_get_valid_departments() {
+    // Example: Return true to allow any department (will be sanitized)
+    return true;
+    // Example: Return an array of specific departments
+    // return array('แผนก A', 'แผนก B', 'สำนักงานใหญ่');
+}
+
+
+/**
+ * Gets the display label for a complaint type slug.
+ * @param string $type The complaint type slug.
+ * @return string The display label.
+ */
+function myplugin_get_complaint_type_label($type) {
+    $types = myplugin_get_valid_complaint_types();
+    return isset($types[$type]) ? $types[$type] : 'ไม่ระบุ (Unspecified)'; // Default label
+}
+
+/**
+ * Generates a unique reference number for a complaint.
+ * Implement secure and unique generation logic here.
+ * @param int $post_id The ID of the complaint post.
+ * @return string The generated reference number.
+ */
+function myplugin_generate_complaint_reference($post_id) {
+    // Example: Simple reference using year and post ID (ensure sufficient padding)
+    // WARNING: This is sequential and potentially guessable.
+    // Consider using random elements or a more robust system if secrecy is needed.
+    $year = date('Y');
+    return sprintf('COMP-%s-%06d', $year, $post_id);
+}
+
+
+/**
+ * Sends a notification email to the admin about a new complaint.
+ * @param int   $post_id        The ID of the new complaint post.
+ * @param array $validated_data The validated and sanitized complaint data.
+ */
+function myplugin_send_complaint_notification($post_id, $validated_data) {
     $admin_email = get_option('admin_email');
-    $site_name = get_bloginfo('name');
-    
-    $subject = sprintf('[%s] มีเรื่องร้องเรียนใหม่', $site_name);
-    
-    $ref_number = get_post_meta($post_id, '_complaint_ref', true);
-    
-    $message = "มีเรื่องร้องเรียนใหม่ถูกส่งเข้ามาในระบบ\n\n";
-    $message .= "เลขที่เรื่อง: " . $ref_number . "\n";
-    $message .= "ประเภท: " . get_complaint_type_label($complaint_data['type']) . "\n";
-    $message .= "หน่วยงาน: " . $complaint_data['department'] . "\n";
-    $message .= "รายละเอียด: " . $complaint_data['details'] . "\n\n";
-    
-    if (empty($complaint_data['isAnonymous'])) {
-        $message .= "ข้อมูลผู้ร้องเรียน:\n";
-        $message .= "ชื่อ-นามสกุล: " . $complaint_data['name'] . "\n";
-        if (!empty($complaint_data['address'])) {
-            $message .= "ที่อยู่: " . $complaint_data['address'] . "\n";
+    if (!is_email($admin_email)) {
+         if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Admin email is not valid. Cannot send complaint notification.');
         }
-        if (!empty($complaint_data['phone'])) {
-            $message .= "เบอร์โทรศัพท์: " . $complaint_data['phone'] . "\n";
-        }
-        if (!empty($complaint_data['email'])) {
-            $message .= "อีเมล: " . $complaint_data['email'] . "\n";
-        }
-    } else {
-        $message .= "ผู้ร้องเรียนไม่ประสงค์ออกนาม\n";
+        return; // Don't attempt to send if admin email is invalid
     }
-    
-    $message .= "\nดูรายละเอียดเพิ่มเติมได้ที่: " . get_edit_post_link($post_id, 'raw');
-    
-    wp_mail($admin_email, $subject, $message);
+
+    $site_name = get_bloginfo('name');
+    $subject = sprintf('[%s] มีเรื่องร้องเรียนใหม่ (New Complaint Received)', $site_name);
+    $ref_number = get_post_meta($post_id, '_complaint_ref', true); // Get saved ref
+
+    // Build message body using validated data
+    $message_lines = array();
+    $message_lines[] = "มีเรื่องร้องเรียนใหม่ถูกส่งเข้ามาในระบบ (A new complaint has been submitted.)";
+    $message_lines[] = ""; // Blank line
+    $message_lines[] = "เลขที่เรื่อง (Reference No.): " . esc_html($ref_number);
+    $message_lines[] = "ประเภท (Type): " . esc_html(myplugin_get_complaint_type_label($validated_data['type']));
+    if ($validated_data['type'] === 'other' && !empty($validated_data['typeOther'])) {
+         $message_lines[] = "   ประเภทอื่นๆ ระบุ (Other Type Specified): " . esc_html($validated_data['typeOther']);
+    }
+    $message_lines[] = "หน่วยงาน (Department): " . esc_html($validated_data['department']);
+    $message_lines[] = "รายละเอียด (Details):";
+    $message_lines[] = esc_html($validated_data['details']); // Use esc_html for plain text email
+    $message_lines[] = ""; // Blank line
+
+    if ($validated_data['isAnonymous']) {
+        $message_lines[] = "ผู้ร้องเรียนไม่ประสงค์ออกนาม (Complainant is anonymous.)";
+    } else {
+        $message_lines[] = "ข้อมูลผู้ร้องเรียน (Complainant Information):";
+        $message_lines[] = "ชื่อ-นามสกุล (Name): " . esc_html($validated_data['name']);
+        if (!empty($validated_data['address'])) {
+            $message_lines[] = "ที่อยู่ (Address): " . esc_html($validated_data['address']);
+        }
+        if (!empty($validated_data['phone'])) {
+            $message_lines[] = "เบอร์โทรศัพท์ (Phone): " . esc_html($validated_data['phone']);
+        }
+        if (!empty($validated_data['email'])) {
+            $message_lines[] = "อีเมล (Email): " . esc_html($validated_data['email']);
+        }
+    }
+
+    $message_lines[] = ""; // Blank line
+    // Use esc_url_raw for URLs in emails/DB, esc_url for display
+    $edit_link = get_edit_post_link($post_id, 'raw');
+    $message_lines[] = "ดูรายละเอียดเพิ่มเติมได้ที่ (View Details): " . esc_url($edit_link); // Escaped for display context in email
+
+    $message = implode("\n", $message_lines);
+
+    // Set headers for better email deliverability (optional but recommended)
+    $headers = array(
+        'Content-Type: text/plain; charset=UTF-8',
+        // 'From: ' . $site_name . ' <noreply@' . parse_url(home_url(), PHP_URL_HOST) . '>' // Example From header
+    );
+
+    wp_mail($admin_email, $subject, $message, $headers);
+
+     if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Complaint notification email sent to: ' . $admin_email . ' for post ID: ' . $post_id);
+    }
 }
 
-// Register custom post type for complaints
-function register_complaint_post_type() {
+// =============================================================================
+// Custom Post Type Registration
+// =============================================================================
+
+/**
+ * Registers the 'complaint' Custom Post Type and associated custom statuses.
+ */
+function myplugin_register_complaint_post_type() {
     $labels = array(
-        'name' => 'เรื่องร้องเรียน',
-        'singular_name' => 'เรื่องร้องเรียน',
-        'menu_name' => 'เรื่องร้องเรียน',
-        'add_new' => 'เพิ่มเรื่องร้องเรียน',
-        'add_new_item' => 'เพิ่มเรื่องร้องเรียนใหม่',
-        'edit_item' => 'แก้ไขเรื่องร้องเรียน',
-        'new_item' => 'เรื่องร้องเรียนใหม่',
-        'view_item' => 'ดูเรื่องร้องเรียน',
-        'search_items' => 'ค้นหาเรื่องร้องเรียน',
-        'not_found' => 'ไม่พบเรื่องร้องเรียน',
-        'not_found_in_trash' => 'ไม่พบเรื่องร้องเรียนในถังขยะ'
+        'name'                  => _x('เรื่องร้องเรียน', 'Post type general name', 'myplugin-textdomain'),
+        'singular_name'         => _x('เรื่องร้องเรียน', 'Post type singular name', 'myplugin-textdomain'),
+        'menu_name'             => _x('เรื่องร้องเรียน', 'Admin Menu text', 'myplugin-textdomain'),
+        'name_admin_bar'        => _x('เรื่องร้องเรียน', 'Add New on Toolbar', 'myplugin-textdomain'),
+        'add_new'               => __('เพิ่มเรื่องร้องเรียน', 'myplugin-textdomain'),
+        'add_new_item'          => __('เพิ่มเรื่องร้องเรียนใหม่', 'myplugin-textdomain'),
+        'new_item'              => __('เรื่องร้องเรียนใหม่', 'myplugin-textdomain'),
+        'edit_item'             => __('แก้ไขเรื่องร้องเรียน', 'myplugin-textdomain'),
+        'view_item'             => __('ดูเรื่องร้องเรียน', 'myplugin-textdomain'),
+        'all_items'             => __('เรื่องร้องเรียนทั้งหมด', 'myplugin-textdomain'),
+        'search_items'          => __('ค้นหาเรื่องร้องเรียน', 'myplugin-textdomain'),
+        'parent_item_colon'     => __('เรื่องร้องเรียนหลัก:', 'myplugin-textdomain'),
+        'not_found'             => __('ไม่พบเรื่องร้องเรียน', 'myplugin-textdomain'),
+        'not_found_in_trash'    => __('ไม่พบเรื่องร้องเรียนในถังขยะ', 'myplugin-textdomain'),
+        'featured_image'        => _x('รูปภาพเด่น', 'Overrides the “Featured Image” phrase for this post type. Added in 4.3', 'myplugin-textdomain'),
+        'set_featured_image'    => _x('ตั้งรูปภาพเด่น', 'Overrides the “Set featured image” phrase for this post type. Added in 4.3', 'myplugin-textdomain'),
+        'remove_featured_image' => _x('ลบรูปภาพเด่น', 'Overrides the “Remove featured image” phrase for this post type. Added in 4.3', 'myplugin-textdomain'),
+        'use_featured_image'    => _x('ใช้เป็นรูปภาพเด่น', 'Overrides the “Use as featured image” phrase for this post type. Added in 4.3', 'myplugin-textdomain'),
+        'archives'              => _x('คลังเรื่องร้องเรียน', 'The post type archive label used in nav menus. Default “Post Archives”. Added in 4.4', 'myplugin-textdomain'),
+        'insert_into_item'      => _x('แทรกในเรื่องร้องเรียน', 'Overrides the “Insert into post”/”Insert into page” phrase (used when inserting media into a post). Added in 4.4', 'myplugin-textdomain'),
+        'uploaded_to_this_item' => _x('อัปโหลดในเรื่องร้องเรียนนี้', 'Overrides the “Uploaded to this post”/”Uploaded to this page” phrase (used when viewing media attached to a post). Added in 4.4', 'myplugin-textdomain'),
+        'filter_items_list'     => _x('กรองรายการเรื่องร้องเรียน', 'Screen reader text for the filter links heading on the post type listing screen. Default “Filter posts list”/”Filter pages list”. Added in 4.4', 'myplugin-textdomain'),
+        'items_list_navigation' => _x('การนำทางรายการเรื่องร้องเรียน', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'myplugin-textdomain'),
+        'items_list'            => _x('รายการเรื่องร้องเรียน', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'myplugin-textdomain'),
     );
 
     $args = array(
-        'labels' => $labels,
-        'public' => false,
-        'show_ui' => true,
-        'show_in_menu' => true,
-        'capability_type' => 'post',
-        'hierarchical' => false,
-        'menu_position' => 25,
-        'menu_icon' => 'dashicons-feedback',
-        'supports' => array('title', 'editor'),
-        'register_meta_box_cb' => 'add_complaint_meta_boxes',
-        // เพิ่ม custom status
-        'register_post_status' => array(
-            'pending' => array(
-                'label' => _x('รอดำเนินการ', 'complaint'),
-                'public' => false,
-                'label_count' => _n_noop('รอดำเนินการ <span class="count">(%s)</span>', 'รอดำเนินการ <span class="count">(%s)</span>')
-            ),
-            'in-progress' => array(
-                'label' => _x('กำลังดำเนินการ', 'complaint'),
-                'public' => false,
-                'label_count' => _n_noop('กำลังดำเนินการ <span class="count">(%s)</span>', 'กำลังดำเนินการ <span class="count">(%s)</span>')
-            ),
-            'completed' => array(
-                'label' => _x('เสร็จสิ้น', 'complaint'),
-                'public' => false,
-                'label_count' => _n_noop('เสร็จสิ้น <span class="count">(%s)</span>', 'เสร็จสิ้น <span class="count">(%s)</span>')
-            ),
-            'rejected' => array(
-                'label' => _x('ไม่รับพิจารณา', 'complaint'),
-                'public' => false,
-                'label_count' => _n_noop('ไม่รับพิจารณา <span class="count">(%s)</span>', 'ไม่รับพิจารณา <span class="count">(%s)</span>')
-            ),
-            'closed' => array(
-                'label' => _x('ปิดเรื่อง', 'complaint'),
-                'public' => false,
-                'label_count' => _n_noop('ปิดเรื่อง <span class="count">(%s)</span>', 'ปิดเรื่อง <span class="count">(%s)</span>')
-            )
-        )
+        'labels'             => $labels,
+        'public'             => false, // Not publicly queryable on front-end
+        'show_ui'            => true,  // Show in admin UI
+        'show_in_menu'       => true,  // Show in admin menu
+        'query_var'          => false, // No query var needed if not public
+        'rewrite'            => false, // No rewrite rules needed
+        // 'capability_type' => 'post', // Use default post capabilities
+        // OR define custom capabilities for finer control:
+        'capability_type'    => 'complaint', // Use 'complaint' as the base
+        'map_meta_cap'       => true, // Required for custom capabilities to work correctly with meta capabilities like edit_post, delete_post
+        'hierarchical'       => false,
+        'menu_position'      => 25, // Below Comments
+        'menu_icon'          => 'dashicons-feedback', // WordPress Dashicon
+        'supports'           => array('title', 'editor'), // Supports title and content editor
+        'register_meta_box_cb' => 'myplugin_add_complaint_meta_boxes', // Function to add meta boxes
+        'show_in_rest'       => false, // Exclude from REST API unless needed
     );
 
     register_post_type('complaint', $args);
-    
-    // Register post statuses
-    register_post_status('pending', array(
-        'label' => _x('รอดำเนินการ', 'complaint'),
-        'public' => false,
-        'label_count' => _n_noop('รอดำเนินการ <span class="count">(%s)</span>', 'รอดำเนินการ <span class="count">(%s)</span>')
-    ));
-    
-    register_post_status('in-progress', array(
-        'label' => _x('กำลังดำเนินการ', 'complaint'),
-        'public' => false,
-        'label_count' => _n_noop('กำลังดำเนินการ <span class="count">(%s)</span>', 'กำลังดำเนินการ <span class="count">(%s)</span>')
-    ));
-    
-    register_post_status('completed', array(
-        'label' => _x('เสร็จสิ้น', 'complaint'),
-        'public' => false,
-        'label_count' => _n_noop('เสร็จสิ้น <span class="count">(%s)</span>', 'เสร็จสิ้น <span class="count">(%s)</span>')
-    ));
-    
-    register_post_status('rejected', array(
-        'label' => _x('ไม่รับพิจารณา', 'complaint'),
-        'public' => false,
-        'label_count' => _n_noop('ไม่รับพิจารณา <span class="count">(%s)</span>', 'ไม่รับพิจารณา <span class="count">(%s)</span>')
-    ));
-    
-    register_post_status('closed', array(
-        'label' => _x('ปิดเรื่อง', 'complaint'),
-        'public' => false,
-        'label_count' => _n_noop('ปิดเรื่อง <span class="count">(%s)</span>', 'ปิดเรื่อง <span class="count">(%s)</span>')
-    ));
-}
-add_action('init', 'register_complaint_post_type');
 
-// เพิ่ม meta boxes ในหน้าแก้ไขเรื่องร้องเรียน
-function add_complaint_meta_boxes() {
-    add_meta_box(
-        'complaint_details',
-        'รายละเอียดเรื่องร้องเรียน',
-        'complaint_details_meta_box',
-        'complaint',
-        'normal',
-        'default'
+    // Register custom post statuses (important to do this *after* CPT registration)
+    $statuses = array(
+        'pending'     => _x('รอดำเนินการ (Pending)', 'complaint status', 'myplugin-textdomain'),
+        'in-progress' => _x('กำลังดำเนินการ (In Progress)', 'complaint status', 'myplugin-textdomain'),
+        'completed'   => _x('เสร็จสิ้น (Completed)', 'complaint status', 'myplugin-textdomain'),
+        'rejected'    => _x('ไม่รับพิจารณา (Rejected)', 'complaint status', 'myplugin-textdomain'),
+        'closed'      => _x('ปิดเรื่อง (Closed)', 'complaint status', 'myplugin-textdomain'),
     );
-    
+
+    foreach ($statuses as $status_slug => $status_label) {
+        register_post_status($status_slug, array(
+            'label'                     => $status_label,
+            'public'                    => false, // Not publicly visible unless needed
+            'exclude_from_search'       => true,  // Exclude from frontend search
+            'show_in_admin_all_list'    => true,  // Show in "All" list
+            'show_in_admin_status_list' => true,  // Show in status filter dropdown
+            'label_count'               => _n_noop($status_label . ' <span class="count">(%s)</span>', $status_label . ' <span class="count">(%s)</span>', 'myplugin-textdomain'),
+        ));
+    }
+}
+add_action('init', 'myplugin_register_complaint_post_type');
+
+// =============================================================================
+// Admin Meta Boxes
+// =============================================================================
+
+/**
+ * Adds meta boxes to the complaint editor screen.
+ */
+function myplugin_add_complaint_meta_boxes() {
+    // Check user capability before adding meta boxes
+    // Note: If using default 'post' capability type, checks like 'edit_posts' apply.
+    // If using custom 'complaint' capability type, checks like 'edit_complaints' would apply (requires role/cap setup).
+    if (!current_user_can('edit_posts')) { // Example check, adjust if using custom caps
+        return;
+    }
+
+    add_meta_box(
+        'complaint_details',           // ID
+        'รายละเอียดเรื่องร้องเรียน (Complaint Details)', // Title
+        'myplugin_complaint_details_meta_box_callback', // Callback function
+        'complaint',                   // Post type
+        'normal',                      // Context (normal, side, advanced)
+        'high'                         // Priority (high, core, default, low)
+    );
+
     add_meta_box(
         'complainant_info',
-        'ข้อมูลผู้ร้องเรียน',
-        'complainant_info_meta_box',
+        'ข้อมูลผู้ร้องเรียน (Complainant Information)',
+        'myplugin_complainant_info_meta_box_callback',
         'complaint',
         'normal',
         'default'
     );
+
+     // Example: Add a meta box for changing status (if not using core status UI)
+    /*
+    add_meta_box(
+        'complaint_status_control',
+        'จัดการสถานะ (Manage Status)',
+        'myplugin_complaint_status_meta_box_callback',
+        'complaint',
+        'side', // Place in the side column
+        'high'
+    );
+    */
 }
 
-// Meta box แสดงรายละเอียดเรื่องร้องเรียน
-function complaint_details_meta_box($post) {
-    $type = get_post_meta($post->ID, '_complaint_type', true);
-    $department = get_post_meta($post->ID, '_complaint_department', true);
-    $ref_number = get_post_meta($post->ID, '_complaint_ref', true);
-    $complaint_date = get_post_meta($post->ID, '_complaint_date', true);
-    $due_date = get_post_meta($post->ID, '_response_due_date', true);
-    
+/**
+ * Callback function to display the 'Complaint Details' meta box.
+ * @param WP_Post $post The current post object.
+ */
+function myplugin_complaint_details_meta_box_callback($post) {
+    // Always retrieve meta fresh inside the callback
+    $type         = get_post_meta($post->ID, '_complaint_type', true);
+    $department   = get_post_meta($post->ID, '_complaint_department', true);
+    $ref_number   = get_post_meta($post->ID, '_complaint_ref', true);
+    $complaint_date_gmt = get_post_meta($post->ID, '_complaint_date', true); // Assuming stored as GMT
+    $due_date_gmt = get_post_meta($post->ID, '_response_due_date', true); // Assuming stored as GMT
+
+    // Generate ref number if missing (e.g., for older posts before ref system)
     if (empty($ref_number)) {
-        $ref_number = generate_complaint_reference($post->ID);
-        update_post_meta($post->ID, '_complaint_ref', $ref_number);
+        $ref_number = myplugin_generate_complaint_reference($post->ID);
+        update_post_meta($post->ID, '_complaint_ref', sanitize_text_field($ref_number));
     }
-    
+
+    // Format dates using WordPress date/time functions for localization
+    $complaint_date_display = !empty($complaint_date_gmt)
+                              ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($complaint_date_gmt))
+                              : date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($post->post_date_gmt)); // Fallback to post date
+
+    $due_date_display = !empty($due_date_gmt)
+                        ? date_i18n(get_option('date_format'), strtotime($due_date_gmt))
+                        : date_i18n(get_option('date_format'), strtotime('+30 days', strtotime($post->post_date_gmt))); // Fallback
+
     ?>
     <style>
-        .complaint-meta-table { width: 100%; border-collapse: collapse; }
-        .complaint-meta-table th, .complaint-meta-table td { padding: 8px; border: 1px solid #ddd; }
-        .complaint-meta-table th { text-align: right; width: 200px; background: #f9f9f9; }
+        /* Scoped styles for meta box table */
+        #complaint_details .complaint-meta-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        #complaint_details .complaint-meta-table th,
+        #complaint_details .complaint-meta-table td { padding: 8px; border: 1px solid #ddd; vertical-align: top; }
+        #complaint_details .complaint-meta-table th { text-align: right; width: 200px; background: #f9f9f9; font-weight: 600; }
     </style>
     <table class="complaint-meta-table">
         <tr>
-            <th>เลขที่เรื่องร้องเรียน:</th>
+            <th><?php esc_html_e('เลขที่เรื่องร้องเรียน:', 'myplugin-textdomain'); ?></th>
             <td><?php echo esc_html($ref_number); ?></td>
         </tr>
         <tr>
-            <th>วันที่รับเรื่อง:</th>
-            <td><?php echo !empty($complaint_date) ? date_i18n('d F Y H:i', strtotime($complaint_date)) : date_i18n('d F Y H:i', strtotime($post->post_date)); ?></td>
+            <th><?php esc_html_e('วันที่รับเรื่อง:', 'myplugin-textdomain'); ?></th>
+            <td><?php echo esc_html($complaint_date_display); ?></td>
         </tr>
         <tr>
-            <th>กำหนดตอบ:</th>
-            <td><?php echo !empty($due_date) ? date_i18n('d F Y', strtotime($due_date)) : date_i18n('d F Y', strtotime('+30 days', strtotime($post->post_date))); ?></td>
+            <th><?php esc_html_e('กำหนดตอบ:', 'myplugin-textdomain'); ?></th>
+            <td><?php echo esc_html($due_date_display); ?></td>
         </tr>
         <tr>
-            <th>ประเภทเรื่องร้องเรียน:</th>
-            <td><?php echo esc_html(get_complaint_type_label($type)); ?></td>
+            <th><?php esc_html_e('ประเภทเรื่องร้องเรียน:', 'myplugin-textdomain'); ?></th>
+            <td><?php echo esc_html(myplugin_get_complaint_type_label($type)); ?></td>
         </tr>
         <tr>
-            <th>หน่วยงานที่ถูกร้องเรียน:</th>
+            <th><?php esc_html_e('หน่วยงานที่ถูกร้องเรียน:', 'myplugin-textdomain'); ?></th>
             <td><?php echo esc_html($department); ?></td>
         </tr>
     </table>
     <?php
 }
 
-// Meta box แสดงข้อมูลผู้ร้องเรียน
-function complainant_info_meta_box($post) {
+/**
+ * Callback function to display the 'Complainant Information' meta box.
+ * @param WP_Post $post The current post object.
+ */
+function myplugin_complainant_info_meta_box_callback($post) {
     $is_anonymous = get_post_meta($post->ID, '_is_anonymous', true);
-    
-    if ($is_anonymous == 'yes') {
-        echo '<p><strong>ผู้ร้องเรียนไม่ประสงค์ออกนาม</strong></p>';
+
+    if ($is_anonymous === 'yes') {
+        echo '<p><strong>' . esc_html__('ผู้ร้องเรียนไม่ประสงค์ออกนาม (Complainant is anonymous)', 'myplugin-textdomain') . '</strong></p>';
         return;
     }
-    
-    $name = get_post_meta($post->ID, '_complainant_name', true);
+
+    // Retrieve potentially sensitive info - ensure user has capability
+    // This check might be redundant if already checked in add_meta_box, but adds layer of security
+    if (!current_user_can('edit_post', $post->ID)) { // Check capability for this specific post
+         echo '<p>' . esc_html__('You do not have permission to view this information.', 'myplugin-textdomain') . '</p>';
+         return;
+    }
+
+    $name    = get_post_meta($post->ID, '_complainant_name', true);
     $address = get_post_meta($post->ID, '_complainant_address', true);
-    $phone = get_post_meta($post->ID, '_complainant_phone', true);
-    $email = get_post_meta($post->ID, '_complainant_email', true);
-    
+    $phone   = get_post_meta($post->ID, '_complainant_phone', true);
+    $email   = get_post_meta($post->ID, '_complainant_email', true);
+
     ?>
+     <style>
+        /* Scoped styles for meta box table */
+        #complainant_info .complaint-meta-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        #complainant_info .complaint-meta-table th,
+        #complainant_info .complaint-meta-table td { padding: 8px; border: 1px solid #ddd; vertical-align: top; }
+        #complainant_info .complaint-meta-table th { text-align: right; width: 200px; background: #f9f9f9; font-weight: 600;}
+    </style>
     <table class="complaint-meta-table">
         <tr>
-            <th>ชื่อ-นามสกุล:</th>
+            <th><?php esc_html_e('ชื่อ-นามสกุล:', 'myplugin-textdomain'); ?></th>
             <td><?php echo esc_html($name); ?></td>
         </tr>
         <?php if (!empty($address)) : ?>
         <tr>
-            <th>ที่อยู่:</th>
-            <td><?php echo nl2br(esc_html($address)); ?></td>
+            <th><?php esc_html_e('ที่อยู่:', 'myplugin-textdomain'); ?></th>
+            <td><?php echo nl2br(esc_html($address)); // Use nl2br for display ?></td>
         </tr>
         <?php endif; ?>
         <?php if (!empty($phone)) : ?>
         <tr>
-            <th>เบอร์โทรศัพท์:</th>
+            <th><?php esc_html_e('เบอร์โทรศัพท์:', 'myplugin-textdomain'); ?></th>
             <td><?php echo esc_html($phone); ?></td>
         </tr>
         <?php endif; ?>
         <?php if (!empty($email)) : ?>
         <tr>
-            <th>อีเมล:</th>
+            <th><?php esc_html_e('อีเมล:', 'myplugin-textdomain'); ?></th>
             <td><?php echo esc_html($email); ?></td>
         </tr>
         <?php endif; ?>
+         <?php if (empty($name) && empty($address) && empty($phone) && empty($email)) : ?>
+         <tr>
+             <td colspan="2"><?php esc_html_e('ไม่พบข้อมูลผู้ร้องเรียน (No complainant details found).', 'myplugin-textdomain'); ?></td>
+         </tr>
+         <?php endif; ?>
     </table>
     <?php
 }
 
-// Add custom columns to admin list
-function add_complaint_columns($columns) {
+
+// =============================================================================
+// Admin Columns Customization
+// =============================================================================
+
+/**
+ * Adds custom columns to the 'complaint' post type admin list table.
+ * @param array $columns Existing columns.
+ * @return array Modified columns.
+ */
+function myplugin_add_complaint_columns($columns) {
     $new_columns = array();
-    $new_columns['cb'] = $columns['cb'];
-    $new_columns['ref_number'] = 'เลขที่';
-    $new_columns['title'] = 'ประเภท';
-    $new_columns['department'] = 'หน่วยงาน';
-    $new_columns['complainant'] = 'ผู้ร้องเรียน';
-    $new_columns['date'] = $columns['date'];
-    $new_columns['status'] = 'สถานะ';
+    // Keep checkbox
+    if (isset($columns['cb'])) {
+        $new_columns['cb'] = $columns['cb'];
+    }
+    // Add custom columns in desired order
+    $new_columns['ref_number'] = __('เลขที่', 'myplugin-textdomain');
+    $new_columns['title'] = __('ประเภท', 'myplugin-textdomain'); // Reuse title column for Type
+    $new_columns['department'] = __('หน่วยงาน', 'myplugin-textdomain');
+    $new_columns['complainant'] = __('ผู้ร้องเรียน', 'myplugin-textdomain');
+    // Keep date
+    if (isset($columns['date'])) {
+         $new_columns['date'] = $columns['date'];
+    }
+     // Add status (using core status handling is often better)
+    // $new_columns['status'] = __('สถานะ', 'myplugin-textdomain');
+
+    // Remove original title if reusing it
+    // unset($columns['title']);
+
+    // Merge remaining original columns if needed (e.g., author, comments)
+    // return array_merge($new_columns, $columns);
+
     return $new_columns;
 }
-add_filter('manage_complaint_posts_columns', 'add_complaint_columns');
+add_filter('manage_complaint_posts_columns', 'myplugin_add_complaint_columns');
 
-// Fill custom columns
-function fill_complaint_columns($column, $post_id) {
+
+/**
+ * Populates the custom columns in the 'complaint' post type admin list table.
+ * @param string $column  The name of the column.
+ * @param int    $post_id The ID of the current post.
+ */
+function myplugin_fill_complaint_columns($column, $post_id) {
+    // Add nonce check or capability check if actions are performed here (none currently)
+
     switch ($column) {
         case 'ref_number':
             $ref_number = get_post_meta($post_id, '_complaint_ref', true);
+            // Generate if missing (optional, could be done on save)
             if (empty($ref_number)) {
-                $ref_number = generate_complaint_reference($post_id);
-                update_post_meta($post_id, '_complaint_ref', $ref_number);
+                $ref_number = myplugin_generate_complaint_reference($post_id);
+                update_post_meta($post_id, '_complaint_ref', sanitize_text_field($ref_number));
             }
-            echo $ref_number;
+            echo esc_html($ref_number);
             break;
-            
+
         case 'department':
-            echo get_post_meta($post_id, '_complaint_department', true);
+            echo esc_html(get_post_meta($post_id, '_complaint_department', true));
             break;
-            
+
         case 'complainant':
             $is_anonymous = get_post_meta($post_id, '_is_anonymous', true);
-            if ($is_anonymous == 'yes') {
-                echo 'ไม่ประสงค์ออกนาม';
+            if ($is_anonymous === 'yes') {
+                esc_html_e('ไม่ประสงค์ออกนาม', 'myplugin-textdomain');
             } else {
-                echo get_post_meta($post_id, '_complainant_name', true);
+                // Display name, but ensure user has capability to view potentially sensitive info
+                if (current_user_can('edit_post', $post_id)) {
+                    echo esc_html(get_post_meta($post_id, '_complainant_name', true));
+                } else {
+                     esc_html_e('[Restricted]', 'myplugin-textdomain');
+                }
             }
             break;
-            
-        case 'status':
-            $status = get_post_status($post_id);
-            $status_labels = array(
-                'pending' => 'รอดำเนินการ',
-                'in-progress' => 'กำลังดำเนินการ',
-                'completed' => 'เสร็จสิ้น',
-                'rejected' => 'ไม่รับพิจารณา',
-                'closed' => 'ปิดเรื่อง'
-            );
-            echo isset($status_labels[$status]) ? $status_labels[$status] : $status;
-            break;
+
+        // Note: WordPress handles the 'status' column automatically if registered correctly.
+        // case 'status':
+        //     $status = get_post_status($post_id);
+        //     $status_object = get_post_status_object($status);
+        //     echo esc_html($status_object ? $status_object->label : $status);
+        //     break;
     }
 }
-add_action('manage_complaint_posts_custom_column', 'fill_complaint_columns', 10, 2);
+add_action('manage_complaint_posts_custom_column', 'myplugin_fill_complaint_columns', 10, 2);
+
+
+/**
+ * Makes the custom 'ref_number' column sortable.
+ * @param array $columns Existing sortable columns.
+ * @return array Modified sortable columns.
+ */
+function myplugin_make_complaint_columns_sortable($columns) {
+    $columns['ref_number'] = '_complaint_ref'; // Sort by meta key
+    // Add other sortable columns if needed
+    // $columns['department'] = '_complaint_department';
+    return $columns;
+}
+add_filter('manage_edit-complaint_sortable_columns', 'myplugin_make_complaint_columns_sortable');
+
+/**
+ * Handles sorting logic for custom sortable columns.
+ * @param WP_Query $query The main WordPress query object.
+ */
+function myplugin_complaint_custom_orderby($query) {
+    // Check if we are in the admin area, on the main query, and sorting complaints
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'complaint') {
+        return;
+    }
+
+    $orderby = $query->get('orderby');
+
+    if ($orderby === '_complaint_ref') {
+        $query->set('meta_key', '_complaint_ref');
+        // Determine if sorting should be numeric or alphabetical
+        // Assuming ref format COMP-YYYY-NNNNNN, alphanumeric sort is likely okay
+        $query->set('orderby', 'meta_value');
+        // Or for numeric sorting if ref was just a number:
+        // $query->set('orderby', 'meta_value_num');
+    }
+    // Add logic for other custom sortable columns here
+    /*
+    elseif ($orderby === '_complaint_department') {
+        $query->set('meta_key', '_complaint_department');
+        $query->set('orderby', 'meta_value');
+    }
+    */
+}
+add_action('pre_get_posts', 'myplugin_complaint_custom_orderby');
+
+
+/**
+ * Adds filtering dropdowns for custom statuses to the admin list table.
+ */
+function myplugin_add_complaint_status_filter() {
+    global $typenow;
+    if ($typenow === 'complaint') {
+        $statuses = get_post_stati(array('show_in_admin_status_list' => true), 'objects');
+        if (!empty($statuses)) {
+            echo '<select name="post_status" id="filter-by-complaint-status">';
+            echo '<option value="">' . esc_html__('ทุกสถานะ (All Statuses)', 'myplugin-textdomain') . '</option>';
+
+            $current_status = isset($_GET['post_status']) ? sanitize_key($_GET['post_status']) : '';
+
+            foreach ($statuses as $status_slug => $status_object) {
+                 // Skip built-in statuses if they are not relevant or handled differently
+                 // if (in_array($status_slug, array('publish', 'draft', 'trash', 'auto-draft', 'private'))) continue;
+
+                 // Only show our custom statuses + pending/trash maybe?
+                 if (!in_array($status_slug, array('pending', 'in-progress', 'completed', 'rejected', 'closed', 'trash'))) continue;
+
+
+                printf(
+                    '<option value="%s"%s>%s</option>',
+                    esc_attr($status_slug),
+                    selected($current_status, $status_slug, false),
+                    esc_html($status_object->label)
+                );
+            }
+            echo '</select>';
+        }
+    }
+}
+// Add filter next to the date filter
+add_action('restrict_manage_posts', 'myplugin_add_complaint_status_filter');
 
 // เพิ่มฟังก์ชันสำหรับการกรองข้อมูลในหน้า admin
 function add_complaint_filters() {

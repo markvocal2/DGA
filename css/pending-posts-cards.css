@@ -1,444 +1,538 @@
-/* Grid Layout */
-.pending-posts-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    padding: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
+/**
+ * Pending Posts Grid - Styles V2 (Refactored)
+ * Provides styling for displaying pending posts in a grid,
+ * including filtering, pagination, skeleton loading, and responsive design.
+ * Refactored using CSS variables for better maintainability and theming.
+ */
+
+:root {
+  /* Colors */
+  --pending-bg-primary: #fff;
+  --pending-bg-secondary: #f5f5f5; /* Post type bg, empty state bg, pagination hover */
+  --pending-text-primary: #333;
+  --pending-text-secondary: #666;
+  --pending-text-muted: #888; /* Post date */
+  --pending-text-placeholder: #999;
+  --pending-border-color: #ddd;
+  --pending-border-color-light: #e0e0e0; /* Pagination border */
+  --pending-border-color-focus: #1e88e5; /* Primary blue */
+
+  /* Primary Action Color */
+  --pending-primary-color: #1e88e5; /* Blue */
+  --pending-primary-color-dark: #1565c0; /* Darker Blue */
+
+  /* Post Type Colors (Card Borders) */
+  --pending-color-egp: #1e88e5;       /* Blue */
+  --pending-color-news: #ff9800;      /* Orange */
+  --pending-color-mpeople: #4caf50;   /* Green */
+  --pending-color-article: #9c27b0;   /* Purple */
+  --pending-color-pha: #f44336;        /* Red */
+  --pending-color-dgallery: #795548;  /* Brown */
+  --pending-color-department: #607d8b; /* Blue Gray */
+  --pending-color-complaint: #e91e63; /* Pink */
+  --pending-color-default-border: #ccc; /* Default card border */
+
+  /* Button Colors */
+  --pending-button-approve-bg: var(--pending-primary-color);
+  --pending-button-approve-bg-hover: var(--pending-primary-color-dark);
+  --pending-button-approve-text: #fff;
+  --pending-button-disabled-bg: #ccc;
+  --pending-button-disabled-text: var(--pending-text-secondary);
+  --pending-pagination-bg: var(--pending-bg-primary);
+  --pending-pagination-text: var(--pending-text-primary);
+  --pending-pagination-border: var(--pending-border-color-light);
+  --pending-pagination-hover-bg: var(--pending-bg-secondary);
+  --pending-pagination-hover-text: var(--pending-primary-color);
+  --pending-pagination-hover-border: var(--pending-primary-color);
+  --pending-pagination-active-bg: var(--pending-primary-color);
+  --pending-pagination-active-text: #fff;
+  --pending-pagination-active-border: var(--pending-primary-color);
+  --pending-pagination-disabled-bg: var(--pending-bg-secondary);
+  --pending-pagination-disabled-text: var(--pending-text-placeholder);
+  --pending-pagination-disabled-border: var(--pending-border-color-light);
+
+  /* Skeleton Loading Colors */
+  --pending-skeleton-bg-start: #f0f0f0;
+  --pending-skeleton-bg-mid: #e0e0e0;
+  --pending-skeleton-bg-end: var(--pending-skeleton-bg-start);
+  --pending-skeleton-gradient: linear-gradient(90deg, var(--pending-skeleton-bg-start) 25%, var(--pending-skeleton-bg-mid) 50%, var(--pending-skeleton-bg-end) 75%);
+
+  /* Filter Colors */
+  --pending-filter-active-bg: #e3f2fd; /* Light blue */
+
+  /* Typography */
+  --pending-font-family: inherit; /* Or specify a font stack */
+  --pending-font-size-base: 16px;
+  --pending-font-size-sm: 14px;
+  --pending-font-size-xs: 12px;
+  --pending-font-size-lg: 18px; /* Post title */
+  --pending-font-weight-normal: 400;
+  --pending-font-weight-medium: 500; /* Title, Button */
+  --pending-line-height-base: 1.4;
+
+  /* Spacing */
+  --pending-spacing-xs: 4px;
+  --pending-spacing-sm: 8px;
+  --pending-spacing-md: 10px; /* Filter gap */
+  --pending-spacing-lg: 12px; /* Button padding */
+  --pending-spacing-xl: 15px; /* Meta margin, Skeleton margin */
+  --pending-spacing-xxl: 20px; /* Grid gap, padding */
+  --pending-spacing-xxxl: 30px; /* Pagination margin */
+  --pending-spacing-xxxxl: 40px; /* Empty state padding */
+
+  /* Borders */
+  --pending-border-radius-sm: 4px;
+  --pending-border-radius-md: 8px; /* Card, Pagination */
+  --pending-border-width: 1px;
+  --pending-border-width-card-top: 4px;
+
+  /* Shadows */
+  --pending-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --pending-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --pending-shadow-focus: 0 0 0 2px rgba(30, 136, 229, 0.1); /* Filter focus */
+
+  /* Transitions */
+  --pending-transition-duration: 0.2s;
+  --pending-transition-duration-long: 0.3s;
+  --pending-transition-timing: ease;
+
+  /* Grid */
+  --pending-grid-columns-lg: 4;
+  --pending-grid-columns-md: 3;
+  --pending-grid-columns-sm: 2;
+  --pending-grid-columns-xs: 1;
+  --pending-grid-max-width: 1600px;
+}
+
+/* Base Grid Layout (Applied to both posts and skeleton) */
+.pending-posts-grid,
+.skeleton-loader {
+  display: grid;
+  grid-template-columns: repeat(var(--pending-grid-columns-lg), 1fr);
+  gap: var(--pending-spacing-xxl);
+  padding: var(--pending-spacing-xxl);
+  max-width: var(--pending-grid-max-width);
+  margin: 0 auto;
+}
+
+/* Filter Controls */
+.filter-controls {
+  padding: var(--pending-spacing-xxl); /* Add padding */
+  background: var(--pending-bg-primary);
+  max-width: 600px; /* Limit width */
+  margin: 0 auto var(--pending-spacing-xxl); /* Center and add bottom margin */
+  border-radius: var(--pending-border-radius-md); /* Optional: Add radius */
+  box-shadow: var(--pending-shadow-sm); /* Optional: Add shadow */
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column; /* Stack vertically by default */
+  gap: var(--pending-spacing-md);
+  align-items: center; /* Center items */
+}
+
+.filter-select,
+.search-input {
+  width: 100%; /* Full width within container */
+  max-width: 500px; /* Max width for inputs */
+  padding: var(--pending-spacing-sm) var(--pending-spacing-lg); /* 8px 12px */
+  border: var(--pending-border-width) solid var(--pending-border-color);
+  border-radius: var(--pending-border-radius-sm);
+  background-color: var(--pending-bg-primary);
+  font-size: var(--pending-font-size-sm);
+  color: var(--pending-text-primary);
+  cursor: pointer;
+  transition: all var(--pending-transition-duration) var(--pending-transition-timing);
+  appearance: none; /* Remove default appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-repeat: no-repeat;
+  background-position: right var(--pending-spacing-sm) center;
+  background-size: 16px;
+  padding-right: calc(var(--pending-spacing-lg) + 20px); /* Space for icon */
+}
+
+.filter-select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+.search-input {
+  cursor: text; /* Use text cursor for input */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='11' cy='11' r='8'%3e%3c/circle%3e%3cline x1='21' y1='21' x2='16.65' y2='16.65'%3e%3c/line%3e%3c/svg%3e");
+}
+
+.search-input::placeholder {
+  color: var(--pending-text-placeholder);
+}
+
+.filter-select:hover,
+.filter-select:focus,
+.search-input:hover,
+.search-input:focus {
+  border-color: var(--pending-border-color-focus);
+  outline: none;
+}
+
+.search-input:focus {
+  box-shadow: var(--pending-shadow-focus); /* Add focus ring only to search */
+}
+
+/* Filter Active Indicators */
+.filter-select.filter-active,
+.search-input.filter-active { /* Add class when filter is active */
+  background-color: var(--pending-filter-active-bg);
+  border-color: var(--pending-border-color-focus);
+}
+
+/* Loading State for Filters */
+.filter-controls.loading {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 /* Card Styles */
 .post-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    border-top: 4px solid #ccc;
-    overflow: hidden;
+  background: var(--pending-bg-primary);
+  border-radius: var(--pending-border-radius-md);
+  box-shadow: var(--pending-shadow-sm);
+  transition: all var(--pending-transition-duration-long) var(--pending-transition-timing);
+  border-top: var(--pending-border-width-card-top) solid var(--pending-color-default-border);
+  overflow: hidden; /* Ensure content respects border-radius */
+  display: flex; /* Use flex for better content control */
+  flex-direction: column; /* Stack content vertically */
+  height: 100%; /* Make cards fill grid cell height */
 }
 
 .post-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+  box-shadow: var(--pending-shadow-md);
 }
 
-/* Post Type Colors */
-.egp-card { border-color: #1e88e5; }
-.news-card { border-color: #ff9800; }
-.mpeople-card { border-color: #4caf50; }
-.article-card { border-color: #9c27b0; }
-.pha-card { border-color: #f44336; }
-.dgallery-card { border-color: #795548; }
-.department-card { border-color: #607d8b; }
-.complaint-card { border-color: #e91e63; }
+/* Post Type Border Colors */
+.egp-card { border-top-color: var(--pending-color-egp); }
+.news-card { border-top-color: var(--pending-color-news); }
+.mpeople-card { border-top-color: var(--pending-color-mpeople); }
+.article-card { border-top-color: var(--pending-color-article); }
+.pha-card { border-top-color: var(--pending-color-pha); }
+.dgallery-card { border-top-color: var(--pending-color-dgallery); }
+.department-card { border-top-color: var(--pending-color-department); }
+.complaint-card { border-top-color: var(--pending-color-complaint); }
 
 /* Card Content */
 .post-card-content {
-    padding: 20px;
+  padding: var(--pending-spacing-xxl);
+  flex-grow: 1; /* Allow content to take available space */
+  display: flex;
+  flex-direction: column;
 }
 
 .post-title {
-    margin: 0 0 15px 0;
-    font-size: 18px;
-    line-height: 1.4;
-    font-weight: 500;
+  margin: 0 0 var(--pending-spacing-xl) 0;
+  font-size: var(--pending-font-size-lg);
+  line-height: var(--pending-line-height-base);
+  font-weight: var(--pending-font-weight-medium);
 }
 
 .post-title a {
-    color: #333;
-    text-decoration: none;
-    transition: color 0.2s ease;
+  color: var(--pending-text-primary);
+  text-decoration: none;
+  transition: color var(--pending-transition-duration) var(--pending-transition-timing);
 }
 
 .post-title a:hover {
-    color: #1e88e5;
+  color: var(--pending-primary-color);
 }
 
 /* Meta Information */
 .post-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--pending-spacing-xl);
+  font-size: var(--pending-font-size-sm);
+  color: var(--pending-text-secondary);
+  flex-wrap: wrap; /* Allow wrapping */
+  gap: var(--pending-spacing-sm); /* Add gap for wrapping */
 }
 
 .post-type {
-    background: #f5f5f5;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
+  background: var(--pending-bg-secondary);
+  padding: var(--pending-spacing-xs) var(--pending-spacing-sm);
+  border-radius: var(--pending-border-radius-sm);
+  font-size: var(--pending-font-size-xs);
 }
 
 .post-date {
-    color: #888;
+  color: var(--pending-text-muted);
+  font-size: var(--pending-font-size-xs); /* Match post-type size */
 }
 
 /* Approve Button */
 .approve-button {
-    width: 100%;
-    padding: 12px;
-    background: #1e88e5;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.2s ease;
+  width: 100%;
+  padding: var(--pending-spacing-lg);
+  background: var(--pending-button-approve-bg);
+  color: var(--pending-button-approve-text);
+  border: none;
+  border-radius: var(--pending-border-radius-sm);
+  cursor: pointer;
+  font-size: var(--pending-font-size-base);
+  font-weight: var(--pending-font-weight-medium);
+  transition: all var(--pending-transition-duration) var(--pending-transition-timing);
+  margin-top: auto; /* Push button to bottom */
 }
 
-.approve-button:hover {
-    background: #1565c0;
+.approve-button:hover:not(:disabled) {
+  background: var(--pending-button-approve-bg-hover);
 }
 
-.approve-button:active {
-    transform: scale(0.98);
+.approve-button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .approve-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
+  background: var(--pending-button-disabled-bg);
+  color: var(--pending-button-disabled-text);
+  cursor: not-allowed;
 }
 
 /* Skeleton Loading */
-.skeleton-loader {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    padding: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
-}
+/* Grid layout already defined above */
 
 .skeleton-card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: var(--pending-bg-primary);
+  border-radius: var(--pending-border-radius-md);
+  padding: var(--pending-spacing-xxl);
+  box-shadow: var(--pending-shadow-sm);
+  border-top: var(--pending-border-width-card-top) solid var(--pending-border-color-light); /* Skeleton border */
 }
 
 .skeleton-title,
 .skeleton-meta,
 .skeleton-button {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 4px;
+  background: var(--pending-skeleton-gradient);
+  background-size: 200% 100%;
+  animation: pending-loading 1.5s infinite;
+  border-radius: var(--pending-border-radius-sm);
 }
 
 .skeleton-title {
-    height: 24px;
-    margin-bottom: 15px;
+  height: 24px; /* Approx title height */
+  margin-bottom: var(--pending-spacing-xl);
 }
 
 .skeleton-meta {
-    height: 16px;
-    margin-bottom: 15px;
-    width: 70%;
+  height: 16px; /* Approx meta height */
+  margin-bottom: var(--pending-spacing-xl);
+  width: 70%;
 }
 
 .skeleton-button {
-    height: 40px;
-    width: 100%;
+  height: 46px; /* Match button height (padding + font size) */
+  width: 100%;
+  margin-top: auto; /* Push to bottom */
 }
 
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+@keyframes pending-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* Empty State */
-.no-posts-message {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 40px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    color: #666;
+.no-posts-message,
+.no-results { /* Combine empty state styles */
+  grid-column: 1 / -1; /* Span full grid width */
+  text-align: center;
+  padding: var(--pending-spacing-xxxxl);
+  background: var(--pending-bg-secondary);
+  border-radius: var(--pending-border-radius-md);
+  color: var(--pending-text-secondary);
+  margin-top: var(--pending-spacing-xxl); /* Add margin if needed */
 }
-
-/* Responsive Design */
-@media (max-width: 1400px) {
-    .pending-posts-grid,
-    .skeleton-loader {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1024px) {
-    .pending-posts-grid,
-    .skeleton-loader {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .pending-posts-grid,
-    .skeleton-loader {
-        grid-template-columns: 1fr;
-        padding: 10px;
-    }
-    
-    .post-title {
-        font-size: 16px;
-    }
-    
-    .post-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .approve-button {
-        padding: 10px;
-        font-size: 14px;
-    }
-    .filter-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .filter-select,
-    .search-input {
-        width: 100%;
-    }
-}
-
-/* Print Styles */
-@media print {
-    .pending-posts-grid {
-        display: block;
-    }
-    
-    .post-card {
-        page-break-inside: avoid;
-        margin-bottom: 20px;
-        box-shadow: none;
-        border: 1px solid #ddd;
-    }
-    
-    .approve-button {
-        display: none;
-    }
-}
-
 
 /* Pagination Styles */
 .pagination {
-    margin-top: 30px;
-    margin-bottom: 30px;
+  margin-top: var(--pending-spacing-xxxl);
+  margin-bottom: var(--pending-spacing-xxxl);
+  padding: 0 var(--pending-spacing-xxl); /* Add horizontal padding */
 }
 
 .pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--pending-spacing-sm); /* 8px */
+  flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .pagination-button {
-    min-width: 40px;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #e0e0e0;
-    background: #fff;
-    color: #333;
-    border-radius: 8px;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 var(--pending-spacing-lg); /* 12px */
+  border: var(--pending-border-width) solid var(--pending-pagination-border);
+  background: var(--pending-pagination-bg);
+  color: var(--pending-pagination-text);
+  border-radius: var(--pending-border-radius-md);
+  font-size: var(--pending-font-size-base);
+  display: inline-flex; /* Use inline-flex */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--pending-transition-duration) var(--pending-transition-timing);
+  text-decoration: none; /* Remove underline if it's an anchor */
 }
 
-.pagination-button:hover {
-    background: #f5f5f5;
-    border-color: #1e88e5;
-    color: #1e88e5;
+.pagination-button:hover:not(:disabled) {
+  background: var(--pending-pagination-hover-bg);
+  border-color: var(--pending-pagination-hover-border);
+  color: var(--pending-pagination-hover-text);
 }
 
 .pagination-button.active {
-    background: #1e88e5;
-    border-color: #1e88e5;
-    color: white;
+  background: var(--pending-pagination-active-bg);
+  border-color: var(--pending-pagination-active-border);
+  color: var(--pending-pagination-active-text);
+  cursor: default;
 }
 
 .pagination-button:disabled {
-    background: #f5f5f5;
-    border-color: #e0e0e0;
-    color: #999;
-    cursor: not-allowed;
+  background: var(--pending-pagination-disabled-bg);
+  border-color: var(--pending-pagination-disabled-border);
+  color: var(--pending-pagination-disabled-text);
+  cursor: not-allowed;
 }
 
 .pagination-ellipsis {
-    color: #666;
-    padding: 0 4px;
+  color: var(--pending-text-secondary);
+  padding: 0 var(--pending-spacing-xs);
+  display: inline-flex; /* Align with buttons */
+  align-items: center;
+  height: 40px; /* Match button height */
 }
 
-/* Grid Layout Update */
-.pending-posts-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    padding: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
-}
+/* --- Responsive Design --- */
 
-/* Responsive Pagination */
-@media (max-width: 768px) {
-    .pagination-container {
-        gap: 4px;
-    }
-
-    .pagination-button {
-        min-width: 36px;
-        height: 36px;
-        padding: 0 8px;
-        font-size: 14px;
-    }
-
-    .pagination-ellipsis {
-        display: none;
-    }
-}
-
-/* Skeleton Loading Update */
-.skeleton-loader {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
+/* Medium-Large Screens */
 @media (max-width: 1400px) {
-    .pending-posts-grid,
-    .skeleton-loader {
-        grid-template-columns: repeat(3, 1fr);
-    }
+  .pending-posts-grid,
+  .skeleton-loader {
+    grid-template-columns: repeat(var(--pending-grid-columns-md), 1fr);
+  }
 }
 
+/* Tablets */
 @media (max-width: 1024px) {
-    .pending-posts-grid,
-    .skeleton-loader {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .pending-posts-grid,
+  .skeleton-loader {
+    grid-template-columns: repeat(var(--pending-grid-columns-sm), 1fr);
+  }
 }
 
+/* Mobile */
 @media (max-width: 768px) {
-    .pending-posts-grid,
-    .skeleton-loader {
-        grid-template-columns: 1fr;
-    }
+  .pending-posts-grid,
+  .skeleton-loader {
+    grid-template-columns: repeat(var(--pending-grid-columns-xs), 1fr);
+    padding: var(--pending-spacing-md); /* Less padding */
+  }
+
+  .filter-controls {
+     padding: var(--pending-spacing-md);
+  }
+
+  .filter-group {
+    /* Already column by default, ensure full width if needed */
+    align-items: stretch;
+  }
+  .filter-select,
+  .search-input {
+     max-width: 100%; /* Allow inputs to take full width */
+  }
+
+  .post-title {
+    font-size: var(--pending-font-size-base); /* Smaller title */
+  }
+
+  .post-meta {
+    flex-direction: column; /* Stack meta items */
+    align-items: flex-start;
+    gap: var(--pending-spacing-sm);
+  }
+
+  .approve-button {
+    padding: var(--pending-spacing-md);
+    font-size: var(--pending-font-size-sm);
+  }
+
+  /* Pagination Adjustments */
+  .pagination-container {
+    gap: var(--pending-spacing-xs); /* 4px */
+  }
+  .pagination-button {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 var(--pending-spacing-sm); /* 8px */
+    font-size: var(--pending-font-size-sm);
+  }
+  .pagination-ellipsis {
+    display: none; /* Hide ellipsis on small screens */
+    height: 36px; /* Match smaller button height */
+  }
 }
 
+/* --- Print Styles --- */
+@media print {
+  :root {
+     /* Adjust variables for print */
+     --pending-bg-primary: white;
+     --pending-bg-secondary: white;
+     --pending-text-primary: black;
+     --pending-text-secondary: #333;
+     --pending-border-color: #ccc;
+     --pending-shadow-sm: none;
+     --pending-shadow-md: none;
+     /* Reset post type colors or use black */
+     --pending-color-egp: black;
+     --pending-color-news: black;
+     /* ... etc ... */
+     --pending-color-default-border: black;
+  }
 
-/* Filter Controls */
-.filter-controls {
-    margin-bottom: 20px;
-    background: #fff;
-    max-width: 600px;
-    margin: 0 auto 20px;
-}
+  body {
+     font-size: 10pt;
+  }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-}
+  .filter-controls,
+  .approve-button,
+  .pagination,
+  .skeleton-loader {
+    display: none !important;
+  }
 
-.filter-select {
-    width: 100%;
-    max-width: 500px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
-    padding-right: 32px;
-}
+  .pending-posts-grid {
+    display: block; /* Reset grid for printing */
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
 
-.filter-select:hover,
-.filter-select:focus {
-    border-color: #1e88e5;
-    outline: none;
-}
+  .post-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: var(--pending-spacing-xxl);
+    box-shadow: none;
+    border: var(--pending-border-width) solid var(--pending-border-color);
+    border-top-width: var(--pending-border-width-card-top); /* Keep top border */
+  }
 
-.search-input {
-    width: 100%;
-    max-width: 500px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #333;
-    transition: all 0.2s ease;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='11' cy='11' r='8'%3e%3c/circle%3e%3cline x1='21' y1='21' x2='16.65' y2='16.65'%3e%3c/line%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
-    padding-right: 32px;
-}
-
-.search-input:hover,
-.search-input:focus {
-    border-color: #1e88e5;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(30,136,229,0.1);
-}
-
-.search-input::placeholder {
-    color: #999;
-}
-
-/* Responsive Filters */
-@media (max-width: 768px) {
-    .filter-group {
-        flex-direction: column;
-    }
-
-    .filter-controls {
-        padding: 10px;
-    }
-
-    .filter-select,
-    .search-input {
-        max-width: 100%;
-    }
-}
-
-/* Loading State */
-.filter-controls.loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-/* Empty State */
-.no-results {
-    text-align: center;
-    padding: 40px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    color: #666;
-    margin-top: 20px;
-}
-
-/* Filter Active Indicators */
-.filter-active {
-    background-color: #e3f2fd;
-    border-color: #1e88e5;
+  .post-title a {
+     color: black;
+     text-decoration: none;
+  }
+  .post-title a[href]::after { /* Optionally show URLs */
+     content: " (" attr(href) ")";
+     font-size: 8pt;
+     color: #555;
+  }
 }

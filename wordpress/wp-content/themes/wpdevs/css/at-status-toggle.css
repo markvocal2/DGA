@@ -1,0 +1,95 @@
+/**
+ * Post Status Toggle Styles
+ * สไตล์สำหรับ Toggle Switch UI
+ */
+
+/* คอนเทนเนอร์สำหรับ toggle component ทั้งหมด */
+.at-status-toggle-container {
+    display: flex;
+    align-items: center;
+    margin: 0px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* พื้นฐานของ Toggle switch */
+.at-status-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    border-radius: 34px;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Toggle switch เมื่ออยู่ในสถานะ active */
+.at-status-toggle-switch.active {
+    background-color: #4CAF50; /* สีเขียว */
+}
+
+/* Toggle switch เมื่ออยู่ในสถานะ inactive */
+.at-status-toggle-switch.inactive {
+    background-color: #f44336; /* สีแดง */
+}
+
+/* Toggle slider (วงกลม) */
+.at-status-toggle-slider {
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s, background-color 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* เลื่อน slider ไปทางขวาเมื่ออยู่ในสถานะ active */
+.at-status-toggle-switch.active .at-status-toggle-slider {
+    transform: translateX(26px);
+}
+
+/* ป้ายแสดงสถานะ */
+.at-status-toggle-label {
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* คอนเทนเนอร์สำหรับข้อความแสดงความสำเร็จ/ข้อผิดพลาด */
+.at-status-toggle-message {
+    margin-left: 10px;
+    font-size: 13px;
+}
+
+/* สไตล์ข้อความแสดงความสำเร็จ */
+.at-status-toggle-message .success {
+    color: #4CAF50;
+}
+
+/* สไตล์ข้อความแสดงข้อผิดพลาด */
+.at-status-toggle-message .error {
+    color: #f44336;
+}
+
+/* สถานะกำลังโหลด */
+.at-status-toggle-switch.loading {
+    opacity: 0.7;
+}
+
+/* Media query สำหรับการแสดงผลบนมือถือ */
+@media (max-width: 480px) {
+    .at-status-toggle-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .at-status-toggle-label,
+    .at-status-toggle-message {
+        margin-left: 0;
+        margin-top: 5px;
+    }
+}

@@ -1,0 +1,154 @@
+/* Custom Main Menu Styles */
+.custom-menu-container {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 4px;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Main level menu */
+.custom-main-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-main-menu > li {
+    position: relative;
+}
+
+.custom-main-menu > li > a {
+    display: block;
+    color: #000000;
+    text-decoration: none;
+    padding: 15px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.custom-main-menu > li:hover > a {
+    background-color: #0066cc;
+    color: #fff;
+}
+
+/* Sub-menu styles */
+.sub-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1000;
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 10px 0;
+}
+
+/* Position sub-menu arrow */
+.sub-menu-arrow {
+    position: absolute;
+    top: -8px;
+    left: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Triangle for sub-menu pointing to parent */
+.triangle {
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #fff;
+}
+
+/* Sub-menu items */
+.sub-menu li:not(.sub-menu-arrow) {
+    position: relative;
+}
+
+.sub-menu li:not(.sub-menu-arrow) a {
+    display: block;
+    color: #000;
+    padding: 10px 20px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sub-menu li:not(.sub-menu-arrow):hover > a {
+    background-color: #0066cc;
+    color: #fff;
+}
+
+/* Dropdown indicator arrow */
+.dropdown-indicator {
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid currentColor;
+    transition: transform 0.2s ease;
+}
+
+/* Third level sub-menus */
+.sub-menu .sub-menu {
+    top: 0;
+    left: 100%;
+}
+
+.sub-menu .sub-menu .sub-menu-arrow {
+    top: 15px;
+    left: -8px;
+}
+
+.sub-menu .sub-menu .triangle {
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #fff;
+    border-left: none;
+}
+
+/* Menu item with children */
+.has-children > a {
+    position: relative;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .custom-main-menu {
+        flex-direction: column;
+    }
+    
+    .sub-menu, .sub-menu .sub-menu {
+        position: static;
+        box-shadow: none;
+        border-left: 3px solid #0066cc;
+        margin-left: 20px;
+        border-radius: 0;
+    }
+    
+    .sub-menu-arrow {
+        display: none;
+    }
+    
+    .custom-main-menu li.has-children > a {
+        cursor: pointer;
+    }
+    
+    .custom-main-menu li.expanded > a > .dropdown-indicator .arrow {
+        transform: rotate(180deg);
+    }
+}

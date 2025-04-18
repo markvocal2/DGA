@@ -1,0 +1,70 @@
+.egp-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.egp-item {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.egp-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.egp-title {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.egp-content {
+    display: none;
+    padding: 10px 0;
+}
+
+.egp-field {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.egp-field strong {
+    color: #666;
+    margin-right: 5px;
+}
+
+.egp-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.egp-item.loading .egp-content {
+    opacity: 0.5;
+}
+
+.egp-item .error {
+    color: #ff0000;
+    margin: 10px 0;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .egp-container {
+        padding: 10px;
+    }
+    
+    .egp-item {
+        padding: 10px;
+    }
+    
+    .egp-title {
+        font-size: 16px;
+    }
+}

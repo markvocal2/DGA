@@ -1,0 +1,340 @@
+/* DGA Mobile Menu Styles - Accordion Style */
+:root {
+    --dga-primary-color: #1e3a8a; /* สีน้ำเงินเข้ม */
+    --dga-secondary-color: #f97316; /* สีส้ม */
+    --dga-light-color: #f8fafc; /* พื้นหลังสีอ่อน */
+    --dga-dark-color: #1e293b; /* พื้นหลังสีเข้ม */
+    --dga-text-on-light: #334155; /* ข้อความบนพื้นสีอ่อน */
+    --dga-text-on-dark: #f1f5f9; /* ข้อความบนพื้นสีเข้ม */
+    --dga-border-color: #e2e8f0; /* สีขอบ */
+    --dga-hover-color: #eff6ff; /* สีเมื่อ hover */
+    --dga-transition: 0.3s ease-in-out;
+}
+
+/* ปุ่มเปิด/ปิดเมนู */
+.dga-mobile-menu-toggle {
+    display: inline-block;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 9995;
+    position: relative;
+}
+
+.dga-mobile-menu-toggle span {
+    display: block;
+    width: 30px;
+    height: 3px;
+    margin: 6px 0;
+    background-color: var(--dga-primary-color);
+    transition: var(--dga-transition);
+    border-radius: 3px;
+}
+
+.dga-mobile-menu-active .dga-mobile-menu-toggle span:nth-child(1) {
+    transform: rotate(-45deg) translate(-6px, 6px);
+    background-color: var(--dga-secondary-color);
+}
+
+.dga-mobile-menu-active .dga-mobile-menu-toggle span:nth-child(2) {
+    opacity: 0;
+}
+
+.dga-mobile-menu-active .dga-mobile-menu-toggle span:nth-child(3) {
+    transform: rotate(45deg) translate(-6px, -6px);
+    background-color: var(--dga-secondary-color);
+}
+
+/* คอนเทนเนอร์เมนู */
+.dga-mobile-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* โอเวอร์เลย์เมนู */
+.dga-mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9996;
+    visibility: hidden;
+    opacity: 0;
+    transition: var(--dga-transition);
+}
+
+.dga-mobile-menu-overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* แรปเปอร์เมนู */
+.dga-mobile-menu-wrapper {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 320px;
+    max-width: 90vw;
+    height: 100%;
+    background-color: var(--dga-light-color);
+    z-index: 9997;
+    overflow-y: auto;
+    transition: right var(--dga-transition);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.dga-mobile-menu-wrapper.active {
+    right: 0;
+}
+
+/* ส่วนหัวเมนู */
+.dga-mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: var(--dga-primary-color);
+    border-bottom: 1px solid var(--dga-border-color);
+}
+
+.dga-mobile-menu-title {
+    color: var(--dga-text-on-dark);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.dga-mobile-menu-close {
+    background: none;
+    border: none;
+    color: var(--dga-text-on-dark);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--dga-transition);
+}
+
+.dga-mobile-menu-close:hover {
+    color: var(--dga-secondary-color);
+}
+
+/* ส่วนเนื้อหาเมนู */
+.dga-mobile-menu-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* ตัวแสดงการโหลด */
+.dga-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--dga-border-color);
+    border-top: 4px solid var(--dga-secondary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* สไตล์เมนูแบบ Accordion */
+.dga-mobile-nav-menu {
+    width: 100%;
+}
+
+.dga-accordion-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dga-accordion-menu li {
+    border-bottom: 1px solid var(--dga-border-color);
+    position: relative;
+}
+
+.dga-accordion-menu > li:last-child {
+    border-bottom: none;
+}
+
+.dga-accordion-menu li a {
+    display: block;
+    padding: 15px 20px;
+    color: var(--dga-text-on-light);
+    text-decoration: none;
+    font-size: 16px;
+    transition: var(--dga-transition);
+}
+
+.dga-accordion-menu > li > a {
+    font-weight: 500;
+}
+
+.dga-accordion-menu li a:hover,
+.dga-accordion-menu li a:focus {
+    background-color: var(--dga-hover-color);
+    color: var(--dga-primary-color);
+}
+
+/* ส่วนหัวของรายการเมนูที่มี submenu */
+.dga-menu-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: transparent;
+    transition: var(--dga-transition);
+}
+
+.dga-menu-item-header:hover {
+    background-color: var(--dga-hover-color);
+}
+
+.dga-menu-item-header > a {
+    flex: 1;
+    padding: 15px 20px;
+    margin: 0;
+}
+
+/* ปุ่ม toggle สำหรับ accordion */
+.dga-accordion-toggle {
+    position: relative;
+    width: 50px;
+    height: 48px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--dga-transition);
+}
+
+.dga-accordion-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* สัญลักษณ์บวก/ลบ */
+.dga-plus-minus {
+    position: relative;
+    width: 14px;
+    height: 14px;
+}
+
+.dga-plus-minus:before,
+.dga-plus-minus:after {
+    content: '';
+    position: absolute;
+    background-color: var(--dga-primary-color);
+    transition: var(--dga-transition);
+}
+
+.dga-plus-minus:before {
+    width: 14px;
+    height: 2px;
+    top: 6px;
+    left: 0;
+}
+
+.dga-plus-minus:after {
+    width: 2px;
+    height: 14px;
+    top: 0;
+    left: 6px;
+}
+
+.submenu-open > .dga-menu-item-header .dga-plus-minus:after {
+    transform: rotate(90deg);
+    opacity: 0;
+}
+
+.submenu-open > .dga-menu-item-header .dga-plus-minus:before {
+    background-color: var(--dga-secondary-color);
+}
+
+/* เมนูย่อย */
+.dga-submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-top: 1px solid var(--dga-border-color);
+}
+
+.dga-submenu li {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dga-submenu li:last-child {
+    border-bottom: none;
+}
+
+/* ระดับต่างๆ ของเมนูย่อย */
+.dga-submenu.level-1 > li > a,
+.dga-submenu.level-1 > li > .dga-menu-item-header > a {
+    padding-left: 30px;
+    font-size: 15px;
+}
+
+.dga-submenu.level-2 > li > a,
+.dga-submenu.level-2 > li > .dga-menu-item-header > a {
+    padding-left: 40px;
+    font-size: 14px;
+}
+
+.dga-submenu.level-3 > li > a,
+.dga-submenu.level-3 > li > .dga-menu-item-header > a {
+    padding-left: 50px;
+    font-size: 14px;
+}
+
+.dga-submenu.level-4 > li > a,
+.dga-submenu.level-4 > li > .dga-menu-item-header > a {
+    padding-left: 60px;
+    font-size: 14px;
+}
+
+/* เมนูที่เลือกอยู่ */
+.dga-accordion-menu .current > a,
+.dga-accordion-menu .current > .dga-menu-item-header > a {
+    color: var(--dga-secondary-color);
+    font-weight: 600;
+}
+
+/* Media queries */
+@media (min-width: 992px) {
+    .dga-mobile-menu-container {
+        display: none;
+    }
+}
+
+/* สไตล์การเข้าถึง */
+.dga-mobile-menu-toggle:focus,
+.dga-mobile-menu-close:focus,
+.dga-accordion-toggle:focus,
+.dga-accordion-menu li a:focus {
+    outline: 2px solid var(--dga-secondary-color);
+    outline-offset: 2px;
+}
+
+/* ป้องกันการเลื่อนหน้าเมื่อเมนูเปิดอยู่ */
+body.dga-mobile-menu-active {
+    overflow: hidden;
+}

@@ -1,0 +1,431 @@
+/**
+ * Inactive News List Styles
+ * ธีมสีน้ำเงินและสีส้ม
+ */
+
+/* ตัวแปรสีที่ใช้ */
+:root {
+    --at-primary-blue: #1a4b8c;
+    --at-secondary-blue: #2a6eba;
+    --at-light-blue: #eef5ff;
+    --at-hover-blue: #0d3e7d;
+    --at-primary-orange: #ff7f1f;
+    --at-secondary-orange: #ff9447;
+    --at-hover-orange: #e06200;
+    --at-border-color: #d8e2f3;
+    --at-text-dark: #333;
+    --at-text-light: #666;
+    --at-text-lighter: #888;
+    --at-success-green: #2ecc71;
+    --at-error-red: #e74c3c;
+}
+
+/* คอนเทนเนอร์หลัก */
+.at-inactive-news-container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    max-width: 100%;
+    margin: 30px 0;
+    color: var(--at-text-dark);
+}
+
+/* ส่วนค้นหา */
+.at-search-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.at-search-box {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 500px;
+}
+
+.at-search-box input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid var(--at-border-color);
+    border-radius: 6px 0 0 6px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.at-search-box input:focus {
+    border-color: var(--at-secondary-blue);
+}
+
+.at-search-box button {
+    background-color: var(--at-primary-blue);
+    color: white;
+    border: none;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.at-search-box button:hover {
+    background-color: var(--at-hover-blue);
+}
+
+.at-search-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 8px;
+}
+
+.at-filter-info {
+    font-size: 14px;
+    color: var(--at-text-light);
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* ตาราง */
+.at-news-table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.at-news-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+.at-news-table thead tr {
+    background-color: var(--at-primary-blue);
+    color: white;
+}
+
+.at-news-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--at-hover-blue);
+}
+
+.at-news-table td {
+    padding: 14px 15px;
+    border-bottom: 1px solid var(--at-border-color);
+    vertical-align: middle;
+}
+
+.at-news-table tr:last-child td {
+    border-bottom: none;
+}
+
+.at-news-table tbody tr:nth-child(even) {
+    background-color: var(--at-light-blue);
+}
+
+.at-news-table tbody tr:hover {
+    background-color: rgba(26, 75, 140, 0.05);
+}
+
+.at-news-title a {
+    color: var(--at-primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.at-news-title a:hover {
+    color: var(--at-primary-orange);
+    text-decoration: underline;
+}
+
+/* สถานะ Badge */
+.at-status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.at-status-active {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: var(--at-success-green);
+}
+
+.at-status-inactive {
+    background-color: rgba(255, 127, 31, 0.15);
+    color: var(--at-primary-orange);
+}
+
+/* คอลัมน์สถานะและการกระทำ */
+.at-status-column {
+    text-align: center;
+}
+
+.at-action-column {
+    text-align: center;
+}
+
+/* เลขที่ประกาศ */
+.at-doc-number {
+    font-size: 14px;
+}
+
+.at-doc-number-item {
+    margin-bottom: 5px;
+}
+
+.at-doc-number-item:last-child {
+    margin-bottom: 0;
+}
+
+.at-doc-label {
+    display: inline-block;
+    background-color: var(--at-primary-blue);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.at-doc-none {
+    color: var(--at-text-lighter);
+    font-style: italic;
+}
+
+/* Custom Toggle Switch ใหม่ */
+.at-direct-toggle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.at-direct-toggle-switch {
+    position: relative;
+    display: flex;
+    width: 120px;
+    height: 34px;
+    border-radius: 34px;
+    background-color: var(--at-error-red);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    align-items: center;
+    padding-right: 10px;
+    padding-left: 45px;
+    justify-content: center;
+}
+
+.at-direct-toggle-switch.active {
+    background-color: var(--at-success-green);
+    padding-right: 45px;
+    padding-left: 10px;
+}
+
+.at-direct-toggle-switch.inactive {
+    background-color: var(--at-primary-orange);
+}
+
+.at-direct-toggle-slider {
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.at-direct-toggle-switch.active .at-direct-toggle-slider {
+    transform: translateX(86px);
+}
+
+.at-status-text {
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ข้อความสถานะโหลด */
+.at-loading-data {
+    text-align: center;
+    color: var(--at-text-light);
+    padding: 40px !important;
+    font-style: italic;
+}
+
+.at-no-data {
+    text-align: center;
+    color: var(--at-text-light);
+    padding: 40px !important;
+    font-style: italic;
+}
+
+.at-error-data {
+    text-align: center;
+    color: var(--at-error-red);
+    padding: 40px !important;
+    font-style: italic;
+}
+
+/* Pagination */
+.at-news-pagination {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+    gap: 6px;
+}
+
+.at-pagination-button {
+    padding: 8px 15px;
+    background-color: white;
+    border: 1px solid var(--at-border-color);
+    border-radius: 4px;
+    color: var(--at-text-dark);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.at-pagination-button:hover {
+    background-color: var(--at-light-blue);
+    border-color: var(--at-secondary-blue);
+}
+
+.at-pagination-button.at-pagination-active {
+    background-color: var(--at-primary-blue);
+    border-color: var(--at-primary-blue);
+    color: white;
+}
+
+.at-pagination-button.prev,
+.at-pagination-button.next {
+    background-color: var(--at-primary-orange);
+    color: white;
+    border-color: var(--at-primary-orange);
+    font-weight: 600;
+}
+
+.at-pagination-button.prev:hover,
+.at-pagination-button.next:hover {
+    background-color: var(--at-hover-orange);
+    border-color: var(--at-hover-orange);
+}
+
+.at-pagination-ellipsis {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: var(--at-text-light);
+}
+
+/* ข้อความแสดงสถานะ */
+.at-news-status-message {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--at-text-light);
+    font-size: 14px;
+}
+
+.at-news-status-message .at-error {
+    color: var(--at-error-red);
+    font-weight: 600;
+}
+
+.at-news-status-message .at-success {
+    color: var(--at-success-green);
+    font-weight: 600;
+}
+
+/* สถานะโหลด */
+.at-direct-toggle-switch.loading {
+    opacity: 0.7;
+}
+
+/* รองรับการแสดงผลบนมือถือ */
+@media (max-width: 992px) {
+    .at-direct-toggle-switch {
+        width: 100px;
+        padding-right: 8px;
+        padding-left: 38px;
+    }
+    
+    .at-direct-toggle-switch.active {
+        padding-right: 38px;
+        padding-left: 8px;
+    }
+    
+    .at-direct-toggle-switch.active .at-direct-toggle-slider {
+        transform: translateX(66px);
+    }
+    
+    .at-status-text {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .at-search-filter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .at-search-box {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .at-filter-info {
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+    
+    .at-news-table th:nth-child(1),
+    .at-news-table td:nth-child(1) {
+        display: none;
+    }
+    
+    .at-pagination-button {
+        padding: 8px 12px;
+        margin: 0 2px;
+    }
+}
+
+@media (max-width: 576px) {
+    .at-news-table th:nth-child(2),
+    .at-news-table td:nth-child(2) {
+        display: none;
+    }
+    
+    .at-news-table th,
+    .at-news-table td {
+        padding: 10px 8px;
+    }
+    
+    .at-direct-toggle-switch {
+        width: 90px;
+    }
+    
+    .at-direct-toggle-switch.active .at-direct-toggle-slider {
+        transform: translateX(56px);
+    }
+}

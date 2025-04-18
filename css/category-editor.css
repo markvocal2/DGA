@@ -1,454 +1,608 @@
-/* /css/category-editor.css */
+/**
+ * Category Editor Styles V2 (Refactored)
+ *
+ * Styles for the category editor modal, including trigger button,
+ * add/edit forms, category grid display, skeleton loading, and notifications.
+ * Uses CSS variables for better maintainability and theming.
+ * File path: /css/category-editor.css
+ */
+
+/* ========== Theme Variables ========== */
 :root {
-    --primary-blue: #1e3a8a;
-    --primary-orange: #f97316;
-    --light-blue: #3b82f6;
-    --light-orange: #fb923c;
-    --dark-text: #1f2937;
-    --light-text: #4b5563;
-    --border-color: #e5e7eb;
-    --background-light: #f8fafc;
-    --white: #ffffff;
-    --error: #ef4444;
-    --success: #22c55e;
+  /* Colors */
+  --cat-edit-primary-blue: #1e3a8a;
+  --cat-edit-primary-orange: #f97316;
+  --cat-edit-light-blue: #3b82f6;
+  --cat-edit-light-orange: #fb923c; /* Not used in original, but defined */
+  --cat-edit-dark-text: #1f2937;
+  --cat-edit-light-text: #4b5563; /* Also used for cancel button bg */
+  --cat-edit-white: #ffffff;
+  --cat-edit-border-color: #e5e7eb;
+  --cat-edit-border-color-dashed: #d1d5db; /* Adjusted for dashed */
+  --cat-edit-bg-light: #f8fafc;
+  --cat-edit-bg-skeleton: #e2e8f0;
+  --cat-edit-bg-modal-overlay: rgba(0, 0, 0, 0.5);
+  --cat-edit-error: #ef4444;
+  --cat-edit-success: #22c55e;
+  --cat-edit-cancel-hover: #6b7280; /* Darker gray for cancel hover */
+
+  /* Typography */
+  --cat-edit-font-family: inherit; /* Assuming font is set globally */
+  --cat-edit-font-size-base: 1rem;      /* 16px */
+  --cat-edit-font-size-sm: 0.875rem;  /* 14px */
+  --cat-edit-font-size-lg: 1.125rem;  /* 18px */
+  --cat-edit-font-size-xl: 1.5rem;    /* 24px */
+  --cat-edit-font-size-xxl: 1.75rem;  /* 28px */
+  --cat-edit-font-weight-normal: 400;
+  --cat-edit-font-weight-medium: 500;
+  --cat-edit-font-weight-semibold: 600;
+  --cat-edit-line-height-base: 1.6;
+
+  /* Spacing */
+  --cat-edit-spacing-xs: 4px;
+  --cat-edit-spacing-sm: 8px;
+  --cat-edit-spacing-md: 12px;
+  --cat-edit-spacing-lg: 16px;
+  --cat-edit-spacing-xl: 20px;
+  --cat-edit-spacing-xxl: 24px;
+
+  /* Borders */
+  --cat-edit-border-radius-sm: 4px;
+  --cat-edit-border-radius-md: 6px;
+  --cat-edit-border-radius-lg: 8px;
+  --cat-edit-border-radius-xl: 10px;
+  --cat-edit-border-radius-xxl: 12px;
+  --cat-edit-border-radius-round: 50%;
+  --cat-edit-border-width: 1px;
+  --cat-edit-border-width-dashed: 2px;
+
+  /* Shadows */
+  --cat-edit-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --cat-edit-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --cat-edit-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --cat-edit-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Transitions & Animations */
+  --cat-edit-transition-duration: 0.3s;
+  --cat-edit-transition-timing: ease;
+  --cat-edit-animation-duration: 1.5s;
+
+  /* Layout */
+  --cat-edit-modal-max-width: 1200px;
+  --cat-edit-grid-min-item-width: 280px;
+  --cat-edit-grid-min-item-width-mobile: 240px;
+  --cat-edit-card-image-height: 200px;
+
+  /* Z-Index */
+  --cat-edit-z-index-modal: 1000;
+  --cat-edit-z-index-notification: 1100;
 }
 
-/* Button Styles */
+/* ========== Trigger Button ========== */
 .category-editor-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background-color: var(--primary-blue);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cat-edit-spacing-sm); /* 8px */
+  padding: var(--cat-edit-spacing-md) var(--cat-edit-spacing-xxl); /* 12px 24px */
+  background-color: var(--cat-edit-primary-blue);
+  color: var(--cat-edit-white);
+  border: none;
+  border-radius: var(--cat-edit-border-radius-lg);
+  cursor: pointer;
+  font-size: var(--cat-edit-font-size-base); /* 16px */
+  font-weight: var(--cat-edit-font-weight-medium);
+  transition: all var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  text-decoration: none; /* Ensure no underline if used as link */
 }
 
 .category-editor-btn:hover {
-    background-color: var(--light-blue);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background-color: var(--cat-edit-light-blue);
+  transform: translateY(-1px);
+  box-shadow: var(--cat-edit-shadow-md);
 }
 
-.category-editor-btn i {
-    font-size: 18px;
+.category-editor-btn i { /* Assuming Font Awesome or similar */
+  font-size: var(--cat-edit-font-size-lg); /* 18px */
+  line-height: 1;
 }
 
-/* Modal Styles */
+/* ========== Modal Styles ========== */
 .category-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    padding: 20px;
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--cat-edit-bg-modal-overlay);
+  z-index: var(--cat-edit-z-index-modal);
+  padding: var(--cat-edit-spacing-xl); /* 20px */
+  overflow-y: auto; /* Allow modal scroll if needed */
 }
 
 .category-modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .category-modal-content {
-    background-color: var(--white);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 1200px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 24px;
-    position: relative;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  background-color: var(--cat-edit-white);
+  border-radius: var(--cat-edit-border-radius-xxl); /* 12px */
+  width: 100%;
+  max-width: var(--cat-edit-modal-max-width);
+  max-height: 90vh; /* Limit height */
+  overflow-y: auto; /* Scroll content if needed */
+  padding: var(--cat-edit-spacing-xxl); /* 24px */
+  position: relative;
+  box-shadow: var(--cat-edit-shadow-xl);
 }
 
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--cat-edit-spacing-xxl); /* 24px */
+  padding-bottom: var(--cat-edit-spacing-lg); /* 16px */
+  border-bottom: var(--cat-edit-border-width) solid var(--cat-edit-border-color);
 }
 
 .modal-header h2 {
-    color: var(--dark-text);
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0;
+  color: var(--cat-edit-dark-text);
+  font-size: var(--cat-edit-font-size-xl); /* 24px */
+  font-weight: var(--cat-edit-font-weight-semibold);
+  margin: 0;
 }
 
 .close-modal {
-    background: none;
-    border: none;
-    font-size: 28px;
-    color: var(--light-text);
-    cursor: pointer;
-    padding: 4px;
-    transition: color 0.3s ease;
+  background: none;
+  border: none;
+  font-size: var(--cat-edit-font-size-xxl); /* 28px */
+  color: var(--cat-edit-light-text);
+  cursor: pointer;
+  padding: var(--cat-edit-spacing-xs); /* 4px */
+  transition: color var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  line-height: 1;
 }
 
 .close-modal:hover {
-    color: var(--error);
+  color: var(--cat-edit-error);
 }
 
-/* Add Category Form Styles */
+/* ========== Common Form Styles ========== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cat-edit-spacing-sm); /* 8px */
+  margin-bottom: var(--cat-edit-spacing-lg); /* 16px */
+}
+.form-group:last-child {
+   margin-bottom: 0; /* Remove margin from last group */
+}
+
+.form-group label {
+  color: var(--cat-edit-dark-text);
+  font-weight: var(--cat-edit-font-weight-medium);
+  font-size: var(--cat-edit-font-size-base); /* Ensure consistent label size */
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"] { /* Added file input */
+  width: 100%; /* Ensure full width */
+  padding: var(--cat-edit-spacing-lg) var(--cat-edit-spacing-lg); /* 10px 16px */
+  border: var(--cat-edit-border-width) solid var(--cat-edit-border-color);
+  border-radius: var(--cat-edit-border-radius-md); /* 6px */
+  font-size: var(--cat-edit-font-size-base); /* 16px */
+  transition: border-color var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  font-family: inherit; /* Inherit font */
+  color: var(--cat-edit-dark-text);
+}
+.form-group input[type="text"]:focus {
+  border-color: var(--cat-edit-primary-blue);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--cat-edit-light-blue); /* Add focus ring */
+}
+
+/* ========== Add Category Form ========== */
 .add-category-section {
-    background-color: var(--background-light);
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 24px;
+  background-color: var(--cat-edit-bg-light);
+  padding: var(--cat-edit-spacing-xl); /* 20px */
+  border-radius: var(--cat-edit-border-radius-lg); /* 8px */
+  margin-bottom: var(--cat-edit-spacing-xxl); /* 24px */
 }
 
 .add-category-section h3 {
-    color: var(--dark-text);
-    font-size: 18px;
-    margin-bottom: 16px;
+  color: var(--cat-edit-dark-text);
+  font-size: var(--cat-edit-font-size-lg); /* 18px */
+  margin-bottom: var(--cat-edit-spacing-lg); /* 16px */
+  font-weight: var(--cat-edit-font-weight-semibold);
 }
 
 .category-form {
-    display: grid;
-    gap: 16px;
-    max-width: 600px;
+  display: grid; /* Use grid for layout */
+  gap: var(--cat-edit-spacing-lg); /* 16px */
+  max-width: 600px; /* Limit form width */
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    color: var(--dark-text);
-    font-weight: 500;
-}
-
-.form-group input[type="text"] {
-    padding: 10px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input[type="text"]:focus {
-    border-color: var(--primary-blue);
-    outline: none;
-}
-
+/* Image Upload Area */
 .image-upload-wrapper {
-    position: relative;
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
+  position: relative;
+  border: var(--cat-edit-border-width-dashed) dashed var(--cat-edit-border-color-dashed);
+  border-radius: var(--cat-edit-border-radius-lg); /* 8px */
+  padding: var(--cat-edit-spacing-xl); /* 20px */
+  text-align: center;
+  transition: all var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  cursor: pointer; /* Indicate clickable */
+  background-color: var(--cat-edit-white); /* Ensure white background */
 }
 
 .image-upload-wrapper:hover {
-    border-color: var(--primary-blue);
+  border-color: var(--cat-edit-primary-blue);
+  background-color: var(--cat-edit-bg-light); /* Slight bg change on hover */
+}
+
+.image-upload-wrapper p { /* Style text inside */
+   color: var(--cat-edit-light-text);
+   font-size: var(--cat-edit-font-size-sm);
+   margin-bottom: var(--cat-edit-spacing-md);
+}
+
+.image-upload-wrapper input[type="file"] { /* Hide default file input */
+   position: absolute;
+   inset: 0;
+   opacity: 0;
+   cursor: pointer;
+   width: 100%;
+   height: 100%;
 }
 
 .preview-image {
-    margin-top: 12px;
+  margin-top: var(--cat-edit-spacing-md); /* 12px */
 }
 
 .preview-image img {
-    max-width: 200px;
-    max-height: 200px;
-    border-radius: 4px;
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: var(--cat-edit-border-radius-sm); /* 4px */
+  display: block; /* Prevent extra space */
+  margin: 0 auto; /* Center preview */
 }
 
-/* Categories Grid Styles */
+/* ========== Categories Grid ========== */
 .categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
-    margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--cat-edit-grid-min-item-width), 1fr));
+  gap: var(--cat-edit-spacing-xxl); /* 24px */
+  margin-top: var(--cat-edit-spacing-xxl); /* 24px */
 }
 
 .category-card {
-    background-color: var(--white);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    overflow: hidden;
-    transition: all 0.3s ease;
+  background-color: var(--cat-edit-white);
+  border: var(--cat-edit-border-width) solid var(--cat-edit-border-color);
+  border-radius: var(--cat-edit-border-radius-xl); /* 10px */
+  overflow: hidden;
+  transition: all var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  display: flex; /* Use flex for layout */
+  flex-direction: column;
 }
 
 .category-card:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+  box-shadow: var(--cat-edit-shadow-lg);
+  transform: translateY(-2px);
 }
 
 .category-image {
-    position: relative;
-    height: 200px;
-    background-color: var(--background-light);
+  position: relative;
+  height: var(--cat-edit-card-image-height); /* 200px */
+  background-color: var(--cat-edit-bg-light);
+  flex-shrink: 0; /* Prevent image shrinking */
 }
 
 .category-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the area */
+  display: block; /* Remove extra space */
 }
 
-.no-image {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--light-text);
-    font-size: 14px;
+.no-image { /* Placeholder for when no image exists */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cat-edit-light-text);
+  font-size: var(--cat-edit-font-size-sm); /* 14px */
 }
 
 .image-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 8px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+  position: absolute;
+  top: var(--cat-edit-spacing-lg); /* 10px */
+  right: var(--cat-edit-spacing-lg);
+  display: flex;
+  gap: var(--cat-edit-spacing-sm); /* 8px */
+  opacity: 0; /* Hidden by default */
+  transition: opacity var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  pointer-events: none; /* Prevent interaction when hidden */
 }
 
 .category-card:hover .image-controls {
-    opacity: 1;
+  opacity: 1;
+  pointer-events: auto; /* Allow interaction on hover */
 }
 
 .image-controls button {
-    background-color: var(--white);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  background-color: var(--cat-edit-white);
+  border: none;
+  border-radius: var(--cat-edit-border-radius-round);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  color: var(--cat-edit-light-text); /* Icon color */
+  box-shadow: var(--cat-edit-shadow-sm);
 }
 
 .image-controls button:hover {
-    background-color: var(--primary-orange);
-    color: var(--white);
+  background-color: var(--cat-edit-primary-orange);
+  color: var(--cat-edit-white);
+  transform: scale(1.1); /* Slight scale effect */
+}
+.image-controls button i { /* Assuming Font Awesome */
+   font-size: 16px;
+   line-height: 1;
 }
 
 .category-info {
-    padding: 16px;
+  padding: var(--cat-edit-spacing-lg); /* 16px */
+  flex-grow: 1; /* Allow info to take space */
+  display: flex;
+  flex-direction: column;
 }
 
 .category-name {
-    color: var(--dark-text);
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
+  color: var(--cat-edit-dark-text);
+  font-size: var(--cat-edit-font-size-lg); /* 18px */
+  font-weight: var(--cat-edit-font-weight-semibold);
+  margin: 0 0 var(--cat-edit-spacing-sm) 0; /* 8px */
+  line-height: 1.3; /* Adjust line height */
 }
 
 .category-slug {
-    color: var(--light-text);
-    font-size: 14px;
-    margin: 0;
+  color: var(--cat-edit-light-text);
+  font-size: var(--cat-edit-font-size-sm); /* 14px */
+  margin: 0;
+  word-break: break-all; /* Break long slugs */
 }
 
 .category-controls {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--cat-edit-spacing-sm); /* 8px */
+  margin-top: var(--cat-edit-spacing-lg); /* 16px */
+  padding-top: var(--cat-edit-spacing-lg); /* Add padding above controls */
+  border-top: var(--cat-edit-border-width) solid var(--cat-edit-border-color); /* Separator */
 }
 
 .category-controls button {
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    color: var(--light-text);
-    transition: color 0.3s ease;
+  background: none;
+  border: none;
+  padding: var(--cat-edit-spacing-sm); /* 8px */
+  cursor: pointer;
+  color: var(--cat-edit-light-text);
+  transition: color var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  line-height: 1; /* Ensure icon aligns */
+}
+.category-controls button i { /* Assuming Font Awesome */
+   font-size: 18px;
 }
 
-.edit-category-btn:hover {
-    color: var(--primary-blue);
+.edit-category-btn:hover { /* Specific hover for edit */
+  color: var(--cat-edit-primary-blue);
 }
 
-.delete-category-btn:hover {
-    color: var(--error);
+.delete-category-btn:hover { /* Specific hover for delete */
+  color: var(--cat-edit-error);
 }
 
-/* Edit Form Styles */
+/* ========== Edit Form (Inline within Card) ========== */
 .edit-form {
-    padding: 16px;
-    background-color: var(--background-light);
+  padding: var(--cat-edit-spacing-lg); /* 16px */
+  background-color: var(--cat-edit-bg-light);
+  border-top: var(--cat-edit-border-width) solid var(--cat-edit-border-color);
 }
 
-.edit-form.hidden {
-    display: none;
+.edit-form.hidden { /* Class to hide the form */
+  display: none;
 }
 
-.edit-form input[type="text"] {
-    width: 100%;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+/* Use common form-group styles */
+.edit-form .form-group input[type="text"] {
+  padding: var(--cat-edit-spacing-sm) var(--cat-edit-spacing-md); /* 8px 12px */
+  margin-bottom: var(--cat-edit-spacing-md); /* 12px */
 }
 
-.form-controls {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+.form-controls { /* Container for save/cancel buttons */
+  display: flex;
+  gap: var(--cat-edit-spacing-sm); /* 8px */
+  justify-content: flex-end;
+  margin-top: var(--cat-edit-spacing-md); /* Space above buttons */
 }
 
 .save-btn, .cancel-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
+  padding: var(--cat-edit-spacing-sm) var(--cat-edit-spacing-lg); /* 8px 16px */
+  border: none;
+  border-radius: var(--cat-edit-border-radius-sm); /* 4px */
+  cursor: pointer;
+  font-weight: var(--cat-edit-font-weight-medium);
+  transition: all var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  font-size: var(--cat-edit-font-size-sm); /* Consistent button size */
 }
 
 .save-btn {
-    background-color: var(--primary-blue);
-    color: var(--white);
+  background-color: var(--cat-edit-primary-blue);
+  color: var(--cat-edit-white);
 }
-
 .save-btn:hover {
-    background-color: var(--light-blue);
+  background-color: var(--cat-edit-light-blue);
 }
 
 .cancel-btn {
-    background-color: var(--light-text);
-    color: var(--white);
+  background-color: var(--cat-edit-light-text); /* Use light text color as bg */
+  color: var(--cat-edit-white); /* White text */
+  border: var(--cat-edit-border-width) solid var(--cat-edit-border-color); /* Add border */
 }
-
 .cancel-btn:hover {
-    background-color: var(--error);
+  background-color: var(--cat-edit-cancel-hover); /* Use darker gray on hover */
 }
 
-/* Skeleton Loading Styles */
-.skeleton {
-    animation: loading 1.5s infinite;
+/* ========== Skeleton Loading ========== */
+.skeleton { /* Base skeleton style */
+  animation: cat-edit-loading var(--cat-edit-animation-duration) infinite;
+  background-color: var(--cat-edit-bg-skeleton); /* Ensure base color */
 }
 
-.skeleton-image {
-    height: 200px;
-    background-color: #e2e8f0;
-    margin-bottom: 16px;
+.skeleton-image { /* Applied to category-image div */
+  height: var(--cat-edit-card-image-height);
+  background-color: var(--cat-edit-bg-skeleton);
+  margin-bottom: var(--cat-edit-spacing-lg); /* 16px */
+  border-radius: 0; /* No radius needed if applied to container */
 }
 
-.skeleton-text {
-    height: 24px;
-    background-color: #e2e8f0;
-    margin-bottom: 12px;
-    border-radius: 4px;
+.skeleton-text { /* Applied to text elements */
+  height: 1.5em; /* 24px approx */
+  background-color: var(--cat-edit-bg-skeleton);
+  margin-bottom: var(--cat-edit-spacing-md); /* 12px */
+  border-radius: var(--cat-edit-border-radius-sm); /* 4px */
+}
+.skeleton-text.short { width: 60%; }
+.skeleton-text.medium { width: 80%; }
+.skeleton-text:last-child { margin-bottom: 0; }
+
+/* Apply skeleton to card structure */
+.category-card.skeleton .category-image {
+   background-color: var(--cat-edit-bg-skeleton);
+   animation: cat-edit-loading var(--cat-edit-animation-duration) infinite;
+}
+.category-card.skeleton .category-info {
+   padding-top: 0; /* Adjust padding */
+}
+.category-card.skeleton .category-name,
+.category-card.skeleton .category-slug {
+   background-color: var(--cat-edit-bg-skeleton);
+   color: transparent; /* Hide text */
+   animation: cat-edit-loading var(--cat-edit-animation-duration) infinite;
+}
+.category-card.skeleton .category-slug {
+   width: 70%; /* Make slug shorter */
+   height: 1em; /* Approx 14px */
+}
+.category-card.skeleton .category-controls {
+   visibility: hidden; /* Hide controls */
 }
 
-@keyframes loading {
-    0% {
-        opacity: 0.5;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.5;
-    }
+
+@keyframes cat-edit-loading { /* Opacity pulse animation */
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }
 
-/* Notification Styles */
+/* ========== Notification ========== */
 .notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    border-radius: 6px;
-    color: var(--white);
-    font-weight: 500;
-    z-index: 1100;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-    max-width: 400px;
+  position: fixed;
+  bottom: var(--cat-edit-spacing-xl); /* 20px */
+  right: var(--cat-edit-spacing-xl);
+  padding: var(--cat-edit-spacing-md) var(--cat-edit-spacing-xxl); /* 12px 24px */
+  border-radius: var(--cat-edit-border-radius-md); /* 6px */
+  color: var(--cat-edit-white);
+  font-weight: var(--cat-edit-font-weight-medium);
+  z-index: var(--cat-edit-z-index-notification);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all var(--cat-edit-transition-duration) var(--cat-edit-transition-timing);
+  max-width: 400px;
+  box-shadow: var(--cat-edit-shadow-lg);
+  font-size: var(--cat-edit-font-size-sm); /* Consistent font size */
 }
 
 .notification.show {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .notification.success {
-    background-color: var(--success);
+  background-color: var(--cat-edit-success);
 }
 
 .notification.error {
-    background-color: var(--error);
+  background-color: var(--cat-edit-error);
 }
 
-/* Form Group Styles */
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--dark-text);
-    font-weight: 500;
-}
-
-.form-group input[type="text"] {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input[type="text"]:focus {
-    border-color: var(--primary-blue);
-    outline: none;
-}
-
-/* Responsive Styles */
+/* ========== Responsive Styles ========== */
 @media (max-width: 768px) {
-    .category-modal-content {
-        padding: 16px;
-    }
+  .category-modal-content {
+    padding: var(--cat-edit-spacing-lg); /* 16px */
+    max-height: 85vh; /* Adjust max height */
+  }
 
-    .categories-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 16px;
-    }
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(var(--cat-edit-grid-min-item-width-mobile), 1fr));
+    gap: var(--cat-edit-spacing-lg); /* 16px */
+  }
 
-    .category-form {
-        max-width: 100%;
-    }
+  .category-form {
+    max-width: 100%; /* Allow form full width */
+  }
 
-    .modal-header h2 {
-        font-size: 20px;
-    }
+  .modal-header h2 {
+    font-size: var(--cat-edit-font-size-xl); /* 20px */
+  }
+
+  .category-editor-btn {
+     font-size: var(--cat-edit-font-size-sm);
+     padding: var(--cat-edit-spacing-md) var(--cat-edit-spacing-lg);
+  }
 }
 
 @media (max-width: 480px) {
-    .category-modal {
-        padding: 12px;
-    }
+  .category-modal {
+    padding: var(--cat-edit-spacing-md); /* 12px */
+    align-items: flex-start; /* Align modal top */
+  }
+  .category-modal-content {
+     margin-top: 5vh; /* Add some top margin */
+     max-height: 80vh;
+  }
 
-    .categories-grid {
-        grid-template-columns: 1fr;
-    }
+  .categories-grid {
+    grid-template-columns: 1fr; /* Single column */
+  }
 
-    .category-editor-btn {
-        width: 100%;
-        justify-content: center;
-    }
+  .category-editor-btn {
+    width: 100%; /* Full width button */
+    justify-content: center;
+  }
+
+  .add-category-section {
+     padding: var(--cat-edit-spacing-lg);
+  }
+  .modal-header {
+     padding-bottom: var(--cat-edit-spacing-md);
+     margin-bottom: var(--cat-edit-spacing-lg);
+  }
+  .modal-header h2 {
+     font-size: var(--cat-edit-font-size-lg); /* 18px */
+  }
+  .close-modal {
+     font-size: 24px; /* Smaller close icon */
+  }
+  .form-controls {
+     flex-direction: column; /* Stack save/cancel */
+  }
+  .save-btn, .cancel-btn {
+     width: 100%;
+  }
 }

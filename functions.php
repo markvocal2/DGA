@@ -1,11 +1,8 @@
 <?php
 /**
- * Theme functions and definitions.
+ * Theme functions and definitions for Hello Elementor Child Theme.
  *
- * For additional information on potential customization options,
- * read the developers' documentation:
- *
- * https://developers.elementor.com/docs/hello-elementor-theme/
+ * @link https://developers.elementor.com/docs/hello-elementor-theme/
  *
  * @package HelloElementorChild
  */
@@ -14,88 +11,246 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'HELLO_ELEMENTOR_CHILD_VERSION', '2.0.0' );
+define( 'HELLO_ELEMENTOR_CHILD_VERSION', '2.0.1' ); // Increment version
+define( 'HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN', 'hello-elementor-child' ); // Define text domain for translations
 
 /**
  * Load child theme scripts & styles.
  *
  * @return void
  */
-function hello_elementor_child_scripts_styles() {
-
+function hello_elementor_child_scripts_styles(): void {
+	// Enqueue child theme style.css
 	wp_enqueue_style(
 		'hello-elementor-child-style',
 		get_stylesheet_directory_uri() . '/style.css',
 		[
-			'hello-elementor-theme-style',
+			'hello-elementor-theme-style', // Ensure parent theme style is loaded first
 		],
 		HELLO_ELEMENTOR_CHILD_VERSION
 	);
-
 }
+// Use priority 20 to ensure it loads after the parent theme's styles
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
 
-
-
-// Add JavaScript Console Logging Function
-function enable_console_logging() {
-    ?>
-    <script>
-    if (!window.console) window.console = {};
-    if (!window.console.log) window.console.log = function(msg) {};
-    console.log('WordPress Console Logging Enabled');
-    </script>
-    <?php
+/**
+ * Add JavaScript Console Logging Function only when WP_DEBUG is true
+ * and user is logged in. Avoids outputting for regular visitors.
+ *
+ * @return void
+ */
+function hello_elementor_child_enable_console_logging(): void {
+	// Only output if WP_DEBUG is enabled and user is logged in (typically admins/developers)
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && is_user_logged_in() ) {
+		?>
+		<script>
+		// Basic console log polyfill for older browsers (though less common now)
+		if ( typeof window.console === 'undefined' ) { window.console = {}; }
+		if ( typeof window.console.log === 'undefined' ) { window.console.log = function(msg) {}; }
+		console.log('WordPress Console Logging Enabled (Debug Mode)');
+		</script>
+		<?php
+	}
 }
-add_action('wp_head', 'enable_console_logging');
+// Add to wp_head action hook
+add_action( 'wp_head', 'hello_elementor_child_enable_console_logging' );
 
-// ฟังก์ชั่นตรวจสอบการเข้าสู่ระบบ
-function verify_login_recaptcha($user, $password) {
-    // ข้ามถ้าผู้ใช้เป็นข้อผิดพลาดแล้ว
-    if (is_wp_error($user)) {
-        return $user;
-    }
-    
-    if (!verify_recaptcha()) {
-        return new WP_Error('recaptcha_error', 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง');
-    }
-    
-    return $user;
+// --- reCAPTCHA Integration ---
+
+/**
+ * Central function to verify the Google reCAPTCHA v2 response.
+ *
+ * IMPORTANT: You MUST configure your Site Key and Secret Key in WordPress settings
+ * for this function to work. These keys should NOT be hardcoded here.
+ * Consider using a settings plugin or the WordPress Customizer API.
+ *
+ * @return bool True if verification is successful, false otherwise.
+ */
+function hello_elementor_child_verify_recaptcha(): bool {
+	// Retrieve keys from WordPress options (replace 'your_recaptcha_secret_key_option' with the actual option name)
+	$recaptcha_secret_key = get_option( 'your_recaptcha_secret_key_option' );
+
+	// If secret key isn't set, verification fails
+	if ( empty( $recaptcha_secret_key ) ) {
+		// Optional: Log an error for the admin
+		// error_log('reCAPTCHA Secret Key is not configured in WordPress settings.');
+		return false;
+	}
+
+	// Check if the reCAPTCHA response field exists in the POST data
+	if ( ! isset( $_POST['g-recaptcha-response'] ) ) {
+		return false;
+	}
+
+	$recaptcha_response = sanitize_text_field( $_POST['g-recaptcha-response'] );
+
+	// Prepare the request to Google's verification endpoint
+	$verify_url = 'https://www.google.com/recaptcha/api/siteverify';
+	$args       = [
+		'body' => [
+			'secret'   => $recaptcha_secret_key,
+			'response' => $recaptcha_response,
+			'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '', // Include user's IP
+		],
+	];
+
+	// Make the POST request
+	$response = wp_remote_post( $verify_url, $args );
+
+	// Check for errors during the request
+	if ( is_wp_error( $response ) ) {
+		// Optional: Log the error
+		// error_log('Error verifying reCAPTCHA: ' . $response->get_error_message());
+		return false;
+	}
+
+	// Decode the JSON response from Google
+	$response_body = wp_remote_retrieve_body( $response );
+	$result        = json_decode( $response_body, true );
+
+	// Check if the verification was successful according to Google
+	return isset( $result['success'] ) && true === $result['success'];
 }
 
-// ฟังก์ชั่นตรวจสอบการลงทะเบียน
-function verify_registration_recaptcha($errors, $sanitized_user_login, $user_email) {
-    if (!verify_recaptcha()) {
-        $errors->add('recaptcha_error', 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง');
-    }
-    
-    return $errors;
+/**
+ * Verify reCAPTCHA on the WordPress login form.
+ *
+ * @param WP_User|WP_Error|null $user     WP_User object if login successful, WP_Error object otherwise.
+ * @param string                $password The password used to log in.
+ * @return WP_User|WP_Error|null Original $user object if reCAPTCHA is valid or not applicable, WP_Error otherwise.
+ */
+function hello_elementor_child_verify_login_recaptcha( $user, string $password ) {
+	// If login is already failed for other reasons (e.g., wrong password), pass the error through
+	if ( is_wp_error( $user ) ) {
+		return $user;
+	}
+
+	// Only verify reCAPTCHA if the form was actually submitted (prevents issues with XML-RPC, etc.)
+	if ( isset( $_POST['wp-submit'] ) ) {
+		if ( ! hello_elementor_child_verify_recaptcha() ) {
+			// Return a WordPress error object if reCAPTCHA fails
+			return new WP_Error(
+				'recaptcha_error',
+				// Use translation function for user-facing error message
+				__( 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN )
+			);
+		}
+	}
+
+	// If reCAPTCHA is valid or not applicable, return the original $user object
+	return $user;
+}
+// Hook into user authentication process with a priority after default checks
+add_filter( 'wp_authenticate_user', 'hello_elementor_child_verify_login_recaptcha', 20, 2 );
+
+/**
+ * Verify reCAPTCHA on the WordPress registration form.
+ *
+ * @param WP_Error $errors               A WP_Error object containing registration errors.
+ * @param string   $sanitized_user_login User's username after sanitization.
+ * @param string   $user_email           User's email.
+ * @return WP_Error The potentially modified WP_Error object.
+ */
+function hello_elementor_child_verify_registration_recaptcha( WP_Error $errors, string $sanitized_user_login, string $user_email ): WP_Error {
+	if ( ! hello_elementor_child_verify_recaptcha() ) {
+		$errors->add(
+			'recaptcha_error',
+			// Use translation function
+			__( 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN )
+		);
+	}
+	return $errors;
+}
+// Hook into registration errors filter
+add_filter( 'registration_errors', 'hello_elementor_child_verify_registration_recaptcha', 10, 3 );
+
+/**
+ * Verify reCAPTCHA on the WordPress lost password form.
+ * Also adds a nonce check for better security.
+ *
+ * @return void
+ */
+function hello_elementor_child_verify_lostpassword_recaptcha(): void {
+	// 1. Verify Nonce (Add a nonce field to your lost password form if it's custom)
+	// If using the default WP lost password form, WP handles its own nonce, but checking $_POST action is good practice.
+	if ( isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) ) {
+		// Replace 'your_lostpassword_nonce_action' if you added a custom nonce
+		// wp_verify_nonce( $_POST['_wpnonce'], 'your_lostpassword_nonce_action' );
+		// For default WP form, the nonce check happens internally, but we proceed only if POST seems valid.
+
+		// 2. Verify reCAPTCHA
+		if ( ! hello_elementor_child_verify_recaptcha() ) {
+			wp_die(
+				// Use translation function and escape HTML
+				esc_html__( 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN ),
+				esc_html__( 'reCAPTCHA Error', HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN ),
+				[ 'response' => 403, 'back_link' => true ] // Add back link for better UX
+			);
+		}
+	}
+}
+// Hook into the lost password form submission process
+add_action( 'lostpassword_post', 'hello_elementor_child_verify_lostpassword_recaptcha', 10 );
+
+
+/**
+ * Verify reCAPTCHA for Contact Form 7 submissions.
+ *
+ * Requires Contact Form 7 plugin to be active.
+ *
+ * @param bool $spam The current spam status.
+ * @param WPCF7_Submission|null $submission The submission object (added type hint if possible).
+ * @return bool True if considered spam, false otherwise.
+ */
+function hello_elementor_child_verify_cf7_recaptcha( bool $spam, $submission = null ): bool {
+	// If already marked as spam by other filters, return true
+	if ( $spam ) {
+		return $spam;
+	}
+
+	// Check if the central verification function fails
+	if ( ! hello_elementor_child_verify_recaptcha() ) {
+		$spam = true;
+		// Optional: Add a specific validation error message to the form
+		if ( $submission && function_exists('wpcf7_get_validation_error') ) {
+			$submission->add_invalid_field('g-recaptcha-response', __('reCAPTCHA verification failed.', HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN));
+		}
+	}
+
+	return $spam;
+}
+// Hook into Contact Form 7's spam filter. Ensure CF7 is active before adding.
+if ( class_exists( 'WPCF7_Submission' ) ) {
+	add_filter( 'wpcf7_spam', 'hello_elementor_child_verify_cf7_recaptcha', 9, 2 ); // Use priority 9 to run early
 }
 
-// ฟังก์ชั่นตรวจสอบลืมรหัสผ่าน
-function verify_lostpassword_recaptcha() {
-    if (!verify_recaptcha()) {
-        wp_die('รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', 'reCAPTCHA Error', ['response' => 403]);
-    }
-}
 
-// ฟังก์ชั่นตรวจสอบการส่ง Contact Form 7
-function verify_cf7_recaptcha($spam, $submission) {
-    if ($spam) {
-        return $spam;
-    }
-    
-    if (!verify_recaptcha()) {
-        $spam = true;
-    }
-    
-    return $spam;
-}
+/**
+ * Add the reCAPTCHA privacy policy notice to the website footer.
+ *
+ * @return void
+ */
+function hello_elementor_child_add_recaptcha_notice(): void {
+	// Only add notice if reCAPTCHA keys are likely configured (check one key as an indicator)
+	if ( ! get_option( 'your_recaptcha_site_key_option' ) ) { // Use your Site Key option name
+		return;
+	}
 
-// ฟังก์ชั่นเพิ่มข้อความเกี่ยวกับ reCAPTCHA ในส่วนท้ายของเว็บไซต์
-function add_recaptcha_notice() {
-    echo '<div class="recaptcha-notice">เว็บไซต์นี้ได้รับการปกป้องด้วย reCAPTCHA และ<a href="https://policies.google.com/privacy" target="_blank">นโยบายความเป็นส่วนตัว</a>และ<a href="https://policies.google.com/terms" target="_blank">ข้อกำหนดในการให้บริการ</a>ของ Google มีผลบังคับใช้</div>';
+	// Use translation functions and esc_url for links
+	$privacy_policy_url = 'https://policies.google.com/privacy';
+	$terms_of_service_url = 'https://policies.google.com/terms';
+
+	// translators: %1$s is the Privacy Policy URL, %2$s is the Terms of Service URL.
+	$notice_text = sprintf(
+		__( 'เว็บไซต์นี้ได้รับการปกป้องด้วย reCAPTCHA และ <a href="%1$s" target="_blank" rel="noopener noreferrer">นโยบายความเป็นส่วนตัว</a> และ <a href="%2$s" target="_blank" rel="noopener noreferrer">ข้อกำหนดในการให้บริการ</a> ของ Google มีผลบังคับใช้', HELLO_ELEMENTOR_CHILD_TEXT_DOMAIN ),
+		esc_url( $privacy_policy_url ),
+		esc_url( $terms_of_service_url )
+	);
+
+	echo '<div class="recaptcha-notice" style="text-align: center; font-size: 0.8em; color: #666; padding: 10px 0;">' . wp_kses_post( $notice_text ) . '</div>';
 }
+// Hook into wp_footer to add the notice
+add_action( 'wp_footer', 'hello_elementor_child_add_recaptcha_notice' );
 
 
 

@@ -1,0 +1,167 @@
+/* CKAN Taxonomy List CSS - ckan-taxo-list.css */
+
+/* Main container */
+.ckan-taxo-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+    font-family: 'Kanit', sans-serif;
+}
+
+/* Header */
+.ckan-taxo-header {
+    background-color: #0056b3;
+    color: white;
+    padding: 12px 15px;
+    border-radius: 8px 8px 0 0;
+}
+
+.ckan-taxo-title {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+/* Content area with scrollbar */
+.ckan-taxo-content {
+    height: 300px;
+    overflow-y: auto;
+    padding: 5px 0;
+    
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f5f5f5;
+}
+
+/* Webkit scrollbar styling */
+.ckan-taxo-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ckan-taxo-content::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+.ckan-taxo-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 6px;
+}
+
+.ckan-taxo-content::-webkit-scrollbar-thumb:hover {
+    background-color: #999;
+}
+
+/* Taxonomy list */
+.ckan-taxo-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ckan-taxo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ckan-taxo-item:last-child {
+    border-bottom: none;
+}
+
+.ckan-taxo-item:hover {
+    background-color: #f8f9fa;
+}
+
+.ckan-taxo-item.active {
+    background-color: #e6f2ff;
+    border-left: 3px solid #0056b3;
+}
+
+.ckan-taxo-item-name {
+    color: #333;
+    font-size: 14px;
+    flex: 1;
+}
+
+.ckan-taxo-item-count {
+    background-color: #ff8c00;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Skeleton loading */
+.ckan-taxo-skeleton {
+    height: 300px;
+    padding: 10px 15px;
+    overflow-y: hidden;
+}
+
+.ckan-taxo-skeleton-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 8px 0;
+}
+
+.ckan-taxo-skeleton-name {
+    height: 16px;
+    width: 70%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+.ckan-taxo-skeleton-count {
+    height: 16px;
+    width: 30px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 12px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Error message */
+.ckan-taxo-error {
+    padding: 15px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ckan-taxo-header {
+        padding: 10px 12px;
+    }
+    
+    .ckan-taxo-item {
+        padding: 8px 12px;
+    }
+    
+    .ckan-taxo-item-name {
+        font-size: 13px;
+    }
+}

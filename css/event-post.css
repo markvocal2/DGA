@@ -1,0 +1,493 @@
+/* Variables */
+:root {
+    --primary-orange: #f97316;
+    --primary-blue: #1e40af;
+    --secondary-blue: #2563eb;
+    --text-black: #000000;
+    --text-gray: #666666;
+    --background-white: #ffffff;
+    --background-gray: #f3f3f3;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --modal-overlay: rgba(0, 0, 0, 0.9);
+    --card-radius: 12px;
+    --transition-speed: 0.3s;
+}
+
+/* Reset & Base Styles */
+.event-post-container * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Main Container */
+.event-post-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Grid Layout */
+.event-post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Card Item */
+.event-post-item {
+    background: var(--background-white);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.event-post-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px var(--shadow-color);
+}
+
+
+/* Image Container */
+.event-post-image-container {
+    position: relative;
+    width: 100%;
+    height: 240px; /* กำหนดความสูงที่แน่นอน */
+    overflow: hidden;
+    background: var(--background-gray);
+}
+
+.event-post-image,
+.event-post-slideshow img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ทำให้ภาพ scale พอดีกับพื้นที่ */
+}
+
+.event-post-slideshow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.event-post-item:hover .event-post-image {
+    opacity: 0;
+}
+
+.event-post-item:hover .event-post-slideshow {
+    opacity: 1;
+}
+
+/* Content Area */
+.event-post-content {
+    padding: 16px;
+    background: var(--background-white);
+}
+
+.event-post-title {
+    color: var(--text-black);
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.8em; /* 2 บรรทัด */
+}
+
+/* ทำให้ลิงก์ทั้ง Card คลิกได้ */
+.event-post-item-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.event-post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.event-post-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.event-post-count {
+    color: var(--primary-blue);
+    cursor: pointer;
+    transition: color var(--transition-speed) ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    z-index: 2;
+}
+
+.event-post-count:hover {
+    color: var(--primary-orange);
+}
+
+.event-post-count::before {
+    content: '🖼';
+    font-size: 1.1em;
+}
+
+.event-post-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.event-post-category {
+    background: var(--primary-blue);
+    color: var(--background-white);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    transition: all var(--transition-speed) ease;
+    cursor: pointer;
+}
+
+.event-post-category:hover {
+    background: var(--primary-orange);
+    transform: translateY(-2px);
+}
+
+/* Modal */
+.event-post-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-overlay);
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    animation: modalFadeIn var(--transition-speed) ease-out;
+}
+
+.modal-close {
+    position: absolute;
+    right: 20px;
+    top: 0;
+    color: var(--background-white);
+    font-size: 30px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background var(--transition-speed) ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modal-gallery-item {
+    position: relative;
+    padding-top: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.modal-thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform var(--transition-speed) ease;
+}
+
+.modal-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+/* Skeleton Loading */
+.event-post-skeleton {
+    background: var(--background-white);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.skeleton-img {
+    width: 100%;
+    padding-top: 66.67%;
+    background: linear-gradient(90deg, 
+        var(--background-gray) 25%, 
+        #e0e0e0 50%, 
+        var(--background-gray) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-content {
+    padding: 20px;
+}
+
+.skeleton-title {
+    height: 24px;
+    background: linear-gradient(90deg, 
+        var(--background-gray) 25%, 
+        #e0e0e0 50%, 
+        var(--background-gray) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.skeleton-meta {
+    height: 16px;
+    width: 60%;
+    background: linear-gradient(90deg, 
+        var(--background-gray) 25%, 
+        #e0e0e0 50%, 
+        var(--background-gray) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.skeleton-category {
+    height: 16px;
+    width: 40%;
+    background: linear-gradient(90deg, 
+        var(--background-gray) 25%, 
+        #e0e0e0 50%, 
+        var(--background-gray) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+/* Animations */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--background-gray);
+    border-top: 4px solid var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Focus States */
+.event-post-count:focus,
+.modal-close:focus,
+.modal-thumbnail:focus {
+    outline: 2px solid var(--primary-orange);
+    outline-offset: 2px;
+}
+
+/* ปรับขนาด Grid ให้เหมาะสม */
+.event-post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 16px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .event-post-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .modal-gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .event-post-container {
+        padding: 15px;
+    }
+    
+    .event-post-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .modal-gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .event-post-image-container {
+        height: 200px; /* ปรับขนาดให้เล็กลงบนมือถือ */
+    }
+    
+    .event-post-title {
+        font-size: 1rem;
+    }
+    
+    .event-post-meta {
+        font-size: 0.8rem;
+    }
+    
+    .event-post-category {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+    
+    .modal-content {
+        margin: 30px auto;
+    }
+
+    /* Modal Image Size */
+    .modal-gallery-item {
+        position: relative;
+        padding-top: 75%; /* อัตราส่วน 4:3 */
+    }
+
+    .modal-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .event-post-container {
+        padding: 10px;
+    }
+
+    .event-post-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .modal-gallery-grid {
+        gap: 8px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+        padding: 15px;
+    }
+    
+    .event-post-content {
+        padding: 15px;
+    }
+
+    .modal-close {
+        right: 10px;
+        top: -40px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .event-post-container {
+        padding: 0;
+    }
+    
+    .event-post-item {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+    
+    .event-post-count,
+    .modal-close,
+    .event-post-slideshow {
+        display: none;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .event-post-item,
+    .event-post-category,
+    .modal-thumbnail,
+    .loading-spinner,
+    .modal-content,
+    .event-post-slideshow,
+    .event-post-image {
+        animation: none;
+        transition: none;
+    }
+    
+    .skeleton-img,
+    .skeleton-title,
+    .skeleton-meta,
+    .skeleton-category {
+        animation: none;
+    }
+}

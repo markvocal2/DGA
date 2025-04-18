@@ -1,0 +1,269 @@
+/* Container หลัก - ปรับเป็นแนวตั้ง */
+.ckan-corg-container {
+    display: flex;
+    flex-direction: column; /* เปลี่ยนเป็นแนวตั้ง */
+    align-items: center; /* จัดให้อยู่ตรงกลาง */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    padding: 20px;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.ckan-corg-container:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Label องค์กร - ปรับให้อยู่ด้านบน */
+.ckan-corg-label {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px; /* เพิ่มระยะห่างด้านล่าง */
+    margin-right: 0; /* ลบ margin ด้านขวาที่ไม่จำเป็นแล้ว */
+}
+
+.ckan-corg-name {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #1e73be; /* สีน้ำเงิน */
+    display: inline-block;
+    padding: 10px 16px;
+    background-color: rgba(30, 115, 190, 0.1);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    min-width: 200px;
+    text-align: center;
+}
+
+.ckan-corg-name:hover {
+    background-color: rgba(30, 115, 190, 0.15);
+}
+
+.ckan-corg-empty {
+    color: #666;
+    font-style: italic;
+    background-color: #f0f0f0;
+}
+
+/* ปุ่ม "แก้ไขข้อมูล" - ปรับให้อยู่ด้านล่าง */
+.ckan-edit-corg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f47321; /* สีส้ม */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(244, 115, 33, 0.2);
+    margin-top: 5px; /* เพิ่มระยะห่างด้านบน */
+}
+
+.ckan-edit-corg-btn:hover {
+    background-color: #e06010; /* สีส้มเข้มเมื่อ hover */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(244, 115, 33, 0.3);
+}
+
+.ckan-edit-corg-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(244, 115, 33, 0.3);
+}
+
+.ckan-edit-corg-btn .dashicons {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+/* สไตล์ของ Modal */
+.ckan-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ckan-modal:not([style*="display: none"]) {
+    opacity: 1;
+}
+
+.ckan-modal-content {
+    background-color: #ffffff;
+    margin: 8% auto;
+    padding: 25px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.ckan-modal:not([style*="display: none"]) .ckan-modal-content {
+    transform: translateY(0);
+}
+
+.ckan-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.ckan-modal-close:hover {
+    color: #333;
+}
+
+.ckan-modal h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #1e73be; /* สีน้ำเงิน */
+    font-size: 1.5em;
+    font-weight: 600;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f4f8;
+}
+
+/* Form ใน Modal */
+.ckan-modal-form {
+    margin-bottom: 25px;
+}
+
+.ckan-form-group {
+    margin-bottom: 15px;
+}
+
+.ckan-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.ckan-corg-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    font-size: 16px;
+    color: #333;
+    transition: all 0.2s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+}
+
+.ckan-corg-select:focus {
+    outline: none;
+    border-color: #1e73be; /* สีน้ำเงิน */
+    box-shadow: 0 0 0 3px rgba(30, 115, 190, 0.2);
+}
+
+/* ส่วนท้ายของ Modal */
+.ckan-modal-footer {
+    text-align: right;
+    padding-top: 15px;
+    border-top: 2px solid #f0f4f8;
+}
+
+.ckan-update-corg-btn {
+    display: inline-block;
+    background-color: #f47321; /* สีส้ม */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(244, 115, 33, 0.2);
+}
+
+.ckan-update-corg-btn:hover {
+    background-color: #e06010; /* สีส้มเข้มเมื่อ hover */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(244, 115, 33, 0.3);
+}
+
+.ckan-update-corg-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(244, 115, 33, 0.3);
+}
+
+.ckan-update-corg-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Notification */
+.ckan-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #1e73be; /* สีน้ำเงิน */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    font-size: 14px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.ckan-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* ทำให้ responsive */
+@media screen and (max-width: 600px) {
+    .ckan-corg-container {
+        padding: 15px;
+    }
+    
+    .ckan-corg-name {
+        font-size: 1.1em;
+        padding: 8px 12px;
+    }
+    
+    .ckan-edit-corg-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .ckan-modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+    
+    .ckan-update-corg-btn {
+        width: 100%;
+    }
+}

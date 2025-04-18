@@ -1,0 +1,602 @@
+/**
+ * Data Post E CSS
+ */
+
+/* Container สำหรับ Edit Icon */
+.data-post-e-container {
+    display: inline-block;
+    position: relative;
+}
+
+/* สไตล์สำหรับ Edit Icon */
+.data-post-e-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #1e73be;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.data-post-e-icon:hover {
+    background-color: #135e9e;
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.data-post-e-icon i {
+    font-size: 20px;
+}
+
+/* Modal Popup */
+.data-post-e-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.data-post-e-modal-content {
+    position: relative;
+    background-color: #ffffff;
+    margin: 30px auto;
+    padding: 25px;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* Notification Modal */
+.notification-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.notification-modal-content {
+    position: relative;
+    background-color: #ffffff;
+    margin: 120px auto;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease;
+    text-align: center;
+}
+
+.notification-modal-content h3 {
+    color: #1e73be;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+.notification-modal-content p {
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.notification-modal-content strong {
+    color: #ff6f00;
+}
+
+.notification-confirm-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background-color: #1e73be;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.notification-confirm-btn:hover {
+    background-color: #135e9e;
+}
+
+/* สไตล์สำหรับ Delete Confirm Modal */
+.delete-confirm-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.delete-confirm-modal-content {
+    position: relative;
+    background-color: #ffffff;
+    margin: 120px auto;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease;
+    text-align: center;
+    border-top: 4px solid #e74c3c;
+}
+
+.delete-confirm-modal-content h3 {
+    color: #e74c3c;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+.delete-confirm-modal-content p {
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.delete-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.confirm-delete-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.confirm-delete-btn:hover {
+    background-color: #c0392b;
+}
+
+.cancel-delete-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-delete-btn:hover {
+    background-color: #e0e0e0;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ปุ่มปิด Modal */
+.data-post-e-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.data-post-e-close:hover {
+    color: #000;
+}
+
+/* สไตล์สำหรับฟอร์ม */
+.data-post-e-form {
+    margin-top: 20px;
+}
+
+.data-post-e-field {
+    margin-bottom: 20px;
+}
+
+.data-post-e-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.data-post-e-field input[type="text"],
+.data-post-e-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.data-post-e-field input[type="text"]:focus,
+.data-post-e-field textarea:focus {
+    border-color: #1e73be;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(30, 115, 190, 0.2);
+}
+
+/* สไตล์สำหรับ WYSIWYG Editor */
+.wp-editor-container {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.wp-editor-tabs {
+    background-color: #f7f7f7;
+}
+
+.wp-switch-editor {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #555;
+    padding: 5px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.wp-switch-editor:hover {
+    background-color: #e8e8e8;
+}
+
+.tmce-active .switch-tmce,
+.html-active .switch-html {
+    background-color: #fff;
+    border-bottom-color: #fff;
+}
+
+/* สไตล์สำหรับ Taxonomy Terms */
+.taxonomy-terms-container {
+    margin-bottom: 15px;
+}
+
+.current-terms-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 14px;
+}
+
+.current-terms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.term-badge {
+    display: inline-block;
+    background-color: #f0f8ff;
+    border: 1px solid #bed4e6;
+    border-radius: 15px;
+    padding: 4px 10px;
+    font-size: 13px;
+    color: #1e73be;
+}
+
+.taxonomy-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    background-color: #fff;
+    min-height: 150px;
+}
+
+.taxonomy-select[multiple] {
+    height: auto;
+}
+
+.taxonomy-select:focus {
+    border-color: #1e73be;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(30, 115, 190, 0.2);
+}
+
+.taxonomy-hint {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #666;
+    font-style: italic;
+}
+
+/* สไตล์สำหรับ Hint */
+.editor-hint {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #666;
+    font-style: italic;
+}
+
+/* สไตล์สำหรับการไฮไลท์การเปลี่ยนแปลง */
+.highlight-change {
+    background-color: #ffff99;
+    padding: 2px 0;
+}
+
+/* สไตล์สำหรับ Repeater */
+.data-post-e-repeater {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.repeater-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.repeater-row:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.repeater-field {
+    position: relative;
+}
+
+.repeater-field label {
+    font-size: 14px;
+}
+
+/* สไตล์สำหรับ URL field */
+.url-field {
+    grid-column: 1 / -1; /* ให้ field URL ขยายเต็มความกว้าง */
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+}
+
+.url-field input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.url-field input[type="text"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* สไตล์สำหรับปุ่ม */
+.add-row-btn,
+.save-post-btn,
+.cancel-btn,
+.download-file-btn,
+.upload-new-file-btn,
+.remove-row-btn,
+.delete-post-btn,
+.link-file-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.add-row-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.add-row-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.save-post-btn {
+    background-color: #1e73be;
+    color: #fff;
+}
+
+.save-post-btn:hover {
+    background-color: #135e9e;
+}
+
+.delete-post-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    margin-left: 10px;
+}
+
+.delete-post-btn:hover {
+    background-color: #c0392b;
+}
+
+.cancel-btn {
+    background-color: #f0f0f0;
+    color: #666;
+    margin-left: 10px;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.download-file-btn {
+    background-color: #1e73be;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
+.download-file-btn:hover {
+    background-color: #135e9e;
+}
+
+.upload-new-file-btn {
+    background-color: #ff6f00;
+    color: #fff;
+    font-size: 13px;
+    padding: 6px 12px;
+    margin-left: 8px;
+}
+
+.upload-new-file-btn:hover {
+    background-color: #e56200;
+}
+
+.link-file-btn {
+    background-color: #4CAF50; /* สีเขียว */
+    color: #fff;
+    font-size: 13px;
+    padding: 6px 12px;
+    margin-left: 8px;
+}
+
+.link-file-btn:hover {
+    background-color: #3e8e41;
+}
+
+.remove-row-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    font-size: 13px;
+    padding: 6px 12px;
+    margin-left: 8px;
+}
+
+.remove-row-btn:hover {
+    background-color: #c0392b;
+}
+
+.file-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* สไตล์สำหรับปุ่มดำเนินการ */
+.data-post-e-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* สไตล์สำหรับการแจ้งเตือน */
+.data-post-e-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 10000;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.data-post-e-notification.success {
+    background-color: #27ae60;
+}
+
+.data-post-e-notification.error {
+    background-color: #e74c3c;
+}
+
+/* สไตล์สำหรับ Responsive */
+@media (max-width: 768px) {
+    .repeater-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .data-post-e-modal-content {
+        margin: 10px auto;
+        padding: 15px;
+    }
+    
+    .data-post-e-actions {
+        flex-direction: column;
+    }
+    
+    .cancel-btn, .delete-post-btn {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+    
+    .current-terms {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .delete-confirm-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .url-field {
+        grid-column: 1;
+    }
+}
+
+/* เพิ่ม CSS เมื่อมีการเปิด Modal */
+body.modal-open {
+    overflow: hidden;
+}

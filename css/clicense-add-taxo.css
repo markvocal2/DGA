@@ -1,0 +1,249 @@
+/**
+ * CLICENSE Add Taxonomy Term - Frontend Styles
+ * File: clicense-add-taxo.css
+ * Modern UI with Blue and Orange theme
+ */
+
+/* Variables */
+:root {
+    --clicense-primary: #1a4b8c; /* Blue */
+    --clicense-primary-dark: #0d3367;
+    --clicense-primary-light: #5b88c7;
+    --clicense-secondary: #ff7e00; /* Orange */
+    --clicense-secondary-dark: #e36a00;
+    --clicense-secondary-light: #ffa54d;
+    --clicense-text: #333333; /* Black */
+    --clicense-light: #ffffff;
+    --clicense-gray: #f5f5f5;
+    --clicense-border: #e0e0e0;
+    --clicense-shadow: rgba(0, 0, 0, 0.1);
+    --clicense-error: #f44336;
+    --clicense-success: #4caf50;
+}
+
+/* Main Container */
+.clicense-add-container {
+    font-family: 'Prompt', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: var(--clicense-text);
+    line-height: 1.6;
+}
+
+/* Button Styles */
+.clicense-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px var(--clicense-shadow);
+    text-align: center;
+}
+
+#clicense-add-button {
+    background-color: var(--clicense-primary);
+    color: var(--clicense-light);
+}
+
+#clicense-add-button:hover {
+    background-color: var(--clicense-primary-dark);
+}
+
+.clicense-button.clicense-submit {
+    background-color: var(--clicense-secondary);
+    color: var(--clicense-light);
+}
+
+.clicense-button.clicense-submit:hover {
+    background-color: var(--clicense-secondary-dark);
+}
+
+.clicense-button.clicense-cancel {
+    background-color: var(--clicense-gray);
+    color: var(--clicense-text);
+    margin-right: 10px;
+}
+
+.clicense-button.clicense-cancel:hover {
+    background-color: var(--clicense-border);
+}
+
+.clicense-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.clicense-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.clicense-modal-content {
+    position: relative;
+    background-color: var(--clicense-light);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    transition: all 0.3s ease;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.clicense-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--clicense-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clicense-close:hover {
+    color: var(--clicense-secondary);
+}
+
+.clicense-modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--clicense-primary);
+    font-size: 24px;
+    font-weight: 600;
+    border-bottom: 2px solid var(--clicense-primary-light);
+    padding-bottom: 10px;
+}
+
+/* Form Styles */
+.clicense-form-group {
+    margin-bottom: 20px;
+}
+
+.clicense-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--clicense-text);
+}
+
+.clicense-form-group input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--clicense-border);
+    border-radius: 4px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.clicense-form-group input[type="text"]:focus {
+    border-color: var(--clicense-primary);
+    box-shadow: 0 0 0 2px rgba(26, 75, 140, 0.2);
+    outline: none;
+}
+
+.clicense-slug-container {
+    display: flex;
+    align-items: center;
+}
+
+.clicense-slug-prefix {
+    background-color: var(--clicense-gray);
+    padding: 12px 15px;
+    border: 1px solid var(--clicense-border);
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    font-family: monospace;
+    color: var(--clicense-primary);
+}
+
+.clicense-slug-container input {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+.clicense-slug-desc {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+.clicense-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+/* Messages */
+.clicense-message {
+    margin-top: 20px;
+    padding: 12px 15px;
+    border-radius: 4px;
+    font-size: 16px;
+    display: none;
+}
+
+.clicense-error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--clicense-error);
+    border-left: 4px solid var(--clicense-error);
+}
+
+.clicense-success {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--clicense-success);
+    border-left: 4px solid var(--clicense-success);
+}
+
+.clicense-loading {
+    background-color: rgba(26, 75, 140, 0.1);
+    color: var(--clicense-primary);
+    border-left: 4px solid var(--clicense-primary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .clicense-modal-content {
+        margin: 20% auto;
+        padding: 20px;
+        width: 95%;
+    }
+    
+    .clicense-form-actions {
+        flex-direction: column;
+    }
+    
+    .clicense-button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .clicense-button.clicense-cancel {
+        margin-right: 0;
+    }
+}

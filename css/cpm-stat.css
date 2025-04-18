@@ -1,0 +1,460 @@
+/* Complaint Statistics Container */
+.complaint-stats-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Header and Filters */
+.stats-header {
+    margin-bottom: 30px;
+}
+
+.stats-header h2 {
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+.stats-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Summary Cards */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stats-card {
+    padding: 20px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-card h3 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #4b5563;
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.total-complaints {
+    border-left: 4px solid #3b82f6;
+}
+
+.daily-average {
+    border-left: 4px solid #10b981;
+}
+
+.pending-complaints {
+    border-left: 4px solid #f59e0b;
+}
+
+.completed-complaints {
+    border-left: 4px solid #6366f1;
+}
+
+/* Charts */
+.stats-charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.chart-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h3 {
+    margin-bottom: 15px;
+    font-size: 1rem;
+    color: #1f2937;
+}
+
+.chart-container.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Form Elements */
+select,
+input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #1f2937;
+    font-size: 0.875rem;
+}
+
+select:focus,
+input[type="date"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    ring: 2px solid rgba(59, 130, 246, 0.1);
+}
+
+.button {
+    padding: 8px 16px;
+    background-color: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.button:hover {
+    background-color: #2563eb;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .stats-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-range {
+        flex-wrap: wrap;
+    }
+
+    .stats-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        grid-column: 1;
+    }
+}
+
+/* Loading State */
+.stats-loading {
+    position: relative;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.stats-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .stats-filters {
+        display: none;
+    }
+
+    .complaint-stats-container {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .stats-card {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+
+    .chart-container {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+}
+
+/* Chart Tooltips */
+.highcharts-tooltip {
+    font-size: 0.875rem;
+}
+
+.highcharts-data-label {
+    font-size: 0.75rem;
+}
+
+/* Custom Colors for Charts */
+.highcharts-color-0 { fill: #3b82f6; stroke: #3b82f6; }
+.highcharts-color-1 { fill: #10b981; stroke: #10b981; }
+.highcharts-color-2 { fill: #f59e0b; stroke: #f59e0b; }
+.highcharts-color-3 { fill: #6366f1; stroke: #6366f1; }
+.highcharts-color-4 { fill: #ec4899; stroke: #ec4899; }
+.highcharts-color-5 { fill: #8b5cf6; stroke: #8b5cf6; }
+
+/* Export Buttons */
+.export-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.export-button {
+    padding: 6px 12px;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.export-button:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+/* Date Range Inputs */
+.date-range input[type="date"] {
+    width: 140px;
+}
+
+/* Filter Labels */
+.filter-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #4b5563;
+    font-size: 0.875rem;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.status-pending { background-color: #f59e0b; }
+.status-progress { background-color: #3b82f6; }
+.status-completed { background-color: #10b981; }
+
+/* Status Grid */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 4px;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-label {
+    flex-grow: 1;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.status-count {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Status Colors */
+.status-pending {
+    background-color: #f59e0b;
+}
+
+.status-progress {
+    background-color: #3b82f6;
+}
+
+.status-completed {
+    background-color: #10b981;
+}
+
+.status-rejected {
+    background-color: #ef4444;
+}
+
+.status-closed {
+    background-color: #6b7280;
+}
+
+/* Trend Chart Filters */
+.trend-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.trend-filters label {
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.trend-filters select {
+    min-width: 150px;
+}
+
+/* Chart Legend */
+.highcharts-legend-item text {
+    font-size: 12px !important;
+}
+
+/* Export Button */
+.export-excel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #059669;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.export-excel:hover {
+    background-color: #047857;
+}
+
+.export-excel svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.stats-loading .stats-card,
+.stats-loading .chart-container {
+    animation: pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Tooltip */
+.tooltip {
+    position: absolute;
+    z-index: 1070;
+    display: block;
+    margin: 0;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    word-break: normal;
+    word-spacing: normal;
+    white-space: normal;
+    line-break: auto;
+    font-size: 0.875rem;
+    word-wrap: break-word;
+    opacity: 0;
+}
+
+.tooltip.show {
+    opacity: 0.9;
+}
+
+.tooltip-inner {
+    max-width: 200px;
+    padding: 3px 8px;
+    color: #fff;
+    text-align: center;
+    background-color: #000;
+    border-radius: 4px;
+}
+
+/* Print Styles */
+@media print {
+    .stats-filters,
+    .trend-filters,
+    .export-excel {
+        display: none !important;
+    }
+    
+    .chart-container {
+        break-inside: avoid;
+    }
+    
+    .status-grid {
+        break-inside: avoid;
+    }
+}

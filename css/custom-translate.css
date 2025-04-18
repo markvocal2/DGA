@@ -1,0 +1,64 @@
+#google_translate_element {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 120px;
+    min-height: 40px;
+    margin: 10px 0;
+}
+
+.goog-te-gadget {
+    font-family: inherit !important;
+    margin: 0 !important;
+}
+
+.goog-te-gadget-simple {
+    background-color: #ffffff !important;
+    border: 1px solid #dddddd !important;
+    padding: 8px 12px !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    line-height: 2 !important;
+    display: inline-block !important;
+    cursor: pointer;
+    margin: 0 !important;
+}
+
+.goog-te-banner-frame {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
+.goog-te-menu-value {
+    color: #333 !important;
+    text-decoration: none !important;
+}
+
+.goog-te-menu-value span {
+    color: #333 !important;
+    text-decoration: none !important;
+}
+
+/* แสดง dropdown ได้สวยงามมากขึ้น */
+.goog-te-combo {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    font-size: 14px;
+    width: 100%;
+    max-width: 200px;
+}
+
+/* Debug styles */
+.translate-loaded #google_translate_element {
+    border: 2px solid green;
+}
+
+#google_translate_element:empty {
+    border: 2px solid red;
+    padding: 10px;
+}

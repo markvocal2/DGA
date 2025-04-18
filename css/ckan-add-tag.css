@@ -1,0 +1,151 @@
+/* Container สำหรับ Tags */
+.ckan-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* รายการ Tags */
+.ckan-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 10px;
+}
+
+/* สไตล์ของแต่ละ Tag */
+.ckan-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #1e73be; /* สีน้ำเงิน */
+    color: #000000; /* ตัวอักษรสีดำ */
+    border-radius: 4px;
+    padding: 5px 10px;
+    margin: 0 5px 5px 0;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: background-color 0.2s;
+}
+
+.ckan-tag:hover {
+    background-color: #1a65a8; /* สีน้ำเงินเข้มเมื่อ hover */
+}
+
+/* ปุ่ม "เพิ่ม TAG" */
+.ckan-add-tag-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f47321; /* สีส้ม */
+    color: #000000; /* ตัวอักษรสีดำ */
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.ckan-add-tag-btn:hover {
+    background-color: #e06010; /* สีส้มเข้มเมื่อ hover */
+}
+
+.ckan-add-tag-btn .dashicons {
+    margin-right: 5px;
+}
+
+/* สไตล์ของ Modal */
+.ckan-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.ckan-modal-content {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.ckan-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.ckan-modal h3 {
+    margin-top: 0;
+    color: #000000; /* ตัวอักษรสีดำ */
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* Tags ใน Modal */
+.ckan-modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.ckan-modal-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e5e5e5;
+    color: #000000; /* ตัวอักษรสีดำ */
+    border-radius: 4px;
+    padding: 5px 10px;
+    margin: 0 5px 5px 0;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.ckan-modal-tag:hover {
+    background-color: #d5d5d5;
+}
+
+.ckan-modal-tag.selected {
+    background-color: #1e73be; /* สีน้ำเงิน */
+    color: #ffffff; /* ตัวอักษรสีขาวสำหรับ tags ที่เลือก */
+}
+
+/* ส่วนท้ายของ Modal */
+.ckan-modal-footer {
+    text-align: right;
+    padding-top: 15px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.ckan-save-tags-btn {
+    background-color: #f47321; /* สีส้ม */
+    color: #000000; /* ตัวอักษรสีดำ */
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.ckan-save-tags-btn:hover {
+    background-color: #e06010; /* สีส้มเข้มเมื่อ hover */
+}

@@ -1,0 +1,151 @@
+/* /css/user-search.css */
+:root {
+    --primary-blue: #1a73e8;
+    --primary-orange: #ff6b35;
+    --text-dark: #333333;
+    --text-light: #ffffff;
+    --bg-light: #f8f9fa;
+    --hover-blue: #1557b0;
+}
+
+.user-search-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+}
+
+.search-box {
+    position: relative;
+}
+
+#user-search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid var(--primary-blue);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+#user-search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+}
+
+.search-results {
+    position: absolute;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: var(--text-light);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.search-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.search-item:hover {
+    background-color: var(--bg-light);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+}
+
+.modal-content {
+    position: relative;
+    background-color: var(--text-light);
+    margin: 15% auto;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--text-dark);
+    cursor: pointer;
+}
+
+.role-list {
+    margin: 20px 0;
+}
+
+.role-option {
+    display: block;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.role-option:hover {
+    border-color: var(--primary-orange);
+    background-color: var(--bg-light);
+}
+
+.role-option.current-role {
+    border-color: var(--primary-blue);
+    background-color: #e8f0fe;
+    position: relative;
+}
+
+.role-option.current-role::after {
+    content: '(ปัจจุบัน)';
+    position: absolute;
+    right: 10px;
+    color: var(--primary-blue);
+    font-size: 0.9em;
+}
+
+.role-option.selected {
+    border-color: var(--primary-orange);
+    background-color: #fff4ef;
+}
+
+.save-button {
+    width: 100%;
+    padding: 12px 24px;
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+    background-color: var(--hover-blue);
+}
+
+/* Loading Indicator */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-dark);
+}

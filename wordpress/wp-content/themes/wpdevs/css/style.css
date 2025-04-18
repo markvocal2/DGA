@@ -1,0 +1,65 @@
+/* Menu Roles Custom Styles */
+.field-menu-role .spinner {
+    visibility: visible;
+    float: none;
+    margin: 0 5px;
+    opacity: 0;
+}
+
+.field-menu-role .spinner.is-active {
+    opacity: 1;
+}
+
+.field-menu-role .status-message {
+    display: inline-block;
+    margin-left: 5px;
+    font-style: italic;
+}
+
+.field-menu-role .error-message {
+    color: #dc3232;
+}
+
+.field-menu-role .success-message {
+    color: #46b450;
+}
+
+/* Select2 Custom Styles */
+.select2-container {
+    min-width: 200px;
+}
+
+.select2-results__option {
+    padding: 6px 12px;
+}
+
+.select2-container--default .select2-selection--multiple {
+    border-color: #8c8f94;
+}
+
+/* Fix for label overlapping with close icon */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    padding: 5px 5px 5px 25px !important;
+    position: relative;
+    margin: 3px;
+    border-radius: 4px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    padding: 0 2px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    padding-left: 5px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}

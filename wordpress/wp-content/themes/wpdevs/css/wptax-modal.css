@@ -1,0 +1,299 @@
+/* Modal Popup สำหรับกำหนดหมวดหมู่ */
+:root {
+    --wptax-modal-primary: #1a4789;    /* สีน้ำเงิน */
+    --wptax-modal-primary-dark: #0d2d5e;
+    --wptax-modal-secondary: #ff6b35;  /* สีส้ม */
+    --wptax-modal-secondary-dark: #e55a24;
+    --wptax-modal-text: #333333;       /* สีดำ */
+    --wptax-modal-bg: #ffffff;
+    --wptax-modal-border: #eaeaea;
+    --wptax-modal-radius: 8px;
+    --wptax-modal-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --wptax-modal-transition: all 0.3s ease;
+    --wptax-modal-overlay: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal Container */
+.wptax-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999999;
+    font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+}
+
+.wptax-modal.wptax-modal-active {
+    display: block;
+    animation: wptaxFadeIn 0.3s ease;
+}
+
+/* Overlay */
+.wptax-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--wptax-modal-overlay);
+    backdrop-filter: blur(2px);
+}
+
+/* Modal Content */
+.wptax-modal-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--wptax-modal-bg);
+    border-radius: var(--wptax-modal-radius);
+    box-shadow: var(--wptax-modal-shadow);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: wptaxSlideIn 0.3s ease;
+}
+
+/* Modal Header */
+.wptax-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 25px;
+    background-color: var(--wptax-modal-primary);
+    color: white;
+    border-top-left-radius: var(--wptax-modal-radius);
+    border-top-right-radius: var(--wptax-modal-radius);
+}
+
+.wptax-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: white;
+}
+
+.wptax-modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 5px;
+    opacity: 0.8;
+    transition: var(--wptax-modal-transition);
+}
+
+.wptax-modal-close:hover {
+    opacity: 1;
+}
+
+/* Modal Body */
+.wptax-modal-body {
+    padding: 20px 25px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+.wptax-modal-desc {
+    margin: 0 0 20px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Taxonomy Section */
+.wptax-taxonomy-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--wptax-modal-border);
+}
+
+.wptax-taxonomy-section:last-child {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: none;
+}
+
+.wptax-taxonomy-title {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--wptax-modal-text);
+}
+
+.wptax-term-select-container {
+    position: relative;
+}
+
+.wptax-term-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--wptax-modal-border);
+    border-radius: var(--wptax-modal-radius);
+    font-size: 15px;
+    color: var(--wptax-modal-text);
+    background-color: white;
+    appearance: none;
+    outline: none;
+    transition: var(--wptax-modal-transition);
+}
+
+.wptax-term-select:focus {
+    border-color: var(--wptax-modal-primary);
+    box-shadow: 0 0 0 3px rgba(26, 71, 137, 0.2);
+}
+
+.wptax-term-select-container::after {
+    content: '▼';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+    font-size: 12px;
+}
+
+/* Modal Footer */
+.wptax-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 15px 25px;
+    background-color: #f8f8f8;
+    border-top: 1px solid var(--wptax-modal-border);
+}
+
+/* Buttons */
+.wptax-save-btn,
+.wptax-cancel-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--wptax-modal-radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--wptax-modal-transition);
+}
+
+.wptax-save-btn {
+    background-color: var(--wptax-modal-primary);
+    color: white;
+}
+
+.wptax-save-btn:hover {
+    background-color: var(--wptax-modal-primary-dark);
+}
+
+.wptax-cancel-btn {
+    background-color: var(--wptax-modal-secondary);
+    color: white;
+}
+
+.wptax-cancel-btn:hover {
+    background-color: var(--wptax-modal-secondary-dark);
+}
+
+/* Message Container */
+.wptax-message-container {
+    margin-top: 15px;
+}
+
+.wptax-message {
+    padding: 12px 15px;
+    border-radius: var(--wptax-modal-radius);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.wptax-success-message {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.wptax-error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Animations */
+@keyframes wptaxFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes wptaxSlideIn {
+    from { 
+        opacity: 0;
+        transform: translate(-50%, -45%);
+    }
+    to { 
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Loading Indicator */
+.wptax-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.wptax-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--wptax-modal-radius);
+}
+
+.wptax-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--wptax-modal-primary);
+    border-radius: 50%;
+    animation: wptaxSpin 1s linear infinite;
+}
+
+@keyframes wptaxSpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .wptax-modal-container {
+        width: 95%;
+    }
+    
+    .wptax-modal-header,
+    .wptax-modal-body,
+    .wptax-modal-footer {
+        padding: 15px;
+    }
+    
+    .wptax-save-btn,
+    .wptax-cancel-btn {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}

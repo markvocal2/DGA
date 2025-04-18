@@ -1,0 +1,214 @@
+/**
+ * CSS สำหรับ Welcome User Widget
+ */
+
+/* สไตล์ทั่วไปสำหรับ Widget */
+.welcome-user-widget {
+    display: inline-flex;
+    align-items: center;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    margin-right: 15px;
+}
+
+/* สไตล์สำหรับผู้ใช้ที่ล็อกอินแล้ว */
+.welcome-user-widget.logged-in .welcome-user-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* สไตล์สำหรับ Avatar */
+.welcome-user-avatar-container {
+    line-height: 0;
+}
+
+.welcome-user-avatar {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* สไตล์สำหรับข้อมูลผู้ใช้ */
+.welcome-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-user-name {
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.welcome-user-role {
+    font-size: 0.8em;
+    opacity: 0.85;
+}
+
+/* สไตล์สำหรับกลุ่มปุ่ม (โปรไฟล์และออกจากระบบ) */
+.welcome-user-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.welcome-user-buttons a {
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9em;
+    padding: 4px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.welcome-user-buttons a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* สไตล์สำหรับปุ่มโปรไฟล์ */
+.welcome-user-profile-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* สไตล์สำหรับผู้ใช้ที่ยังไม่ได้ล็อกอิน */
+.welcome-user-widget.not-logged-in {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* สไตล์สำหรับกลุ่มปุ่มของผู้ใช้ที่ยังไม่ได้ล็อกอิน */
+.guest-user-buttons {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+/* สไตล์สำหรับปุ่มลงชื่อเข้าใช้งานและสมัครสมาชิก */
+.login-trigger-container,
+.register-container {
+    display: inline-block !important;
+    margin: 0 5px !important;
+}
+
+/* สไตล์สำหรับปุ่ม "ลงชื่อเข้าใช้งาน" */
+.login-trigger-container a {
+    display: inline-block !important;
+    color: white !important;
+    text-decoration: none !important;
+    font-size: 0.9em !important;
+    padding: 4px 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+    background-color: transparent !important;
+}
+
+.login-trigger-container a:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* สไตล์สำหรับปุ่ม "สมัครสมาชิก" */
+.register-container a {
+    display: inline-block !important;
+    color: white !important;
+    text-decoration: none !important;
+    font-size: 0.9em !important;
+    padding: 4px 12px !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.register-container a:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* สไตล์สำหรับฟอร์มล็อกอินแบบแนวนอน (inline) */
+.login-form-container {
+    margin-left: 10px;
+}
+
+#ajax-login-form {
+    display: flex;
+    align-items: center;
+}
+
+/* สไตล์ใหม่สำหรับฟอร์มแบบ inline */
+.inline-login-form {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+}
+
+/* สไตล์สำหรับช่องกรอกข้อมูลในฟอร์ม inline */
+.inline-login-form input[type="text"],
+.inline-login-form input[type="password"] {
+    padding: 6px 10px !important;
+    border: none !important;
+    border-radius: 4px !important;
+    font-size: 0.9em !important;
+    width: 150px !important;
+    margin: 0 !important;
+}
+
+/* สไตล์สำหรับปุ่มเข้าสู่ระบบในฟอร์ม inline */
+.inline-login-form button[type="submit"] {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+    font-size: 0.9em !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+.inline-login-form button[type="submit"]:hover {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* สไตล์สำหรับลิงก์ "ลืมรหัสผ่าน" ในฟอร์ม inline */
+.forgot-password-link {
+    color: white !important;
+    text-decoration: none !important;
+    font-size: 0.9em !important;
+    padding: 6px 10px !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.forgot-password-link:hover {
+    text-decoration: underline !important;
+}
+
+/* สไตล์สำหรับข้อความแจ้งเตือน */
+.login-message {
+    margin-left: 10px;
+    font-size: 0.85em;
+    color: white;
+}
+
+.login-message.error {
+    color: #ffcccc;
+}
+
+.login-message.success {
+    color: #ccffcc;
+}

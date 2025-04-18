@@ -1,0 +1,1 @@
+.thai-date-views{display:flex;align-items:center;gap:1.5em;font-size:.8em;color:#666;padding:.5em 0}.thai-date-views i{margin-right:.4em;color:#888}.thai-date,.post-views{display:inline-flex;align-items:center;transition:color .2s ease}.thai-date:hover,.post-views:hover{color:#333}@media(max-width:576px){.thai-date-views{flex-direction:column;align-items:flex-start;gap:.5em}}

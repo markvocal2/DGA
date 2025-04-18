@@ -1,0 +1,94 @@
+/* Back Button Styles */
+:root {
+    --tdep-back-primary: #1a4789;    /* สีน้ำเงิน */
+    --tdep-back-secondary: #ff6b35;  /* สีส้ม */
+    --tdep-back-text: #333333;      /* สีดำ */
+    --tdep-back-hover-bg: #f5f8ff;
+    --tdep-back-shadow: 0 2px 8px rgba(26, 71, 137, 0.15);
+}
+
+.tdep-back-button-wrapper {
+    margin: 0rem 0;
+}
+
+.tdep-back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    background-color: white;
+    border: 2px solid var(--tdep-back-primary);
+    border-radius: 8px;
+    color: var(--tdep-back-text);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: var(--tdep-back-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.tdep-back-button:hover {
+    background-color: var(--tdep-back-hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 71, 137, 0.2);
+}
+
+.tdep-back-button:active {
+    transform: translateY(0);
+}
+
+.tdep-back-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 0.75rem;
+    transition: transform 0.3s ease;
+}
+
+.tdep-back-button:hover .tdep-back-icon {
+    transform: translateX(-3px);
+}
+
+.tdep-back-icon svg {
+    fill: var(--tdep-back-primary);
+    transition: fill 0.3s ease;
+}
+
+.tdep-back-button:hover svg {
+    fill: var(--tdep-back-secondary);
+}
+
+.tdep-back-label {
+    position: relative;
+    z-index: 1;
+}
+
+/* Animation for click effect */
+.tdep-back-button-clicked {
+    animation: clickEffect 0.3s ease-out;
+}
+
+@keyframes clickEffect {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.97);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .tdep-back-button {
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .tdep-back-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+}

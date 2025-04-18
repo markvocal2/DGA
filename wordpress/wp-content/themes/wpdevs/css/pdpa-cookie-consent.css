@@ -1,0 +1,310 @@
+/**
+ * PDPA Cookie Consent CSS
+ * สีหลัก: น้ำเงิน, ส้ม, ตัวอักษรสีดำ
+ */
+
+ :root {
+    --pdpa-primary: #1a56db; /* สีน้ำเงิน */
+    --pdpa-secondary: #ff8a33; /* สีส้ม */
+    --pdpa-text: #2d3748; /* สีดำอ่อน */
+    --pdpa-light-bg: #f8fafc;
+    --pdpa-border: #e2e8f0;
+    --pdpa-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --pdpa-toggle-on: #1a56db; /* สีน้ำเงิน */
+    --pdpa-toggle-off: #cbd5e0;
+}
+
+/* PDPA Cookie Consent Container */
+.pdpa-cookie-consent {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: var(--pdpa-text);
+    line-height: 1.5;
+    position: relative;
+    z-index: 9999;
+}
+
+/* Main container */
+.pdpa-consent-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: var(--pdpa-shadow);
+    z-index: 9999;
+    overflow: hidden;
+    animation: pdpa-slide-up 0.5s ease;
+    display: block; /* แก้ไข: ระบุให้แสดงแบบ block ชัดเจน */
+}
+
+@keyframes pdpa-slide-up {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Header */
+.pdpa-header {
+    background-color: var(--pdpa-primary);
+    color: white;
+    padding: 20px;
+    position: relative;
+}
+
+.pdpa-header h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.pdpa-header p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Content */
+.pdpa-content {
+    padding: 20px;
+    background-color: white;
+    border-bottom: 1px solid var(--pdpa-border);
+}
+
+.pdpa-content p {
+    margin: 0;
+}
+
+/* Action buttons */
+.pdpa-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background-color: var(--pdpa-light-bg);
+}
+
+.pdpa-button {
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 14px;
+    outline: none;
+}
+
+.pdpa-accept {
+    background-color: var(--pdpa-primary);
+    color: white;
+}
+
+.pdpa-accept:hover {
+    background-color: #0f45b5;
+}
+
+.pdpa-reject {
+    background-color: #e2e8f0;
+    color: var(--pdpa-text);
+}
+
+.pdpa-reject:hover {
+    background-color: #cbd5e0;
+}
+
+.pdpa-settings {
+    background-color: white;
+    color: var(--pdpa-primary);
+    border: 1px solid var(--pdpa-primary);
+}
+
+.pdpa-settings:hover {
+    background-color: #f0f5ff;
+}
+
+.pdpa-save {
+    background-color: var(--pdpa-secondary);
+    color: white;
+}
+
+.pdpa-save:hover {
+    background-color: #f97316;
+}
+
+/* Settings panel */
+.pdpa-settings-panel {
+    padding: 20px;
+    background-color: white;
+    border-top: 1px solid var(--pdpa-border);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.pdpa-setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--pdpa-border);
+}
+
+.pdpa-setting-item:last-child {
+    border-bottom: none;
+}
+
+.pdpa-setting-info {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.pdpa-setting-info h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.pdpa-setting-info p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Toggle switch */
+.pdpa-toggle-wrapper {
+    position: relative;
+    width: 48px;
+    height: 24px;
+}
+
+.pdpa-toggle {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pdpa-toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--pdpa-toggle-off);
+    border-radius: 24px;
+    transition: .3s;
+}
+
+.pdpa-toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .3s;
+}
+
+.pdpa-toggle:checked + .pdpa-toggle-label {
+    background-color: var(--pdpa-toggle-on);
+}
+
+.pdpa-toggle:checked + .pdpa-toggle-label:before {
+    transform: translateX(24px);
+}
+
+.pdpa-toggle:disabled + .pdpa-toggle-label {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+/* Setting actions */
+.pdpa-setting-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+/* Reopen button */
+.pdpa-reopen-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--pdpa-primary);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    display: flex; /* แก้ไข: เปลี่ยนจาก none เป็น flex */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--pdpa-shadow);
+    z-index: 9998;
+    transition: all 0.3s ease;
+}
+
+.pdpa-reopen-button:hover {
+    background-color: #0f45b5;
+}
+
+.pdpa-reopen-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Notification */
+.pdpa-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 10000;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .pdpa-consent-container {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .pdpa-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .pdpa-button {
+        width: 100%;
+    }
+    
+    .pdpa-reopen-button {
+        padding: 8px 15px;
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .pdpa-reopen-text {
+        display: none; /* ซ่อนข้อความบนมือถือ */
+    }
+    
+    .pdpa-reopen-icon {
+        margin-right: 0;
+        font-size: 20px;
+    }
+}

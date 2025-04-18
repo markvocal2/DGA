@@ -1,0 +1,458 @@
+/* W3C CSS Validator Styles */
+
+.w3c-test-container {
+    max-width: 100%;
+    margin: 10px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Header */
+.w3c-test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+}
+
+.w3c-test-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.w3c-test-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.w3c-grade {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+}
+
+.w3c-grade.grade-a {
+    background-color: #4CAF50;
+}
+
+.w3c-grade.grade-b {
+    background-color: #8BC34A;
+}
+
+.w3c-grade.grade-c {
+    background-color: #FFC107;
+}
+
+.w3c-grade.grade-d {
+    background-color: #FF9800;
+}
+
+.w3c-grade.grade-f {
+    background-color: #F44336;
+}
+
+.w3c-grade.grade-error {
+    background-color: #757575;
+    font-size: 12px;
+}
+
+.w3c-score-value {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Toggle Button */
+.w3c-test-toggle {
+    padding: 8px 15px;
+    background-color: #1976D2;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+
+.w3c-test-toggle:hover {
+    background-color: #1565C0;
+}
+
+/* Content Area */
+.w3c-test-content {
+    padding: 15px;
+    background-color: white;
+}
+
+/* Summary Section */
+.w3c-stylesheets-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.w3c-info-item {
+    flex: 1;
+    min-width: 100px;
+    background-color: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.w3c-info-label {
+    font-size: 12px;
+    color: #666;
+    display: block;
+}
+
+.w3c-info-value {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Categories */
+.w3c-test-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.w3c-category {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.w3c-category.no-issues {
+    border-color: #4CAF50;
+}
+
+.w3c-category.has-issues {
+    border-color: #FF9800;
+}
+
+.w3c-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.w3c-category-name {
+    font-weight: 500;
+}
+
+.w3c-category-score {
+    font-weight: bold;
+}
+
+.w3c-category-issues-count {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #666;
+}
+
+.w3c-category-issues-count.no-issues {
+    color: #4CAF50;
+}
+
+/* View Details Button */
+.w3c-view-details-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 0;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.w3c-view-details-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* Loading Indicator */
+.w3c-test-loading {
+    padding: 15px;
+    text-align: center;
+    color: #666;
+}
+
+.w3c-test-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    border-top-color: #1976D2;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.w3c-error {
+    padding: 10px;
+    background-color: #FFEBEE;
+    color: #D32F2F;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Modal */
+.w3c-test-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.w3c-test-modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.w3c-test-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.w3c-test-modal-close:hover {
+    color: #333;
+}
+
+.w3c-test-modal-header h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+/* Modal content styles */
+.w3c-modal-url {
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-family: monospace;
+    word-break: break-all;
+    font-size: 12px;
+}
+
+.w3c-modal-score-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.w3c-modal-grade {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+}
+
+.w3c-modal-score {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.w3c-modal-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.w3c-modal-category {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.w3c-modal-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.w3c-modal-category-name {
+    font-weight: bold;
+}
+
+.w3c-modal-issues {
+    padding: 10px 15px;
+}
+
+.w3c-modal-issue {
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #ddd;
+}
+
+.w3c-modal-issue.error {
+    background-color: #FFEBEE;
+    border-left-color: #F44336;
+}
+
+.w3c-modal-issue.warning {
+    background-color: #FFF8E1;
+    border-left-color: #FFC107;
+}
+
+.w3c-modal-issue.info {
+    background-color: #E3F2FD;
+    border-left-color: #2196F3;
+}
+
+.w3c-issue-header {
+    margin-bottom: 5px;
+}
+
+.w3c-issue-severity {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.w3c-modal-issue.error .w3c-issue-severity {
+    background-color: #F44336;
+    color: white;
+}
+
+.w3c-modal-issue.warning .w3c-issue-severity {
+    background-color: #FFC107;
+    color: black;
+}
+
+.w3c-modal-issue.info .w3c-issue-severity {
+    background-color: #2196F3;
+    color: white;
+}
+
+.w3c-issue-message {
+    font-weight: 500;
+}
+
+.w3c-issue-recommendation {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #666;
+}
+
+.w3c-recommendation-label {
+    font-weight: 500;
+    margin-right: 5px;
+}
+
+.w3c-no-issues {
+    padding: 10px 15px;
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+.w3c-modal-recommendations {
+    background-color: #E8F5E9;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.w3c-modal-recommendations h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2E7D32;
+}
+
+.w3c-modal-recommendations ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.w3c-modal-recommendations li {
+    margin-bottom: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .w3c-test-categories {
+        grid-template-columns: 1fr;
+    }
+    
+    .w3c-stylesheets-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .w3c-info-item {
+        min-width: auto;
+    }
+    
+    .w3c-test-modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 15px;
+    }
+    
+    .w3c-modal-score-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

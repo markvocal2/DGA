@@ -1,460 +1,588 @@
-/* Complaint Statistics Container */
+/**
+ * Complaint Statistics - Styles V2 (Refactored)
+ * Provides styling for the complaint statistics dashboard, including filters,
+ * summary cards, charts, and status indicators.
+ * Refactored using CSS variables for better maintainability and theming.
+ */
+
+:root {
+  /* Colors */
+  --stats-bg-primary: #fff;
+  --stats-bg-secondary: #f8fafc; /* Filters background */
+  --stats-text-primary: #1f2937; /* Dark Gray */
+  --stats-text-secondary: #4b5563; /* Medium Gray */
+  --stats-text-light: #6b7280; /* Light Gray */
+  --stats-border-color: #e5e7eb; /* Light Gray Border */
+  --stats-border-color-focus: #3b82f6; /* Blue */
+  --stats-focus-ring-color: rgba(59, 130, 246, 0.1);
+
+  /* Card Border Colors / Status Colors */
+  --stats-color-total: #3b82f6; /* Blue */
+  --stats-color-average: #10b981; /* Green */
+  --stats-color-pending: #f59e0b; /* Amber */
+  --stats-color-completed: #6366f1; /* Indigo */
+  --stats-color-rejected: #ef4444; /* Red */
+  --stats-color-closed: var(--stats-text-light); /* Gray */
+  --stats-color-progress: var(--stats-color-total); /* Alias for consistency */
+
+  /* Button Colors */
+  --stats-button-primary-bg: var(--stats-color-total);
+  --stats-button-primary-bg-hover: #2563eb; /* Darker Blue */
+  --stats-button-primary-text: #fff;
+  --stats-button-secondary-bg: #f3f4f6; /* Very Light Gray */
+  --stats-button-secondary-bg-hover: var(--stats-border-color);
+  --stats-button-secondary-text: var(--stats-text-secondary);
+  --stats-button-secondary-text-hover: var(--stats-text-primary);
+  --stats-button-export-bg: #059669; /* Dark Green */
+  --stats-button-export-bg-hover: #047857; /* Darker Green */
+  --stats-button-export-text: #fff;
+
+  /* Chart Colors (Matching Highcharts overrides) */
+  --stats-chart-color-0: var(--stats-color-total);
+  --stats-chart-color-1: var(--stats-color-average);
+  --stats-chart-color-2: var(--stats-color-pending);
+  --stats-chart-color-3: var(--stats-color-completed);
+  --stats-chart-color-4: #ec4899; /* Pink */
+  --stats-chart-color-5: #8b5cf6; /* Violet */
+
+  /* Tooltip */
+  --stats-tooltip-bg: #000;
+  --stats-tooltip-text: #fff;
+
+  /* Typography */
+  --stats-font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* System Font Stack */
+  --stats-font-size-base: 1rem; /* 16px */
+  --stats-font-size-sm: 0.875rem; /* 14px */
+  --stats-font-size-xs: 0.75rem; /* 12px */
+  --stats-font-size-lg: 1.125rem; /* 18px - Example */
+  --stats-font-size-xl: 2rem; /* 32px - Card Number */
+  --stats-font-weight-normal: 400;
+  --stats-font-weight-bold: 700;
+  --stats-line-height-base: 1.5;
+
+  /* Spacing */
+  --stats-spacing-xs: 4px;
+  --stats-spacing-sm: 5px; /* Filter group gap */
+  --stats-spacing-md: 8px; /* Input padding, status indicator size */
+  --stats-spacing-lg: 10px; /* Date range gap, status grid gap */
+  --stats-spacing-xl: 15px; /* Filter padding, chart heading margin */
+  --stats-spacing-xxl: 20px; /* Main padding, card padding, filter gap */
+  --stats-spacing-xxxl: 30px; /* Header margin, summary margin */
+
+  /* Borders */
+  --stats-border-radius-sm: 4px;
+  --stats-border-radius-md: 6px;
+  --stats-border-radius-lg: 8px;
+  --stats-border-width: 1px;
+  --stats-border-width-card: 4px; /* Card left border */
+
+  /* Shadows */
+  --stats-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --stats-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  /* Transitions */
+  --stats-transition-duration: 0.2s;
+  --stats-transition-timing: ease;
+
+  /* Z-Index */
+  --stats-z-index-tooltip: 1070;
+  --stats-z-index-loading: 10;
+}
+
+/* Base Container */
 .complaint-stats-container {
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: var(--stats-spacing-xxl);
+  background: var(--stats-bg-primary);
+  border-radius: var(--stats-border-radius-lg);
+  box-shadow: var(--stats-shadow-sm);
+  font-family: var(--stats-font-family);
 }
 
 /* Header and Filters */
 .stats-header {
-    margin-bottom: 30px;
+  margin-bottom: var(--stats-spacing-xxxl);
 }
 
 .stats-header h2 {
-    margin-bottom: 20px;
-    color: #1f2937;
+  margin-bottom: var(--stats-spacing-xxl);
+  color: var(--stats-text-primary);
+  font-size: var(--stats-font-size-lg); /* Example size */
 }
 
 .stats-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-end;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--stats-spacing-xxl);
+  align-items: flex-end; /* Align items to bottom */
+  padding: var(--stats-spacing-xl);
+  background: var(--stats-bg-secondary);
+  border-radius: var(--stats-border-radius-md);
 }
 
 .filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--stats-spacing-sm);
 }
 
-.filter-group label {
-    font-size: 0.875rem;
-    color: #4b5563;
+.filter-group label,
+.filter-label { /* Combined label styles */
+  display: block; /* Ensure label is block */
+  margin-bottom: var(--stats-spacing-xs); /* Consistent margin */
+  font-size: var(--stats-font-size-sm);
+  color: var(--stats-text-secondary);
 }
 
 .date-range {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--stats-spacing-lg);
+}
+
+.date-range input[type="date"] {
+  width: 140px; /* Specific width for date inputs */
 }
 
 /* Summary Cards */
 .stats-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--stats-spacing-xxl);
+  margin-bottom: var(--stats-spacing-xxxl);
 }
 
 .stats-card {
-    padding: 20px;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    text-align: center;
-    transition: transform 0.2s ease;
+  padding: var(--stats-spacing-xxl);
+  border-radius: var(--stats-border-radius-lg);
+  background: var(--stats-bg-primary);
+  box-shadow: var(--stats-shadow-md);
+  text-align: center;
+  transition: transform var(--stats-transition-duration) var(--stats-transition-timing);
+  border-left: var(--stats-border-width-card) solid transparent; /* Base border */
 }
 
 .stats-card:hover {
-    transform: translateY(-2px);
+  transform: translateY(-2px);
 }
 
 .stats-card h3 {
-    margin-bottom: 10px;
-    font-size: 1rem;
-    color: #4b5563;
+  margin-bottom: var(--stats-spacing-lg);
+  font-size: var(--stats-font-size-base);
+  color: var(--stats-text-secondary);
+  font-weight: var(--stats-font-weight-normal); /* Normal weight for title */
 }
 
 .stats-number {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #1f2937;
+  font-size: var(--stats-font-size-xl);
+  font-weight: var(--stats-font-weight-bold);
+  color: var(--stats-text-primary);
 }
 
-.total-complaints {
-    border-left: 4px solid #3b82f6;
-}
+/* Card Specific Border Colors */
+.total-complaints { border-left-color: var(--stats-color-total); }
+.daily-average { border-left-color: var(--stats-color-average); }
+.pending-complaints { border-left-color: var(--stats-color-pending); }
+.completed-complaints { border-left-color: var(--stats-color-completed); }
 
-.daily-average {
-    border-left: 4px solid #10b981;
-}
-
-.pending-complaints {
-    border-left: 4px solid #f59e0b;
-}
-
-.completed-complaints {
-    border-left: 4px solid #6366f1;
-}
-
-/* Charts */
+/* Charts Section */
 .stats-charts {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Default to 2 columns */
+  gap: var(--stats-spacing-xxl);
+  margin-top: var(--stats-spacing-xxxl); /* Add margin above charts */
 }
 
 .chart-container {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--stats-bg-primary);
+  border-radius: var(--stats-border-radius-lg);
+  padding: var(--stats-spacing-xxl);
+  box-shadow: var(--stats-shadow-md);
 }
 
 .chart-container h3 {
-    margin-bottom: 15px;
-    font-size: 1rem;
-    color: #1f2937;
+  margin-bottom: var(--stats-spacing-xl);
+  font-size: var(--stats-font-size-base);
+  color: var(--stats-text-primary);
+  font-weight: var(--stats-font-weight-bold); /* Bold chart titles */
 }
 
 .chart-container.full-width {
-    grid-column: 1 / -1;
-}
-
-/* Form Elements */
-select,
-input[type="date"] {
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #1f2937;
-    font-size: 0.875rem;
-}
-
-select:focus,
-input[type="date"]:focus {
-    outline: none;
-    border-color: #3b82f6;
-    ring: 2px solid rgba(59, 130, 246, 0.1);
-}
-
-.button {
-    padding: 8px 16px;
-    background-color: #3b82f6;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.button:hover {
-    background-color: #2563eb;
-}
-
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-    .stats-filters {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .date-range {
-        flex-wrap: wrap;
-    }
-
-    .stats-charts {
-        grid-template-columns: 1fr;
-    }
-
-    .chart-container {
-        grid-column: 1;
-    }
-}
-
-/* Loading State */
-.stats-loading {
-    position: relative;
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-.stats-loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f4f6;
-    border-top-color: #3b82f6;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-
-/* Print Styles */
-@media print {
-    .stats-filters {
-        display: none;
-    }
-
-    .complaint-stats-container {
-        box-shadow: none;
-        padding: 0;
-    }
-
-    .stats-card {
-        break-inside: avoid;
-        box-shadow: none;
-    }
-
-    .chart-container {
-        break-inside: avoid;
-        box-shadow: none;
-    }
-}
-
-/* Chart Tooltips */
-.highcharts-tooltip {
-    font-size: 0.875rem;
-}
-
-.highcharts-data-label {
-    font-size: 0.75rem;
-}
-
-/* Custom Colors for Charts */
-.highcharts-color-0 { fill: #3b82f6; stroke: #3b82f6; }
-.highcharts-color-1 { fill: #10b981; stroke: #10b981; }
-.highcharts-color-2 { fill: #f59e0b; stroke: #f59e0b; }
-.highcharts-color-3 { fill: #6366f1; stroke: #6366f1; }
-.highcharts-color-4 { fill: #ec4899; stroke: #ec4899; }
-.highcharts-color-5 { fill: #8b5cf6; stroke: #8b5cf6; }
-
-/* Export Buttons */
-.export-buttons {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.export-button {
-    padding: 6px 12px;
-    background-color: #f3f4f6;
-    color: #4b5563;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.export-button:hover {
-    background-color: #e5e7eb;
-    color: #1f2937;
-}
-
-/* Date Range Inputs */
-.date-range input[type="date"] {
-    width: 140px;
-}
-
-/* Filter Labels */
-.filter-label {
-    display: block;
-    margin-bottom: 4px;
-    color: #4b5563;
-    font-size: 0.875rem;
-}
-
-/* Status Indicators */
-.status-indicator {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 6px;
-}
-
-.status-pending { background-color: #f59e0b; }
-.status-progress { background-color: #3b82f6; }
-.status-completed { background-color: #10b981; }
-
-/* Status Grid */
-.status-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.status-item {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    background: #f8fafc;
-    border-radius: 4px;
-}
-
-.status-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 8px;
-}
-
-.status-label {
-    flex-grow: 1;
-    font-size: 0.875rem;
-    color: #4b5563;
-}
-
-.status-count {
-    font-weight: 600;
-    color: #1f2937;
-}
-
-/* Status Colors */
-.status-pending {
-    background-color: #f59e0b;
-}
-
-.status-progress {
-    background-color: #3b82f6;
-}
-
-.status-completed {
-    background-color: #10b981;
-}
-
-.status-rejected {
-    background-color: #ef4444;
-}
-
-.status-closed {
-    background-color: #6b7280;
+  grid-column: 1 / -1; /* Span full width */
 }
 
 /* Trend Chart Filters */
 .trend-filters {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: var(--stats-spacing-lg);
+  margin-bottom: var(--stats-spacing-xl);
 }
 
 .trend-filters label {
-    font-size: 0.875rem;
-    color: #4b5563;
+  font-size: var(--stats-font-size-sm);
+  color: var(--stats-text-secondary);
 }
 
 .trend-filters select {
-    min-width: 150px;
+  min-width: 150px; /* Minimum width for trend select */
 }
 
-/* Chart Legend */
-.highcharts-legend-item text {
-    font-size: 12px !important;
+/* Form Elements (Select, Date Input) */
+select,
+input[type="date"] {
+  padding: var(--stats-spacing-md) var(--stats-spacing-lg); /* 8px 12px */
+  border: var(--stats-border-width) solid var(--stats-border-color);
+  border-radius: var(--stats-border-radius-sm);
+  background-color: var(--stats-bg-primary);
+  color: var(--stats-text-primary);
+  font-size: var(--stats-font-size-sm);
+  transition: border-color var(--stats-transition-duration);
 }
 
-/* Export Button */
+select:focus,
+input[type="date"]:focus {
+  outline: none;
+  border-color: var(--stats-border-color-focus);
+  /* Consider removing ring if outline is sufficient */
+  /* box-shadow: 0 0 0 2px var(--stats-focus-ring-color); */
+}
+
+/* Buttons */
+.button { /* General button style, maps to primary */
+  padding: var(--stats-spacing-md) var(--stats-spacing-lg); /* 8px 16px */
+  background-color: var(--stats-button-primary-bg);
+  color: var(--stats-button-primary-text);
+  border: none;
+  border-radius: var(--stats-border-radius-sm);
+  font-size: var(--stats-font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--stats-transition-duration) var(--stats-transition-timing);
+}
+
+.button:hover {
+  background-color: var(--stats-button-primary-bg-hover);
+}
+
+/* Export Buttons (Secondary Style) */
+.export-buttons {
+  display: flex;
+  gap: var(--stats-spacing-lg);
+  margin-bottom: var(--stats-spacing-xxl); /* Space below export buttons */
+}
+
+.export-button {
+  padding: var(--stats-spacing-sm) var(--stats-spacing-lg); /* 6px 12px */
+  background-color: var(--stats-button-secondary-bg);
+  color: var(--stats-button-secondary-text);
+  border: var(--stats-border-width) solid var(--stats-border-color);
+  border-radius: var(--stats-border-radius-sm);
+  font-size: var(--stats-font-size-sm);
+  cursor: pointer;
+  transition: all var(--stats-transition-duration) var(--stats-transition-timing);
+}
+
+.export-button:hover {
+  background-color: var(--stats-button-secondary-bg-hover);
+  color: var(--stats-button-secondary-text-hover);
+}
+
+/* Export Excel Button (Specific Style) */
 .export-excel {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background-color: #059669;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--stats-spacing-sm); /* 6px */
+  padding: var(--stats-spacing-sm) var(--stats-spacing-lg); /* 6px 12px */
+  background-color: var(--stats-button-export-bg);
+  color: var(--stats-button-export-text);
+  border: none;
+  border-radius: var(--stats-border-radius-sm);
+  font-size: var(--stats-font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--stats-transition-duration);
 }
 
 .export-excel:hover {
-    background-color: #047857;
+  background-color: var(--stats-button-export-bg-hover);
 }
 
 .export-excel svg {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
+  fill: currentColor; /* Make SVG color match text */
 }
 
-/* Loading Animation */
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
+/* Status Grid & Indicators */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--stats-spacing-lg);
+  margin-top: var(--stats-spacing-lg);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  padding: var(--stats-spacing-md);
+  background: var(--stats-bg-secondary);
+  border-radius: var(--stats-border-radius-sm);
+}
+
+.status-indicator {
+  display: inline-block; /* Keep inline-block if needed elsewhere */
+  width: var(--stats-spacing-lg); /* 10px */
+  height: var(--stats-spacing-lg); /* 10px */
+  border-radius: 50%;
+  margin-right: var(--stats-spacing-md);
+  flex-shrink: 0; /* Prevent indicator from shrinking */
+}
+
+.status-label {
+  flex-grow: 1;
+  font-size: var(--stats-font-size-sm);
+  color: var(--stats-text-secondary);
+  margin-right: var(--stats-spacing-sm); /* Space between label and count */
+}
+
+.status-count {
+  font-weight: var(--stats-font-weight-bold);
+  color: var(--stats-text-primary);
+  font-size: var(--stats-font-size-sm); /* Match label size */
+}
+
+/* Status Colors */
+.status-pending .status-indicator, /* Apply color to indicator */
+.status-item.status-pending .status-indicator { /* Allow class on item or indicator */
+  background-color: var(--stats-color-pending);
+}
+.status-progress .status-indicator,
+.status-item.status-progress .status-indicator {
+  background-color: var(--stats-color-progress);
+}
+.status-completed .status-indicator,
+.status-item.status-completed .status-indicator {
+  background-color: var(--stats-color-completed);
+}
+.status-rejected .status-indicator,
+.status-item.status-rejected .status-indicator {
+  background-color: var(--stats-color-rejected);
+}
+.status-closed .status-indicator,
+.status-item.status-closed .status-indicator {
+  background-color: var(--stats-color-closed);
+}
+
+/* Loading State */
+.stats-loading {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none; /* Prevent interaction while loading */
+}
+
+/* Loading Spinner (Alternative: Pulse animation) */
+.stats-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Center using translate */
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--stats-button-secondary-bg); /* Light track */
+  border-top-color: var(--stats-color-total); /* Spinner color */
+  border-radius: 50%;
+  animation: stats-spin 1s linear infinite;
+  z-index: var(--stats-z-index-loading); /* Ensure spinner is above overlay */
+}
+
+@keyframes stats-spin {
+  to {
+    /* Keep translate for centering, only rotate */
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Loading Pulse Animation (Alternative) */
+@keyframes stats-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .stats-loading .stats-card,
 .stats-loading .chart-container {
-    animation: pulse 1.5s ease-in-out infinite;
-    pointer-events: none;
+  /* Uncomment to use pulse instead of overlay/spinner */
+  /* animation: stats-pulse 1.5s ease-in-out infinite; */
+  /* pointer-events: none; */ /* Already handled by .stats-loading */
 }
 
-/* Tooltip */
+/* Tooltip Styles (Generic - Assumed external or base style) */
 .tooltip {
-    position: absolute;
-    z-index: 1070;
-    display: block;
-    margin: 0;
-    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: left;
-    text-decoration: none;
-    text-shadow: none;
-    text-transform: none;
-    letter-spacing: normal;
-    word-break: normal;
-    word-spacing: normal;
-    white-space: normal;
-    line-break: auto;
-    font-size: 0.875rem;
-    word-wrap: break-word;
-    opacity: 0;
+  position: absolute;
+  z-index: var(--stats-z-index-tooltip);
+  display: block;
+  margin: 0;
+  font-family: var(--stats-font-family);
+  font-style: normal;
+  font-weight: var(--stats-font-weight-normal);
+  line-height: var(--stats-line-height-base);
+  text-align: left;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-break: normal;
+  word-spacing: normal;
+  white-space: normal;
+  line-break: auto;
+  font-size: var(--stats-font-size-sm);
+  word-wrap: break-word;
+  opacity: 0;
 }
 
 .tooltip.show {
-    opacity: 0.9;
+  opacity: 0.9;
 }
 
 .tooltip-inner {
-    max-width: 200px;
-    padding: 3px 8px;
-    color: #fff;
-    text-align: center;
-    background-color: #000;
-    border-radius: 4px;
+  max-width: 200px;
+  padding: var(--stats-spacing-xs) var(--stats-spacing-md); /* 3px 8px */
+  color: var(--stats-tooltip-text);
+  text-align: center;
+  background-color: var(--stats-tooltip-bg);
+  border-radius: var(--stats-border-radius-sm);
 }
 
-/* Print Styles */
+/* Highcharts Specific Styles */
+/* (Keep these specific overrides if necessary, as injecting variables might be complex) */
+.highcharts-tooltip {
+  font-size: var(--stats-font-size-sm) !important; /* Use important if needed */
+}
+
+.highcharts-data-label {
+  font-size: var(--stats-font-size-xs) !important;
+}
+
+.highcharts-legend-item text {
+  font-size: var(--stats-font-size-xs) !important;
+}
+
+/* Highcharts Color Classes (Map to variables if possible, otherwise keep) */
+.highcharts-color-0 { fill: var(--stats-chart-color-0); stroke: var(--stats-chart-color-0); }
+.highcharts-color-1 { fill: var(--stats-chart-color-1); stroke: var(--stats-chart-color-1); }
+.highcharts-color-2 { fill: var(--stats-chart-color-2); stroke: var(--stats-chart-color-2); }
+.highcharts-color-3 { fill: var(--stats-chart-color-3); stroke: var(--stats-chart-color-3); }
+.highcharts-color-4 { fill: var(--stats-chart-color-4); stroke: var(--stats-chart-color-4); }
+.highcharts-color-5 { fill: var(--stats-chart-color-5); stroke: var(--stats-chart-color-5); }
+
+/* --- Responsive Design --- */
+@media screen and (max-width: 768px) {
+  .stats-filters {
+    flex-direction: column;
+    align-items: stretch; /* Stretch filters full width */
+  }
+
+  .date-range {
+    flex-wrap: wrap; /* Allow date inputs to wrap */
+    gap: var(--stats-spacing-md); /* Reduce gap */
+  }
+  .date-range input[type="date"] {
+     width: calc(50% - var(--stats-spacing-md) / 2); /* Try to fit two per line */
+     min-width: 130px; /* Ensure minimum size */
+  }
+
+  .stats-charts {
+    grid-template-columns: 1fr; /* Stack charts */
+  }
+
+  .chart-container.full-width {
+    grid-column: 1; /* Reset full-width span */
+  }
+
+  .stats-summary {
+     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Smaller min width for cards */
+  }
+}
+
+@media screen and (max-width: 480px) {
+   .stats-summary {
+      grid-template-columns: 1fr; /* Stack cards completely */
+   }
+   .stats-card {
+      text-align: left; /* Align text left */
+      display: flex;
+      align-items: center;
+      gap: var(--stats-spacing-lg);
+   }
+   .stats-card h3 {
+      margin-bottom: 0;
+      flex-grow: 1; /* Push number to the right */
+   }
+   .stats-number {
+      font-size: 1.5rem; /* Smaller number */
+   }
+   .date-range input[type="date"] {
+      width: 100%; /* Full width date inputs */
+   }
+}
+
+
+/* --- Print Styles --- */
 @media print {
-    .stats-filters,
-    .trend-filters,
-    .export-excel {
-        display: none !important;
-    }
-    
-    .chart-container {
-        break-inside: avoid;
-    }
-    
-    .status-grid {
-        break-inside: avoid;
-    }
+  :root {
+     /* Adjust variables for print */
+     --stats-bg-primary: white;
+     --stats-bg-secondary: white;
+     --stats-text-primary: black;
+     --stats-text-secondary: #333;
+     --stats-border-color: #ccc;
+     --stats-shadow-sm: none;
+     --stats-shadow-md: none;
+     /* Reset status colors to black or remove borders */
+     --stats-color-total: black;
+     --stats-color-average: black;
+     --stats-color-pending: black;
+     --stats-color-completed: black;
+  }
+
+  body {
+     font-size: 10pt;
+  }
+
+  .complaint-stats-container {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .stats-filters,
+  .trend-filters,
+  .export-buttons,
+  .export-excel,
+  .button { /* Hide all interactive elements */
+    display: none !important;
+  }
+
+  .stats-card,
+  .chart-container,
+  .status-grid,
+  .status-item {
+    break-inside: avoid; /* Prevent breaking inside elements */
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: var(--stats-border-width) solid var(--stats-border-color); /* Add simple border */
+    background: white !important; /* Ensure white background */
+  }
+
+  .stats-card {
+     border-left-width: var(--stats-border-width-card); /* Keep left border */
+  }
+
+  .status-indicator {
+     border: 1px solid black; /* Outline status dots */
+     background-color: white !important; /* Remove color */
+  }
+
+  /* Ensure charts render for print if possible (Highcharts often handles this) */
+  .highcharts-container svg {
+     width: 100% !important;
+  }
 }

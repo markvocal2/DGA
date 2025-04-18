@@ -8,53 +8,49 @@
 
 :root {
   /* Colors */
-  --cpd-color-danger: #ff3e3e;         /* Primary Red */
-  --cpd-color-danger-dark: #ff1f1f;   /* Darker Red (Hover) */
+  --cpd-color-danger: #ff3e3e;
+  --cpd-color-danger-dark: #ff1f1f;
   --cpd-color-danger-shadow: rgba(255, 62, 62, 0.2);
   --cpd-color-danger-shadow-hover: rgba(255, 62, 62, 0.3);
   --cpd-color-danger-pulse: rgba(255, 62, 62, 0.4);
   --cpd-color-danger-icon-bg: rgba(255, 62, 62, 0.1);
-
-  --cpd-color-success: #4CAF50;        /* Green */
+  --cpd-color-success: #4CAF50;
   --cpd-color-success-icon-bg: rgba(76, 175, 80, 0.1);
-
-  --cpd-modal-bg: #212121;             /* Dark Gray */
-  --cpd-modal-footer-bg: #2a2a2a;     /* Slightly Lighter Dark Gray */
+  --cpd-modal-bg: #212121;
+  --cpd-modal-footer-bg: #2a2a2a;
   --cpd-modal-overlay-bg: rgba(0, 0, 0, 0.75);
   --cpd-modal-text: #ffffff;
   --cpd-modal-border: var(--cpd-color-danger);
   --cpd-modal-shadow: rgba(255, 0, 0, 0.3);
-
   --cpd-button-secondary-border: #5a5a5a;
   --cpd-button-secondary-hover-bg: #3a3a3a;
   --cpd-button-secondary-text: var(--cpd-modal-text);
-
   --cpd-loading-spinner-track: rgba(255, 255, 255, 0.3);
   --cpd-loading-spinner-color: var(--cpd-modal-text);
 
   /* Typography */
-  --cpd-font-family: inherit; /* Or specify font stack */
+  --cpd-font-family: inherit;
   --cpd-font-size-base: 16px;
   --cpd-font-size-sm: 14px;
-  --cpd-font-size-lg: 20px; /* Button icon, Mobile header */
-  --cpd-font-size-xl: 24px; /* Modal header */
-  --cpd-font-size-xxl: 28px; /* Close button */
-  --cpd-font-size-icon: 40px; /* Warning/Success/Error icon */
+  --cpd-font-size-lg: 20px;
+  --cpd-font-size-xl: 24px;
+  --cpd-font-size-xxl: 28px;
+  --cpd-font-size-icon: 40px;
   --cpd-font-weight-normal: 400;
-  --cpd-font-weight-semibold: 600; /* Buttons */
-  --cpd-font-weight-bold: 700; /* Modal header, Emphasis text */
+  --cpd-font-weight-semibold: 600;
+  --cpd-font-weight-bold: 700;
   --cpd-line-height-base: 1.5;
 
   /* Spacing */
   --cpd-spacing-xs: 8px;
-  --cpd-spacing-sm: 10px; /* Button margin, Body text margin */
-  --cpd-spacing-md: 15px; /* Header/Footer padding vertical */
-  --cpd-spacing-lg: 20px; /* Button padding horizontal, Header/Footer padding horizontal, Icon margin */
-  --cpd-spacing-xl: 30px; /* Body padding vertical */
+  --cpd-spacing-sm: 10px;
+  --cpd-spacing-md: 15px;
+  --cpd-spacing-lg: 20px;
+  --cpd-spacing-xl: 30px;
 
   /* Borders */
   --cpd-border-radius-sm: 4px;
-  --cpd-border-radius-md: 8px; /* Modal */
+  --cpd-border-radius-md: 8px;
   --cpd-border-radius-round: 50%;
   --cpd-border-width: 1px;
   --cpd-border-width-icon: 2px;
@@ -80,20 +76,20 @@
 
 /* Delete Button Styles */
 .cpd-delete-post-btn {
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
   background-color: var(--cpd-color-danger);
-  color: var(--cpd-modal-text); /* Use modal text color for consistency */
   border: none;
   border-radius: var(--cpd-border-radius-sm);
-  padding: var(--cpd-spacing-sm) var(--cpd-spacing-lg);
+  box-shadow: var(--cpd-shadow-button);
+  color: var(--cpd-modal-text);
+  cursor: pointer;
+  display: inline-flex;
   font-size: var(--cpd-font-size-base);
   font-weight: var(--cpd-font-weight-semibold);
-  cursor: pointer;
+  justify-content: center;
+  padding: var(--cpd-spacing-sm) var(--cpd-spacing-lg);
+  text-decoration: none;
   transition: all var(--cpd-transition-duration) var(--cpd-transition-timing);
-  box-shadow: var(--cpd-shadow-button);
-  text-decoration: none; /* In case it's an anchor */
 }
 
 .cpd-delete-post-btn:hover {
@@ -103,98 +99,95 @@
 }
 
 .cpd-delete-post-btn:active {
-  transform: translateY(0);
   box-shadow: var(--cpd-shadow-button-active);
+  transform: translateY(0);
 }
 
-/* Icon using Dashicons font */
 .cpd-delete-post-btn::before {
-  content: "\f182"; /* Dashicon trash icon */
-  font-family: dashicons; /* Ensure Dashicons font is loaded */
-  margin-right: var(--cpd-spacing-xs);
+  content: "\f182";
+  font-family: dashicons;
   font-size: var(--cpd-font-size-lg);
-  line-height: 1; /* Adjust line-height for icon alignment */
+  line-height: 1;
+  margin-right: var(--cpd-spacing-xs);
 }
 
-/* Modal Styles */
+/* Modal Core Styles */
 .cpd-modal {
-  display: none; /* Hidden by default */
-  position: fixed;
-  z-index: var(--cpd-z-index-modal);
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto; /* Enable scroll if needed (though content should fit) */
   background-color: var(--cpd-modal-overlay-bg);
-  backdrop-filter: blur(5px); /* Frosted glass effect */
+  backdrop-filter: blur(5px);
+  display: none;
+  height: 100%;
+  left: 0;
   opacity: 0;
+  overflow: auto;
+  position: fixed;
+  top: 0;
   transition: opacity var(--cpd-transition-duration) var(--cpd-transition-timing);
+  width: 100%;
+  z-index: var(--cpd-z-index-modal);
 }
 
 .cpd-modal.cpd-show {
-  display: block; /* Show modal */
+  display: block;
   opacity: 1;
 }
 
-/* Prevent body scroll when modal is open */
 body.cpd-modal-open {
   overflow: hidden;
 }
 
 /* Modal Content Box */
 .cpd-modal-content {
-  position: relative;
   background-color: var(--cpd-modal-bg);
-  margin: 10% auto; /* Center vertically (approx) and horizontally */
-  padding: 0; /* Padding is handled by header/body/footer */
-  width: 90%; /* Responsive width */
-  max-width: 500px; /* Max width */
+  border: var(--cpd-border-width) solid var(--cpd-modal-border);
   border-radius: var(--cpd-border-radius-md);
   box-shadow: var(--cpd-shadow-modal);
   color: var(--cpd-modal-text);
-  border: var(--cpd-border-width) solid var(--cpd-modal-border);
-  /* Animation properties */
-  transform: translateY(-50px);
+  margin: 10% auto;
+  max-width: 500px;
   opacity: 0;
-  transition: transform var(--cpd-transition-duration-slow) var(--cpd-transition-timing-cubic),
-              opacity var(--cpd-transition-duration-slow) var(--cpd-transition-timing);
+  padding: 0;
+  position: relative;
+  transform: translateY(-50px);
+  transition: 
+    transform var(--cpd-transition-duration-slow) var(--cpd-transition-timing-cubic),
+    opacity var(--cpd-transition-duration-slow) var(--cpd-transition-timing);
+  width: 90%;
 }
 
-.cpd-modal.cpd-show .cpd-modal-content { /* Animate in when modal is shown */
-  transform: translateY(0);
+.cpd-modal.cpd-show .cpd-modal-content {
   opacity: 1;
+  transform: translateY(0);
 }
 
 /* Modal Header */
 .cpd-modal-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--cpd-spacing-md) var(--cpd-spacing-lg);
   background-color: var(--cpd-color-danger);
-  /* Apply border radius only to top corners */
   border-top-left-radius: var(--cpd-border-radius-md);
   border-top-right-radius: var(--cpd-border-radius-md);
+  display: flex;
+  justify-content: space-between;
+  padding: var(--cpd-spacing-md) var(--cpd-spacing-lg);
 }
 
 .cpd-modal-header h2 {
-  margin: 0;
-  font-size: var(--cpd-font-size-xl);
   color: var(--cpd-modal-text);
+  font-size: var(--cpd-font-size-xl);
   font-weight: var(--cpd-font-weight-bold);
   letter-spacing: 1px;
+  margin: 0;
   text-transform: uppercase;
 }
 
 .cpd-close {
   color: var(--cpd-modal-text);
+  cursor: pointer;
   font-size: var(--cpd-font-size-xxl);
   font-weight: var(--cpd-font-weight-bold);
-  cursor: pointer;
+  line-height: 1;
+  padding: 0 var(--cpd-spacing-xs);
   transition: transform var(--cpd-transition-duration-fast) var(--cpd-transition-timing);
-  line-height: 1; /* Prevent extra space */
-  padding: 0 var(--cpd-spacing-xs); /* Add some clickable area */
 }
 
 .cpd-close:hover {
@@ -208,41 +201,45 @@ body.cpd-modal-open {
 }
 
 .cpd-modal-body p {
-  margin: var(--cpd-spacing-sm) 0;
   font-size: var(--cpd-font-size-base);
   line-height: var(--cpd-line-height-base);
+  margin: var(--cpd-spacing-sm) 0;
 }
 
-.cpd-modal-body p.cpd-emphasis { /* Class for emphasized text */
-  font-weight: var(--cpd-font-weight-bold);
+.cpd-modal-body p.cpd-emphasis {
   color: var(--cpd-color-danger);
+  font-weight: var(--cpd-font-weight-bold);
 }
 
-/* Warning/Success/Error Icons */
+/* Icons - Common Styles */
 .cpd-warning-icon,
 .cpd-success-icon,
 .cpd-error-icon {
-  display: flex; /* Use flex for centering icon */
-  justify-content: center;
   align-items: center;
+  border-radius: var(--cpd-border-radius-round);
+  border-style: solid;
+  border-width: var(--cpd-border-width-icon);
+  display: flex;
+  height: 80px;
+  justify-content: center;
   margin: 0 auto var(--cpd-spacing-lg);
   width: 80px;
-  height: 80px;
-  border-radius: var(--cpd-border-radius-round);
 }
 
 .cpd-warning-icon i,
 .cpd-success-icon i,
 .cpd-error-icon i {
   font-size: var(--cpd-font-size-icon);
-  line-height: 1; /* Ensure icon fits */
+  line-height: 1;
 }
 
+/* Icons - Specific Styles */
 .cpd-warning-icon,
-.cpd-error-icon { /* Shared styles for danger/error */
+.cpd-error-icon {
   background-color: var(--cpd-color-danger-icon-bg);
-  border: var(--cpd-border-width-icon) solid var(--cpd-color-danger);
+  border-color: var(--cpd-color-danger);
 }
+
 .cpd-warning-icon i,
 .cpd-error-icon i {
   color: var(--cpd-color-danger);
@@ -250,42 +247,48 @@ body.cpd-modal-open {
 
 .cpd-success-icon {
   background-color: var(--cpd-color-success-icon-bg);
-  border: var(--cpd-border-width-icon) solid var(--cpd-color-success);
+  border-color: var(--cpd-color-success);
 }
+
 .cpd-success-icon i {
   color: var(--cpd-color-success);
 }
 
-/* Icon Pulse Animation */
-.cpd-warning-icon.cpd-pulse { /* Add class to enable pulse */
+.cpd-warning-icon.cpd-pulse {
   animation: cpd-pulse var(--cpd-animation-duration-pulse) infinite;
 }
 
 /* Modal Footer */
 .cpd-modal-footer {
-  display: flex;
-  justify-content: flex-end; /* Align buttons to the right */
-  align-items: center; /* Vertically align buttons */
-  padding: var(--cpd-spacing-md) var(--cpd-spacing-lg);
+  align-items: center;
   background-color: var(--cpd-modal-footer-bg);
-  /* Apply border radius only to bottom corners */
   border-bottom-left-radius: var(--cpd-border-radius-md);
   border-bottom-right-radius: var(--cpd-border-radius-md);
-  gap: var(--cpd-spacing-sm); /* Add gap between buttons */
+  display: flex;
+  gap: var(--cpd-spacing-sm);
+  justify-content: flex-end;
+  padding: var(--cpd-spacing-md) var(--cpd-spacing-lg);
 }
 
-/* Footer Buttons (Cancel, Close, Redirect - Secondary Style) */
+/* Button Base Styles */
+.cpd-cancel-btn,
+.cpd-close-btn,
+.cpd-redirect-btn,
+.cpd-confirm-delete-btn {
+  border-radius: var(--cpd-border-radius-sm);
+  cursor: pointer;
+  font-size: var(--cpd-font-size-sm);
+  font-weight: var(--cpd-font-weight-semibold);
+  padding: var(--cpd-spacing-sm) var(--cpd-spacing-lg);
+}
+
+/* Footer Buttons - Secondary Style */
 .cpd-cancel-btn,
 .cpd-close-btn,
 .cpd-redirect-btn {
-  padding: var(--cpd-spacing-sm) var(--cpd-spacing-lg);
   background-color: transparent;
-  color: var(--cpd-button-secondary-text);
   border: var(--cpd-border-width) solid var(--cpd-button-secondary-border);
-  border-radius: var(--cpd-border-radius-sm);
-  font-size: var(--cpd-font-size-sm);
-  font-weight: var(--cpd-font-weight-semibold);
-  cursor: pointer;
+  color: var(--cpd-button-secondary-text);
   transition: background-color var(--cpd-transition-duration) var(--cpd-transition-timing);
 }
 
@@ -295,16 +298,11 @@ body.cpd-modal-open {
   background-color: var(--cpd-button-secondary-hover-bg);
 }
 
-/* Confirm Delete Button (Primary Danger Style) */
+/* Confirm Delete Button - Primary Danger Style */
 .cpd-confirm-delete-btn {
-  padding: var(--cpd-spacing-sm) var(--cpd-spacing-lg);
   background-color: var(--cpd-color-danger);
-  color: var(--cpd-modal-text);
   border: none;
-  border-radius: var(--cpd-border-radius-sm);
-  font-size: var(--cpd-font-size-sm);
-  font-weight: var(--cpd-font-weight-semibold);
-  cursor: pointer;
+  color: var(--cpd-modal-text);
   transition: background-color var(--cpd-transition-duration) var(--cpd-transition-timing);
 }
 
@@ -312,32 +310,27 @@ body.cpd-modal-open {
   background-color: var(--cpd-color-danger-dark);
 }
 
-/* Loading State (Applied to button) */
+/* Loading State */
 .cpd-loading {
-  position: relative; /* Needed for pseudo-element positioning */
+  cursor: wait;
   opacity: 0.7;
-  cursor: wait; /* Indicate loading */
-  pointer-events: none; /* Prevent clicks while loading */
+  pointer-events: none;
+  position: relative;
 }
 
-.cpd-loading::after { /* Spinner pseudo-element */
-  content: "";
-  box-sizing: border-box; /* Include border in size */
-  position: absolute;
-  width: 20px; /* Spinner size */
-  height: 20px;
-  top: 50%;
-  left: 50%;
-  /* Position spinner relative to button center, adjust as needed */
-  /* Original offset: margin-left: -30px; margin-top: -10px; */
-  /* Alternative centering: */
-  transform: translate(-50%, -50%);
-  margin-left: -20px; /* Adjust left offset if needed */
-
+.cpd-loading::after {
+  animation: cpd-spin var(--cpd-animation-duration) linear infinite;
   border: 3px solid var(--cpd-loading-spinner-track);
   border-radius: var(--cpd-border-radius-round);
-  border-top-color: var(--cpd-loading-spinner-color); /* Spinner color */
-  animation: cpd-spin var(--cpd-animation-duration) linear infinite;
+  border-top-color: var(--cpd-loading-spinner-color);
+  box-sizing: border-box;
+  content: "";
+  height: 20px;
+  left: calc(50% - 20px);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
 }
 
 /* Animations */
@@ -346,7 +339,7 @@ body.cpd-modal-open {
     box-shadow: 0 0 0 0 var(--cpd-color-danger-pulse);
   }
   70% {
-    box-shadow: 0 0 0 15px rgba(255, 62, 62, 0); /* Use transparent end color */
+    box-shadow: 0 0 0 15px rgba(255, 62, 62, 0);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(255, 62, 62, 0);
@@ -354,61 +347,60 @@ body.cpd-modal-open {
 }
 
 @keyframes cpd-spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+  0% { 
+    transform: translateY(-50%) rotate(0deg); 
+  }
+  100% { 
+    transform: translateY(-50%) rotate(360deg); 
+  }
 }
 
 /* --- Responsive Styles --- */
 @media (max-width: 768px) {
   .cpd-modal-content {
+    margin: 15% auto;
+    max-width: none;
     width: 95%;
-    margin: 15% auto; /* Adjust vertical margin */
-    max-width: none; /* Allow full width minus padding */
   }
 
   .cpd-modal-header h2 {
-    font-size: var(--cpd-font-size-lg); /* Smaller header */
+    font-size: var(--cpd-font-size-lg);
   }
 
   .cpd-modal-body {
-    padding: var(--cpd-spacing-lg) var(--cpd-spacing-md); /* Less padding */
+    padding: var(--cpd-spacing-lg) var(--cpd-spacing-md);
   }
 
   .cpd-modal-footer {
-    padding: var(--cpd-spacing-md); /* Less padding */
-    /* Stack buttons vertically if needed */
-    /* flex-direction: column;
-       align-items: stretch;
-       gap: var(--cpd-spacing-sm); */
+    padding: var(--cpd-spacing-md);
   }
-  /* If stacking footer buttons: */
-  /* .cpd-modal-footer button {
-       margin-left: 0;
-       width: 100%;
-     } */
 }
 
 @media (max-width: 480px) {
-   .cpd-modal-header h2 {
-      font-size: 18px; /* Even smaller header */
-   }
-   .cpd-warning-icon,
-   .cpd-success-icon,
-   .cpd-error-icon {
-      width: 60px;
-      height: 60px;
-   }
-   .cpd-warning-icon i,
-   .cpd-success-icon i,
-   .cpd-error-icon i {
-      font-size: 30px;
-   }
-   .cpd-modal-footer {
-      flex-direction: column; /* Stack buttons */
-      align-items: stretch;
-   }
-   .cpd-modal-footer button {
-       margin-left: 0; /* Remove left margin when stacked */
-       width: 100%;
-   }
+  .cpd-modal-header h2 {
+    font-size: 18px;
+  }
+  
+  .cpd-warning-icon,
+  .cpd-success-icon,
+  .cpd-error-icon {
+    height: 60px;
+    width: 60px;
+  }
+  
+  .cpd-warning-icon i,
+  .cpd-success-icon i,
+  .cpd-error-icon i {
+    font-size: 30px;
+  }
+  
+  .cpd-modal-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  
+  .cpd-modal-footer button {
+    margin-left: 0;
+    width: 100%;
+  }
 }

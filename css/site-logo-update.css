@@ -1,0 +1,307 @@
+/* site-logo-update.css */
+
+/* Container styling */
+.site-logo-updater-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Header */
+.site-logo-title {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #23282d;
+    font-size: 24px;
+    font-weight: 600;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Tabs styling */
+.site-logo-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.site-logo-tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    margin-right: 5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: 500;
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.site-logo-tab:hover {
+    background-color: #e9e9e9;
+}
+
+.site-logo-tab.active {
+    background-color: #fff;
+    border-color: #ddd;
+    border-bottom-color: #fff;
+    margin-bottom: -1px;
+    color: #2271b1;
+}
+
+/* Content panel */
+.site-logo-content-panels {
+    position: relative;
+    min-height: 350px;
+}
+
+.site-logo-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    background-color: #fff;
+}
+
+.site-logo-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Information panel */
+.site-logo-info-panel {
+    background-color: #f8f9fa;
+    border-left: 4px solid #2271b1;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.site-logo-info-panel h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #1d2327;
+}
+
+.site-logo-instructions {
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.site-logo-instructions p {
+    margin: 0 0 10px;
+}
+
+.site-logo-instructions code {
+    background: #f0f0f1;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #007cba;
+    font-family: Consolas, Monaco, monospace;
+}
+
+/* Preview area styling */
+.site-logo-preview-area {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Transparent background pattern */
+.transparent-bg {
+    background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                     linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                     linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                     linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.site-logo-preview-area:hover {
+    border-color: #2271b1;
+    background-color: rgba(34, 113, 177, 0.05);
+}
+
+.site-logo-placeholder {
+    color: #999;
+    font-size: 16px;
+    text-align: center;
+    padding: 20px;
+}
+
+.site-logo-image-container {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.site-logo-image-container img {
+    display: block;
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+}
+
+/* Overlay message */
+.site-logo-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 5px 0;
+    font-size: 12px;
+    z-index: 7;
+}
+
+/* Panel info */
+.site-logo-panel-info {
+    margin-top: 15px;
+}
+
+.site-logo-panel-info h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #23282d;
+    font-size: 16px;
+}
+
+.site-logo-panel-info p {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.site-logo-panel-info code {
+    background: #f0f0f1;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #007cba;
+    font-family: Consolas, Monaco, monospace;
+}
+
+/* Controls styling */
+.site-logo-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.site-logo-button {
+    background-color: #2271b1;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.site-logo-button:hover {
+    background-color: #135e96;
+}
+
+.site-logo-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Message area styling */
+.site-logo-update-message {
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 20px;
+    display: none;
+    text-align: center;
+}
+
+.site-logo-update-message.success {
+    display: block;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.site-logo-update-message.error {
+    display: block;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.site-logo-update-message.info {
+    display: block;
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+/* Success banner */
+.site-logo-success-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    color: #155724;
+}
+
+.site-logo-success-banner code {
+    background: #fff;
+    padding: 3px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #155724;
+    font-family: Consolas, Monaco, monospace;
+}
+
+/* รองรับ responsive */
+@media (max-width: 768px) {
+    .site-logo-tab {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .site-logo-preview-area {
+        height: 180px;
+    }
+    
+    .site-logo-controls {
+        flex-direction: column;
+    }
+    
+    .site-logo-button {
+        width: 100%;
+    }
+}

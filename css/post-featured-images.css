@@ -1,0 +1,24 @@
+/**
+ * Post Featured Images CSS
+ */
+
+/* Styles for post featured images */
+.post-featured-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+/* Style for fallback image */
+.fallback-featured-image {
+    border: 1px solid #ddd;
+}
+
+/* Style for no-image placeholder */
+.no-featured-image {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 20px;
+    text-align: center;
+}

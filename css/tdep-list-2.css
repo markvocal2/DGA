@@ -1,0 +1,146 @@
+/* Variables */
+:root {
+    --tdep-list-2-primary: #1a4789;    /* สีน้ำเงิน */
+    --tdep-list-2-secondary: #ff6b35;  /* สีส้ม */
+    --tdep-list-2-text: #333333;      /* สีดำ */
+    --tdep-list-2-bg: #ffffff;
+    --tdep-list-2-border: #eaeaea;
+    --tdep-list-2-radius: 12px;
+    --tdep-list-2-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --tdep-list-2-transition: all 0.3s ease;
+}
+
+/* Container and Wrapper */
+.tdep-list-2-container {
+    margin: 0rem 0;
+}
+
+.tdep-list-2-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Card Item */
+.tdep-list-2-item {
+    background: var(--tdep-list-2-bg);
+    border-radius: var(--tdep-list-2-radius);
+    overflow: hidden;
+    box-shadow: var(--tdep-list-2-shadow);
+    transition: var(--tdep-list-2-transition);
+}
+
+.tdep-list-2-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tdep-list-2-link {
+    text-decoration: none;
+    color: var(--tdep-list-2-text);
+    display: block;
+}
+
+/* Image Container */
+.tdep-list-2-image {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: #f5f5f5;
+    overflow: hidden;
+}
+
+.tdep-list-2-thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.tdep-list-2-item:hover .tdep-list-2-thumbnail {
+    transform: scale(1.05);
+}
+
+.tdep-list-2-no-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--tdep-list-2-primary), var(--tdep-list-2-secondary));
+    opacity: 0.1;
+}
+
+/* Badge */
+.tdep-list-2-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--tdep-list-2-secondary);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+}
+
+/* Content */
+.tdep-list-2-content {
+    padding: 1.25rem;
+}
+
+.tdep-list-2-title {
+    font-size: 1em;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+    color: var(--tdep-list-2-text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Meta Information */
+.tdep-list-2-meta {
+    display: flex;
+    align-items: center;
+    font-size: 0.85em;
+    color: #666;
+}
+
+.tdep-list-2-time {
+    color: #666;
+}
+
+.tdep-list-2-separator {
+    margin: 0 0.5rem;
+    color: #ccc;
+}
+
+.tdep-list-2-readmore {
+    color: var(--tdep-list-2-primary);
+    transition: color 0.3s ease;
+}
+
+.tdep-list-2-item:hover .tdep-list-2-readmore {
+    color: var(--tdep-list-2-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tdep-list-2-wrapper {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tdep-list-2-content {
+        padding: 1rem;
+    }
+    
+    .tdep-list-2-badge {
+        font-size: 0.75em;
+        padding: 0.3rem 0.6rem;
+    }
+}

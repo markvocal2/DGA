@@ -1,0 +1,64 @@
+/* CSS สำหรับหน้ากำหนดสิทธิ์พิเศษ */
+/* ไฟล์นี้ควรบันทึกไว้ที่ child-theme/css/special-permissions.css */
+
+.special-permissions-wrap {
+    max-width: 800px;
+}
+
+.special-permissions-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.special-permissions-option {
+    margin-bottom: 25px;
+}
+
+.special-permissions-radio {
+    margin: 10px 0;
+}
+
+.special-permissions-radio label {
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+}
+
+.special-permissions-radio input[type="radio"] {
+    margin-right: 8px;
+}
+
+.special-permissions-existing-role,
+.special-permissions-new-role {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.special-permissions-field {
+    margin-bottom: 15px;
+}
+
+.special-permissions-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.special-permissions-field input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+}
+
+#role-name-select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.special-permissions-submit {
+    margin-top: 20px;
+}

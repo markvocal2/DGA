@@ -1,0 +1,12 @@
+/* child-theme/css/sign-out.css */
+.sign-out-button {
+    background-color: #f14141;
+    color: #fff;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 3px;
+    display: inline-block;
+}
+.sign-out-button:hover {
+    background-color: #d33a3a;
+}

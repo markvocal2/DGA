@@ -1,13 +1,13 @@
 jQuery(document).ready(function($) {
     // Cache DOM elements
-    var $menuToggle = $('.dga-mobile-menu-toggle'),
-        $menuClose = $('.dga-mobile-menu-close'),
-        $menuOverlay = $('.dga-mobile-menu-overlay'),
-        $menuWrapper = $('.dga-mobile-menu-wrapper'),
-        $menuContent = $('.dga-mobile-menu-content');
+    const $menuToggle = $('.dga-mobile-menu-toggle'),
+          $menuClose = $('.dga-mobile-menu-close'),
+          $menuOverlay = $('.dga-mobile-menu-overlay'),
+          $menuWrapper = $('.dga-mobile-menu-wrapper'),
+          $menuContent = $('.dga-mobile-menu-content');
     
     // Load menu via AJAX when toggle is clicked for the first time
-    var menuLoaded = false;
+    let menuLoaded = false;
     
     function loadMenu() {
         if (!menuLoaded) {
@@ -55,9 +55,9 @@ jQuery(document).ready(function($) {
             e.preventDefault();
             e.stopPropagation();
             
-            var $this = $(this);
-            var $parent = $this.closest('li');
-            var $submenu = $parent.children('ul.dga-submenu');
+            const $this = $(this);
+            const $parent = $this.closest('li');
+            const $submenu = $parent.children('ul.dga-submenu');
             
             // Toggle current submenu
             $parent.toggleClass('submenu-open');
@@ -74,7 +74,7 @@ jQuery(document).ready(function($) {
         
         // Add 'current-menu-item' class detection
         $('.dga-accordion-menu li').each(function() {
-            var $this = $(this);
+            const $this = $(this);
             if ($this.hasClass('current-menu-item') || $this.hasClass('current-menu-parent') || $this.hasClass('current-menu-ancestor')) {
                 $this.addClass('current');
                 $this.parents('li').addClass('current');

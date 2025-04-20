@@ -1,7 +1,7 @@
 /**
  * Department Role Manager - CSS Styles
  * สไตล์สำหรับระบบจัดการบทบาทแผนก
- * เวอร์ชัน: 1.0.1
+ * เวอร์ชัน: 1.0.1 (Refactored)
  */
 
 /* ===== ตัวแปรสี และค่าพื้นฐาน ===== */
@@ -11,23 +11,26 @@
     --primary-dark: #1e40af;
     --primary-light: #60a5fa;
     --primary-lightest: #dbeafe;
-    
+
     /* สีรอง */
     --secondary: #f97316;
     --secondary-dark: #ea580c;
     --secondary-light: #fb923c;
     --secondary-lightest: #ffedd5;
-    
+
     /* สีพื้นฐาน */
     --success: #22c55e;
     --success-light: #dcfce7;
+    --success-dark: #15803d; /* Added for consistency, adjust if needed */
     --warning: #f59e0b;
     --warning-light: #fef3c7;
     --error: #ef4444;
     --error-light: #fee2e2;
+    --error-dark: #b91c1c; /* Added for consistency, adjust if needed */
     --info: #3b82f6;
     --info-light: #dbeafe;
-    
+    --info-dark: #1d4ed8; /* Added */
+
     /* สีโทนเทา */
     --dark: #1e293b;
     --dark-light: #334155;
@@ -38,31 +41,31 @@
     --gray-300: #cbd5e1;
     --gray-400: #94a3b8;
     --gray-500: #64748b;
-    
+
     /* สีปุ่ม */
     --btn-primary: #0284c7;
     --btn-primary-hover: #0369a1;
     --btn-primary-active: #075985;
-    
+
     --btn-edit: #f97316;
     --btn-edit-hover: #ea580c;
     --btn-edit-active: #c2410c;
-    
+
     --btn-delete: #ef4444;
     --btn-delete-hover: #dc2626;
     --btn-delete-active: #b91c1c;
-    
+
     /* เงา */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-    
+
     /* มุมโค้ง */
     --radius-sm: 0.375rem;
     --radius: 0.5rem;
     --radius-lg: 0.75rem;
-    
+
     /* การเปลี่ยนแปลง */
     --transition: all 0.2s ease;
 }
@@ -106,7 +109,7 @@
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; /* Adjusted based on later media query */
 }
 
 .form-label {
@@ -138,7 +141,8 @@
 }
 
 /* ===== ตาราง ===== */
-.roles-table {
+.roles-table,
+.users-table { /* Combined similar table styles */
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -149,7 +153,8 @@
     box-shadow: var(--shadow-sm);
 }
 
-.roles-table th {
+.roles-table th,
+.users-table th { /* Combined similar table header styles */
     background: var(--primary);
     color: var(--light);
     font-weight: 600;
@@ -160,17 +165,20 @@
     text-align: left;
 }
 
-.roles-table td {
+.roles-table td,
+.users-table td { /* Combined similar table data cell styles */
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--gray-200);
     color: var(--dark);
 }
 
-.roles-table tr:last-child td {
+.roles-table tr:last-child td,
+.users-table tr:last-child td { /* Combined similar last row styles */
     border-bottom: none;
 }
 
-.roles-table tr:hover {
+.roles-table tr:hover,
+.users-table tr:hover { /* Combined similar hover styles */
     background-color: var(--gray-50);
 }
 
@@ -193,81 +201,78 @@
     z-index: 10;
 }
 
-/* ===== ส่วนของการกำหนดสิทธิ์ ===== */
+/* ===== ส่วนของการกำหนดสิทธิ์ (Merged) ===== */
 .permissions-container {
-    margin: 1.5rem 0;
-    padding: 1.5rem;
+    margin: 1.5rem 0; /* Kept from first block */
+    padding: 1.5rem; /* Kept from first block */
     background-color: var(--gray-50);
     border-radius: var(--radius);
     border: 1px solid var(--gray-200);
-    transition: var(--transition);
+    transition: var(--transition); /* Added from first block */
 }
 
 .permissions-container h3 {
     margin-top: 0;
+    padding-bottom: 0.75rem; /* Kept from second block */
+    border-bottom: 1px solid var(--gray-300); /* Kept from second block */
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--gray-200);
     color: var(--dark);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 1.5rem; /* Kept from first block */
 }
 
 .permissions-container h3::after {
     content: '▲';
     font-size: 0.75rem;
     color: var(--gray-500);
-    transition: var(--transition);
+    transition: transform 0.2s ease; /* Kept specific transition from second block */
 }
 
 .permissions-container.collapsed h3::after {
-    transform: rotate(180deg);
+    transform: rotate(180deg); /* Kept identical rule */
 }
 
 .permissions-container.collapsed .permission-item {
-    display: none;
+    display: none; /* Kept identical rule */
 }
 
 .permission-item {
-    margin-bottom: 1.25rem;
-    padding-bottom: 1.25rem;
+    margin-bottom: 0.75rem; /* Kept from second block */
+    padding: 0.75rem; /* Kept from second block */
     border-bottom: 1px solid var(--gray-200);
+    transition: background-color 0.2s ease; /* Kept from second block */
 }
 
 .permission-item:last-child {
     margin-bottom: 0;
-    padding-bottom: 0;
+    padding-bottom: 0; /* Kept explicit reset from first block */
     border-bottom: none;
 }
 
+.permission-item:hover { /* Kept from second block */
+    background-color: var(--gray-100);
+}
+
 .permission-item h4 {
-    margin-top: 0;
-    margin-bottom: 0.75rem;
+    margin: 0 0 0.75rem 0; /* Kept from second block */
     font-size: 1rem;
     font-weight: 600;
-    color: var(--dark);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    color: var(--dark-light); /* Kept from second block */
 }
 
 .permission-item.alternate {
     background-color: var(--gray-50);
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    border-radius: var(--radius-sm);
+    /* Removed margin/padding adjustments from first block, assume padding in .permission-item is sufficient */
 }
 
 .permission-options {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(4, 1fr); /* Kept from second block */
+    gap: 0.5rem; /* Kept from second block */
 }
 
 .permission-options label {
@@ -299,28 +304,59 @@
 
 .permission-options input[type="checkbox"]:checked + span {
     font-weight: 500;
-    color: var(--primary);
+    /* Color is handled by the :has selectors below */
 }
 
-/* สีตามประเภทสิทธิ์ */
+/* สีตามประเภทสิทธิ์ (Using the second, more detailed block) */
+.permission-options label:has(input[name$="[read]"]) {
+    background-color: var(--primary-lightest);
+    border-color: var(--primary-light);
+}
+
+.permission-options label:has(input[name$="[edit]"]) {
+    background-color: var(--secondary-lightest);
+    border-color: var(--secondary-light);
+}
+
+.permission-options label:has(input[name$="[delete]"]) {
+    background-color: var(--error-light);
+    border-color: var(--error);
+    opacity: 0.8;
+}
+
+.permission-options label:has(input[name$="[write]"]) {
+    background-color: var(--success-light);
+    border-color: var(--success);
+    opacity: 0.8;
+}
+
+/* Checked states */
 .permission-options label:has(input[name$="[read]"]:checked) {
-    background-color: var(--info-light);
-    border-color: var(--info);
+    background-color: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    font-weight: 600;
 }
 
 .permission-options label:has(input[name$="[edit]"]:checked) {
-    background-color: var(--warning-light);
-    border-color: var(--warning);
+    background-color: var(--secondary-light);
+    border-color: var(--secondary);
+    color: var(--secondary-dark);
+    font-weight: 600;
 }
 
 .permission-options label:has(input[name$="[delete]"]:checked) {
-    background-color: var(--error-light);
-    border-color: var(--error);
+    background-color: var(--error);
+    border-color: var(--error-dark);
+    color: white;
+    font-weight: 600;
 }
 
 .permission-options label:has(input[name$="[write]"]:checked) {
-    background-color: var(--success-light);
-    border-color: var(--success);
+    background-color: var(--success);
+    border-color: var(--success-dark);
+    color: white;
+    font-weight: 600;
 }
 
 /* ===== ปุ่ม ===== */
@@ -328,7 +364,10 @@
 .save-btn,
 .edit-role-btn,
 .delete-role-btn,
-.cancel-btn {
+.cancel-btn,
+.view-users-btn, /* Added */
+.edit-user-btn,  /* Added */
+.close-btn {     /* Added */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -339,6 +378,8 @@
     gap: 0.5rem;
     white-space: nowrap;
     position: relative;
+    text-decoration: none; /* Ensure links styled as buttons don't have underlines */
+    text-align: center; /* For link buttons */
 }
 
 /* เพิ่มแผนก Button */
@@ -383,7 +424,7 @@
     transform: translateY(0);
 }
 
-/* แก้ไข Button */
+/* แก้ไข Role Button */
 .edit-role-btn {
     background-color: var(--btn-edit);
     color: white;
@@ -403,7 +444,7 @@
     transform: translateY(0);
 }
 
-/* ลบ Button */
+/* ลบ Role Button */
 .delete-role-btn {
     background-color: transparent;
     color: var(--btn-delete);
@@ -444,6 +485,56 @@
     color: var(--dark-light);
 }
 
+/* ปุ่มดูผู้ใช้ */
+.view-users-btn {
+    background-color: var(--info);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    min-width: 80px;
+}
+
+.view-users-btn:hover {
+    background-color: var(--info-dark);
+    transform: translateY(-1px);
+}
+
+.view-users-btn:active {
+    background-color: var(--info-dark);
+    transform: translateY(0);
+}
+
+/* ปุ่มแก้ไขผู้ใช้ */
+.edit-user-btn {
+    background-color: var(--btn-edit);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    min-width: 80px;
+}
+
+.edit-user-btn:hover {
+    background-color: var(--btn-edit-hover);
+    color: white; /* Ensure text remains white */
+    transform: translateY(-1px);
+}
+
+/* ปุ่มปิด Modal */
+.close-btn {
+    background-color: var(--gray-300);
+    color: var(--dark);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+}
+
+.close-btn:hover {
+    background-color: var(--gray-400);
+}
+
+
 /* Action Buttons Container */
 .action-buttons {
     display: flex;
@@ -458,13 +549,14 @@
     margin-top: 2rem;
 }
 
-/* Loading State */
+/* Loading State for Buttons */
 .submit-btn.loading,
 .edit-role-btn.loading,
 .delete-role-btn.loading,
-.save-btn.loading {
+.save-btn.loading,
+.view-users-btn.loading { /* Added view users */
     position: relative;
-    padding-right: 2.5rem;
+    padding-right: 2.5rem; /* Make space for spinner */
     pointer-events: none;
     opacity: 0.8;
 }
@@ -472,7 +564,8 @@
 .submit-btn.loading::after,
 .edit-role-btn.loading::after,
 .delete-role-btn.loading::after,
-.save-btn.loading::after {
+.save-btn.loading::after,
+.view-users-btn.loading::after { /* Added view users */
     content: '';
     position: absolute;
     right: 0.75rem;
@@ -481,10 +574,16 @@
     width: 1rem;
     height: 1rem;
     border: 2px solid rgba(255, 255, 255, 0.5);
-    border-right-color: transparent;
+    border-top-color: white; /* Make spinner more visible */
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
+/* Specific spinner color for delete button */
+.delete-role-btn.loading::after {
+    border-color: rgba(239, 68, 68, 0.5); /* Semi-transparent red */
+    border-top-color: var(--btn-delete); /* Solid red */
+}
+
 
 @keyframes spin {
     to { transform: translateY(-50%) rotate(360deg); }
@@ -495,10 +594,15 @@
 .edit-role-btn:disabled,
 .delete-role-btn:disabled,
 .save-btn:disabled,
-.cancel-btn:disabled {
+.cancel-btn:disabled,
+.view-users-btn:disabled, /* Added */
+.edit-user-btn:disabled,  /* Added */
+.close-btn:disabled {     /* Added */
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
+    pointer-events: none; /* Ensure no interaction */
+    box-shadow: none; /* Remove shadow on disabled */
+    transform: none; /* Remove hover transform */
 }
 
 /* ===== Role Badge ===== */
@@ -537,7 +641,7 @@
 
 .modal.modal-visible {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-start; /* Align top */
     justify-content: center;
     animation: modalFadeIn 0.3s ease;
 }
@@ -548,9 +652,9 @@
     border-radius: var(--radius-lg);
     width: 100%;
     max-width: 800px;
-    margin: 40px auto;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
+    margin: 40px auto; /* Top/bottom margin */
+    max-height: calc(100vh - 80px); /* Max height with margin */
+    overflow-y: auto; /* Scroll inside modal if needed */
     box-shadow: var(--shadow-lg);
     position: relative;
     animation: modalSlideIn 0.3s ease;
@@ -602,11 +706,11 @@
 }
 
 @keyframes modalSlideIn {
-    from { 
+    from {
         opacity: 0;
         transform: translateY(-2rem);
     }
-    to { 
+    to {
         opacity: 1;
         transform: translateY(0);
     }
@@ -617,7 +721,7 @@
     .modal-content {
         max-width: 90%;
     }
-    
+
     .department-role-container,
     .roles-table-container {
         padding: 1.5rem;
@@ -632,14 +736,16 @@
     }
 
     .roles-table th,
-    .roles-table td {
+    .roles-table td,
+    .users-table th, /* Added users table */
+    .users-table td { /* Added users table */
         padding: 0.75rem 1rem;
     }
 
     .action-buttons {
-        display: flex;
+        display: flex; /* Ensure flex on smaller screens too */
         gap: 0.5rem;
-        flex-wrap: wrap;
+        flex-wrap: wrap; /* Allow buttons to wrap */
     }
 
     .toast {
@@ -647,49 +753,54 @@
         right: 1rem;
         text-align: center;
         bottom: 1rem;
+        max-width: calc(100% - 2rem); /* Adjust max-width */
     }
-    
+
     .permission-options {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr); /* Kept from second block */
     }
-    
+
     .button-group {
-        flex-direction: column;
+        flex-direction: column; /* Stack buttons */
     }
-    
+
     .modal-content {
         padding: 1.5rem;
-        margin: 15px auto;
-        max-height: calc(100vh - 30px);
+        margin: 15px auto; /* Reduce margin */
+        max-height: calc(100vh - 30px); /* Adjust max height */
     }
 }
 
 @media (max-width: 576px) {
-    .roles-table {
-        display: block;
+    .roles-table,
+    .users-table { /* Added users table */
+        display: block; /* Allow horizontal scroll */
         overflow-x: auto;
+        white-space: nowrap; /* Prevent wrapping within table */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
-    
+
     .permission-options {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Kept from second block */
     }
-    
+
     .permissions-container {
-        padding: 1rem;
+        padding: 1rem; /* Kept from second block */
     }
-    
+
     .edit-role-btn,
-    .delete-role-btn {
-        width: 100%;
+    .delete-role-btn,
+    .view-users-btn, /* Added */
+    .edit-user-btn {  /* Added */
+        width: 100%; /* Make buttons full width */
         min-width: unset;
-        justify-content: center;
+        justify-content: center; /* Center text/icon */
     }
-    
-    .form-group, 
-    .permission-item {
+
+    .form-group { /* Kept from second block */
         margin-bottom: 1rem;
-        padding-bottom: 1rem;
     }
+    /* Removed duplicate permission-item margin from here */
 }
 
 /* ===== Print styles ===== */
@@ -700,21 +811,43 @@
         margin: 0;
         padding: 0;
     }
-    
+
     .submit-btn,
     .edit-role-btn,
     .delete-role-btn,
-    .action-buttons {
-        display: none;
+    .action-buttons,
+    .save-btn, /* Added */
+    .cancel-btn, /* Added */
+    .view-users-btn, /* Added */
+    .edit-user-btn, /* Added */
+    .close-btn, /* Added */
+    .modal, /* Added */
+    .toast { /* Added */
+        display: none !important;
     }
-    
-    .roles-table {
+
+    .roles-table,
+    .users-table { /* Added users table */
         border: 1px solid #ccc;
+        box-shadow: none;
     }
-    
-    .roles-table th {
+
+    .roles-table th,
+    .users-table th { /* Added users table */
         background-color: #f2f2f2 !important;
         color: #333 !important;
+    }
+    .roles-table td,
+    .users-table td { /* Added users table */
+        border-color: #ccc;
+    }
+
+    .permissions-container {
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+    }
+    .permission-options label {
+        border: 1px solid #ccc;
     }
 }
 
@@ -738,263 +871,30 @@
     .edit-role-btn,
     .delete-role-btn,
     .save-btn,
-    .cancel-btn {
+    .cancel-btn,
+    .view-users-btn, /* Added */
+    .edit-user-btn, /* Added */
+    .close-btn { /* Added */
         border: 2px solid currentColor;
     }
-    
+
     .permission-options label {
         border: 1px solid currentColor;
+    }
+    .form-input {
+        border-color: currentColor;
     }
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-    .submit-btn,
-    .edit-role-btn,
-    .delete-role-btn,
-    .save-btn,
-    .toast,
-    .modal-content,
-    .modal,
-    .permission-options label {
-        transform: none !important;
-        transition: opacity 0.1s linear !important;
-        animation: none !important;
+    *, *::before, *::after { /* Apply broadly */
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transform: none !important; /* Added to prevent transforms */
+        transition: none !important; /* Added to prevent transitions */
+        animation: none !important; /* Added to prevent animations */
     }
-}
-
-
-/* เพิ่มสไตล์สำหรับส่วนแสดงตัวเลือกสิทธิ์ */
-.permissions-container {
-    margin: 1rem 0;
-    padding: 1.25rem;
-    background-color: var(--gray-50);
-    border-radius: var(--radius);
-    border: 1px solid var(--gray-200);
-}
-
-.permissions-container h3 {
-    margin-top: 0;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--gray-300);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--dark);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.permissions-container h3::after {
-    content: '▲';
-    font-size: 0.75rem;
-    color: var(--gray-500);
-    transition: transform 0.2s ease;
-}
-
-.permissions-container.collapsed h3::after {
-    transform: rotate(180deg);
-}
-
-.permissions-container.collapsed .permission-item {
-    display: none;
-}
-
-.permission-item {
-    margin-bottom: 0.75rem;
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--gray-200);
-    transition: background-color 0.2s ease;
-}
-
-.permission-item:last-child {
-    margin-bottom: 0;
-    border-bottom: none;
-}
-
-.permission-item:hover {
-    background-color: var(--gray-100);
-}
-
-.permission-item h4 {
-    margin: 0 0 0.75rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--dark-light);
-}
-
-.permission-item.alternate {
-    background-color: var(--gray-50);
-}
-
-.permission-options {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-}
-
-/* สีสำหรับแต่ละประเภทสิทธิ์ */
-.permission-options label:has(input[name$="[read]"]) {
-    background-color: var(--primary-lightest);
-    border-color: var(--primary-light);
-}
-
-.permission-options label:has(input[name$="[edit]"]) {
-    background-color: var(--secondary-lightest);
-    border-color: var(--secondary-light);
-}
-
-.permission-options label:has(input[name$="[delete]"]) {
-    background-color: var(--error-light);
-    border-color: var(--error);
-    opacity: 0.8;
-}
-
-.permission-options label:has(input[name$="[write]"]) {
-    background-color: var(--success-light);
-    border-color: var(--success);
-    opacity: 0.8;
-}
-
-.permission-options label:has(input[name$="[read]"]:checked) {
-    background-color: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary-dark);
-    font-weight: 600;
-}
-
-.permission-options label:has(input[name$="[edit]"]:checked) {
-    background-color: var(--secondary-light);
-    border-color: var(--secondary);
-    color: var(--secondary-dark);
-    font-weight: 600;
-}
-
-.permission-options label:has(input[name$="[delete]"]:checked) {
-    background-color: var(--error);
-    border-color: var(--error-dark);
-    color: white;
-    font-weight: 600;
-}
-
-.permission-options label:has(input[name$="[write]"]:checked) {
-    background-color: var(--success);
-    border-color: var(--success-dark);
-    color: white;
-    font-weight: 600;
-}
-
-/* ปรับขนาดสำหรับอุปกรณ์เล็ก */
-@media (max-width: 768px) {
-    .permission-options {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .permission-options {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-/* ตารางแสดงข้อมูลผู้ใช้ */
-.users-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 1rem 0;
-    background: var(--light);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-}
-
-.users-table th {
-    background: var(--primary);
-    color: var(--light);
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.875rem;
-    letter-spacing: 0.05em;
-    padding: 1rem 1.5rem;
-    text-align: left;
-}
-
-.users-table td {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-    color: var(--dark);
-}
-
-.users-table tr:last-child td {
-    border-bottom: none;
-}
-
-.users-table tr:hover {
-    background-color: var(--gray-50);
-}
-
-/* ปุ่มดูผู้ใช้ */
-.view-users-btn {
-    background-color: var(--info);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    min-width: 80px;
-}
-
-.view-users-btn:hover {
-    background-color: var(--info-dark);
-    transform: translateY(-1px);
-}
-
-.view-users-btn:active {
-    background-color: var(--info-dark);
-    transform: translateY(0);
-}
-
-/* ปุ่มแก้ไขผู้ใช้ */
-.edit-user-btn {
-    display: inline-block;
-    background-color: var(--btn-edit);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    text-decoration: none;
-    min-width: 80px;
-    text-align: center;
-}
-
-.edit-user-btn:hover {
-    background-color: var(--btn-edit-hover);
-    color: white;
-    transform: translateY(-1px);
-}
-
-.close-btn {
-    background-color: var(--gray-300);
-    color: var(--dark);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: 600;
-}
-
-.close-btn:hover {
-    background-color: var(--gray-400);
-}
-
-/* เพิ่มตัวแปรสีที่ขาดหายไป */
-:root {
-    --info-dark: #1d4ed8;
 }

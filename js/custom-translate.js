@@ -5,7 +5,7 @@ jQuery(document).ready(function($) {
             console.log('Google Translate API loaded');
             
             // ตรวจสอบการโหลดของ dropdown
-            var checkDropdown = setInterval(function() {
+            const checkDropdown = setInterval(function() {
                 const dropdown = $('.goog-te-combo');
                 if (dropdown.length) {
                     clearInterval(checkDropdown);
@@ -39,7 +39,7 @@ jQuery(document).ready(function($) {
         
         // ปรับชื่อภาษาในตัวเลือก
         $('.goog-te-combo option').each(function() {
-            var langCode = $(this).val();
+            const langCode = $(this).val();
             if (nativeNames[langCode]) {
                 $(this).text(nativeNames[langCode]);
             }

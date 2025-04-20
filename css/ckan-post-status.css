@@ -105,12 +105,10 @@
 /* --- Styling for Pending Posts (Visible to Author/Admin) --- */
 /* Apply grayscale filter to the main content area when the body has the class */
 /* You might need to adjust the selector (#primary, .site-content) based on your theme's structure */
+/* Commented-out styles related to grayscale, opacity, and border were removed from here */
 .ckan-post-is-pending #primary,
 .ckan-post-is-pending .site-content {
-    /* filter: grayscale(100%); */ /* Uncomment this line to enable grayscale */
-    /* opacity: 0.8; */ /* Optional: Reduce opacity */
-    /* border-left: 5px solid #ff8c42; */ /* Optional: Add an orange indicator bar */
-    /* padding-left: 15px; */ /* Optional: Add padding if using border */
+    /* Styles for pending posts can be added here if needed */
 }
 
 /* Optional: Add a specific notice for pending posts */

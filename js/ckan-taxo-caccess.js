@@ -1,16 +1,16 @@
 jQuery(document).ready(function($) {
     // Handle select all checkbox
     $('#ckan-taxo-select-all').on('change', function() {
-        var isChecked = $(this).prop('checked');
+        const isChecked = $(this).prop('checked');
         $('.ckan-taxo-term-item input[type="checkbox"]').prop('checked', isChecked);
     });
     
     // Handle search functionality
     $('#ckan-taxo-search').on('keyup', function() {
-        var searchTerm = $(this).val().toLowerCase();
+        const searchTerm = $(this).val().toLowerCase();
         
         $('.ckan-taxo-term-item').each(function() {
-            var termText = $(this).text().toLowerCase();
+            const termText = $(this).text().toLowerCase();
             if (termText.indexOf(searchTerm) > -1) {
                 $(this).show();
             } else {
@@ -30,13 +30,13 @@ jQuery(document).ready(function($) {
         $('#ckan-taxo-message').removeClass('success error').html('');
         
         // Get selected terms
-        var selectedTerms = [];
+        const selectedTerms = [];
         $('input[name="ckan_taxo_terms[]"]:checked').each(function() {
             selectedTerms.push($(this).val());
         });
         
         // Get post ID
-        var postID = $(this).data('post-id');
+        const postID = $(this).data('post-id');
         
         // Send AJAX request
         $.ajax({
@@ -80,7 +80,7 @@ jQuery(document).ready(function($) {
     
     // Check select all status when individual checkboxes change
     $(document).on('change', '.ckan-taxo-term-item input[type="checkbox"]', function() {
-        var allChecked = $('.ckan-taxo-term-item input[type="checkbox"]:checked').length === $('.ckan-taxo-term-item input[type="checkbox"]').length;
+        const allChecked = $('.ckan-taxo-term-item input[type="checkbox"]:checked').length === $('.ckan-taxo-term-item input[type="checkbox"]').length;
         $('#ckan-taxo-select-all').prop('checked', allChecked);
     });
 });

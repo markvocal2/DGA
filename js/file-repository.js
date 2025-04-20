@@ -1,15 +1,15 @@
 // /js/file-repository.js
-jQuery(document).ready(function($) {
+jQuery(document).ready(($) => {
     // Media uploader
-    var mediaUploader;
-    var canManage = fileRepositoryAjax.canManage === "1" || fileRepositoryAjax.canManage === true;
-    var currentPostId = $('#add-file').data('post-id');
+    let mediaUploader;
+    const canManage = fileRepositoryAjax.canManage === "1" || fileRepositoryAjax.canManage === true;
+    const currentPostId = $('#add-file').data('post-id');
     
     // Load files on page load
     loadFileData();
     
     // Add file button click handler - แสดง Modal แทนที่จะเปิด Media Uploader โดยตรง
-    $('#add-file').on('click', function(e) {
+    $('#add-file').on('click', (e) => {
         e.preventDefault();
         
         if (!canManage) {
@@ -26,12 +26,12 @@ jQuery(document).ready(function($) {
     });
     
     // ปิด Modal
-    $('.file-modal-close, .btn-cancel').on('click', function() {
+    $('.file-modal-close, .btn-cancel').on('click', () => {
         $('#file-modal').removeClass('show');
     });
     
     // เพิ่ม Row ใหม่
-    $('.btn-add-row').on('click', function(e) {
+    $('.btn-add-row').on('click', (e) => {
         e.preventDefault(); // ป้องกันการ submit form
         addRepeaterRow();
     });
@@ -47,12 +47,12 @@ jQuery(document).ready(function($) {
     $(document).on('click', '.btn-file-upload', function(e) {
         e.preventDefault(); // ป้องกันการ submit form
         
-        var fileUploadBtn = $(this);
-        var fileField = fileUploadBtn.siblings('.file-link');
-        var nameField = fileUploadBtn.closest('.repeater-item').find('.file-name');
+        const fileUploadBtn = $(this);
+        const fileField = fileUploadBtn.siblings('.file-link');
+        const nameField = fileUploadBtn.closest('.repeater-item').find('.file-name');
         
         // สร้าง Media Uploader ใหม่ทุกครั้ง
-        var tempMediaUploader = wp.media({
+        const tempMediaUploader = wp.media({
             title: 'เลือกเอกสาร',
             button: {
                 text: 'เลือกเอกสาร'
@@ -60,8 +60,8 @@ jQuery(document).ready(function($) {
             multiple: false
         });
         
-        tempMediaUploader.on('select', function() {
-            var attachment = tempMediaUploader.state().get('selection').first().toJSON();
+        tempMediaUploader.on('select', () => {
+            const attachment = tempMediaUploader.state().get('selection').first().toJSON();
             fileField.val(attachment.url);
             
             // อัพเดตชื่อไฟล์ถ้ายังว่างอยู่
@@ -74,7 +74,7 @@ jQuery(document).ready(function($) {
     });
     
     // บันทึกฟอร์ม
-    $('#file-form').on('submit', function(e) {
+    $('#file-form').on('submit', (e) => {
         e.preventDefault();
         
         if (!validateForm()) {
@@ -86,7 +86,7 @@ jQuery(document).ready(function($) {
     });
     
     // โหลดข้อมูล Repeater เดิมจาก customfield
-    function loadExistingRepeaterData() {
+    const loadExistingRepeaterData = () => {
         showLoading();
         
         $.ajax({
@@ -97,14 +97,14 @@ jQuery(document).ready(function($) {
                 nonce: fileRepositoryAjax.nonce,
                 post_id: currentPostId
             },
-            success: function(response) {
+            success: (response) => {
                 if (response.success) {
                     // เคลียร์ข้อมูลเดิมก่อน
                     $('.file-repeater-list').empty();
                     
                     if (response.data.length > 0) {
                         // สร้าง Row สำหรับแต่ละเอกสารที่มีอยู่
-                        $.each(response.data, function(index, item) {
+                        response.data.forEach((item) => {
                             addRepeaterRowWithData(item);
                         });
                     } else {
@@ -119,42 +119,42 @@ jQuery(document).ready(function($) {
                     hideLoading();
                 }
             },
-            error: function() {
+            error: () => {
                 console.error('Error loading existing repeater data');
                 showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลเอกสาร');
                 addRepeaterRow(); // เพิ่ม Row เปล่า 1 อัน
                 hideLoading();
             }
         });
-    }
+    };
     
     // เพิ่ม Row ใหม่
-    function addRepeaterRow() {
-        var template = document.getElementById('repeater-item-template').innerHTML;
-        var newItem = $(template);
+    const addRepeaterRow = () => {
+        const template = document.getElementById('repeater-item-template').innerHTML;
+        const newItem = $(template);
         
         // อัพเดตลำดับของ row ใหม่
-        var itemCount = $('.repeater-item').length + 1;
+        const itemCount = $('.repeater-item').length + 1;
         newItem.find('.item-number').text(itemCount);
         
         // อัพเดตวันที่ด้วยวันที่ปัจจุบัน (พ.ศ.)
-        var today = new Date();
-        var day = String(today.getDate()).padStart(2, '0');
-        var month = String(today.getMonth() + 1).padStart(2, '0');
-        var year = today.getFullYear() + 543; // แปลงเป็น พ.ศ.
-        var thaiDate = day + '/' + month + '/' + year;
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear() + 543; // แปลงเป็น พ.ศ.
+        const thaiDate = `${day}/${month}/${year}`;
         newItem.find('.file-date').val(thaiDate);
         
         $('.file-repeater-list').append(newItem);
-    }
+    };
     
     // เพิ่ม Row พร้อมข้อมูล
-    function addRepeaterRowWithData(data) {
-        var template = document.getElementById('repeater-item-template').innerHTML;
-        var newItem = $(template);
+    const addRepeaterRowWithData = (data) => {
+        const template = document.getElementById('repeater-item-template').innerHTML;
+        const newItem = $(template);
         
         // อัพเดตลำดับของ row ใหม่
-        var itemCount = $('.repeater-item').length + 1;
+        const itemCount = $('.repeater-item').length + 1;
         newItem.find('.item-number').text(itemCount);
         
         // ใส่ข้อมูลเข้าไปในฟอร์ม
@@ -163,18 +163,18 @@ jQuery(document).ready(function($) {
         newItem.find('.file-link').val(data.link);
         
         $('.file-repeater-list').append(newItem);
-    }
+    };
     
     // อัพเดตลำดับของ items
-    function updateItemNumbers() {
+    const updateItemNumbers = () => {
         $('.repeater-item').each(function(index) {
             $(this).find('.item-number').text(index + 1);
         });
-    }
+    };
     
     // ตรวจสอบความถูกต้องของฟอร์ม
-    function validateForm() {
-        var isValid = true;
+    const validateForm = () => {
+        let isValid = true;
         
         $('.file-name, .file-link').each(function() {
             if ($(this).val() === '') {
@@ -186,16 +186,16 @@ jQuery(document).ready(function($) {
         });
         
         return isValid;
-    }
+    };
     
     // บันทึกข้อมูล Repeater
-    function saveRepeaterData() {
+    const saveRepeaterData = () => {
         showLoading();
         
-        var filesData = [];
+        const filesData = [];
         
         $('.repeater-item').each(function() {
-            var item = $(this);
+            const item = $(this);
             
             filesData.push({
                 name: item.find('.file-name').val(),
@@ -213,13 +213,13 @@ jQuery(document).ready(function($) {
                 post_id: currentPostId,
                 files_data: filesData
             },
-            success: function(response) {
+            success: (response) => {
                 if (response.success) {
                     showToast('บันทึกข้อมูลสำเร็จ');
                     $('#file-modal').removeClass('show');
                     
                     // รีโหลดหน้าเว็บ
-                    setTimeout(function() {
+                    setTimeout(() => {
                         location.reload();
                     }, 1000);
                 } else {
@@ -227,16 +227,16 @@ jQuery(document).ready(function($) {
                     hideLoading();
                 }
             },
-            error: function() {
+            error: () => {
                 console.error('Error saving repeater data');
                 showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
                 hideLoading();
             }
         });
-    }
+    };
     
     // โหลดข้อมูลเอกสารจาก Repeater field
-    function loadFileData() {
+    const loadFileData = () => {
         showSkeletonLoader();
         
         $.ajax({
@@ -247,55 +247,57 @@ jQuery(document).ready(function($) {
                 nonce: fileRepositoryAjax.nonce,
                 post_id: currentPostId
             },
-            success: function(response) {
+            success: (response) => {
                 if (response.success) {
                     renderFiles(response.data);
                 } else {
                     showToast('เกิดข้อผิดพลาดในการโหลดเอกสาร');
                 }
             },
-            error: function() {
+            error: () => {
                 console.error('Error loading files');
                 showToast('เกิดข้อผิดพลาดในการโหลดเอกสาร');
                 hideSkeletonLoader();
             }
         });
-    }
+    };
     
     // Render files in table
-    function renderFiles(files) {
-        var tbody = $('#file-repository-body');
+    const renderFiles = (files) => {
+        const tbody = $('#file-repository-body');
         tbody.empty();
         
         if (files.length === 0) {
-            var colspan = '4';
-            tbody.append(
-                '<tr><td colspan="' + colspan + '" class="file-table-empty">' +
-                '<i class="fas fa-file-alt"></i><br>' +
-                'ไม่พบเอกสาร' +
-                '</td></tr>'
-            );
+            const colspan = '4';
+            tbody.append(`
+                <tr>
+                    <td colspan="${colspan}" class="file-table-empty">
+                        <i class="fas fa-file-alt"></i><br>
+                        ไม่พบเอกสาร
+                    </td>
+                </tr>
+            `);
         } else {
-            files.forEach(function(file, index) {
-                var row = createFileRow(file, index + 1);
+            files.forEach((file, index) => {
+                const row = createFileRow(file, index + 1);
                 tbody.append(row);
             });
         }
         
         hideSkeletonLoader();
-    }
+    };
     
     // Create file row
-    function createFileRow(file, number) {
+    const createFileRow = (file, number) => {
         // Get file extension
-        var extension = file.name.split('.').pop().toLowerCase();
-        var iconClass = getFileIconClass(extension);
+        const extension = file.name.split('.').pop().toLowerCase();
+        const iconClass = getFileIconClass(extension);
         
-        var row = $('<tr>').append(
+        const row = $('<tr>').append(
             $('<td>').addClass('column-number').text(number),
             $('<td>').append(
                 $('<div>').addClass('file-icon').append(
-                    $('<i>').addClass('fas ' + iconClass),
+                    $('<i>').addClass(`fas ${iconClass}`),
                     $('<span>').text(file.name)
                 )
             ),
@@ -311,11 +313,11 @@ jQuery(document).ready(function($) {
         );
         
         return row;
-    }
+    };
     
     // Get file icon class based on extension
-    function getFileIconClass(extension) {
-        var iconMap = {
+    const getFileIconClass = (extension) => {
+        const iconMap = {
             'pdf': 'fa-file-pdf',
             'doc': 'fa-file-word',
             'docx': 'fa-file-word',
@@ -333,57 +335,59 @@ jQuery(document).ready(function($) {
         };
         
         return iconMap[extension] || 'fa-file';
-    }
+    };
     
     // Show skeleton loader
-    function showSkeletonLoader() {
-        var tbody = $('#file-repository-body');
+    const showSkeletonLoader = () => {
+        const tbody = $('#file-repository-body');
         if (tbody.children().length === 0) {
-            tbody.html(
-                '<tr class="skeleton-row">' +
-                '<td><div class="skeleton-loader"></div></td>'.repeat(4) +
-                '</tr>'.repeat(3)
-            );
+            const skeletonRows = Array(3).fill(
+                `<tr class="skeleton-row">
+                    ${Array(4).fill('<td><div class="skeleton-loader"></div></td>').join('')}
+                </tr>`
+            ).join('');
+            
+            tbody.html(skeletonRows);
         }
-    }
+    };
     
     // Hide skeleton loader
-    function hideSkeletonLoader() {
+    const hideSkeletonLoader = () => {
         $('.skeleton-row').remove();
-    }
+    };
     
     // Show loading overlay
-    function showLoading() {
+    const showLoading = () => {
         if ($('.loading-overlay').length === 0) {
             $('<div class="loading-overlay"><div class="loading-spinner"></div></div>').appendTo('body');
         }
         $('.loading-overlay').addClass('show');
-    }
+    };
     
     // Hide loading overlay
-    function hideLoading() {
+    const hideLoading = () => {
         $('.loading-overlay').removeClass('show');
-    }
+    };
     
     // Show toast notification
-    function showToast(message) {
+    const showToast = (message) => {
         // ลบ toast เก่าถ้ามี
         $('.file-repository-toast').remove();
         
-        var toast = $('<div>')
+        const toast = $('<div>')
             .addClass('file-repository-toast')
             .text(message)
             .appendTo('body');
         
-        setTimeout(function() {
+        setTimeout(() => {
             toast.addClass('show');
         }, 100);
         
-        setTimeout(function() {
+        setTimeout(() => {
             toast.removeClass('show');
-            setTimeout(function() {
+            setTimeout(() => {
                 toast.remove();
             }, 300);
         }, 3000);
-    }
+    };
 });

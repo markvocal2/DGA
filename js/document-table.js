@@ -1,9 +1,9 @@
 // /js/document-table.js
 jQuery(document).ready(function($) {
     // Media uploader
-    var mediaUploader;
-    var canManage = documentTableAjax.canManage === "1" || documentTableAjax.canManage === true;
-    var currentPostId = $('#add-document').data('post-id');
+    let mediaUploader;
+    const canManage = documentTableAjax.canManage === "1" || documentTableAjax.canManage === true;
+    const currentPostId = $('#add-document').data('post-id');
     
     // Load documents on page load
     loadDocumentData();
@@ -47,12 +47,12 @@ jQuery(document).ready(function($) {
     $(document).on('click', '.btn-file-upload', function(e) {
         e.preventDefault(); // ป้องกันการ submit form
         
-        var fileUploadBtn = $(this);
-        var fileField = fileUploadBtn.siblings('.file-link');
-        var nameField = fileUploadBtn.closest('.repeater-item').find('.file-name');
+        const fileUploadBtn = $(this);
+        const fileField = fileUploadBtn.siblings('.file-link');
+        const nameField = fileUploadBtn.closest('.repeater-item').find('.file-name');
         
         // สร้าง Media Uploader ใหม่ทุกครั้ง
-        var tempMediaUploader = wp.media({
+        const tempMediaUploader = wp.media({
             title: 'เลือกเอกสาร',
             button: {
                 text: 'เลือกเอกสาร'
@@ -61,7 +61,7 @@ jQuery(document).ready(function($) {
         });
         
         tempMediaUploader.on('select', function() {
-            var attachment = tempMediaUploader.state().get('selection').first().toJSON();
+            const attachment = tempMediaUploader.state().get('selection').first().toJSON();
             fileField.val(attachment.url);
             
             // อัพเดตชื่อไฟล์ถ้ายังว่างอยู่
@@ -130,19 +130,19 @@ jQuery(document).ready(function($) {
     
     // เพิ่ม Row ใหม่
     function addRepeaterRow() {
-        var template = document.getElementById('repeater-item-template').innerHTML;
-        var newItem = $(template);
+        const template = document.getElementById('repeater-item-template').innerHTML;
+        const newItem = $(template);
         
         // อัพเดตลำดับของ row ใหม่
-        var itemCount = $('.repeater-item').length + 1;
+        const itemCount = $('.repeater-item').length + 1;
         newItem.find('.item-number').text(itemCount);
         
         // อัพเดตวันที่ด้วยวันที่ปัจจุบัน (พ.ศ.)
-        var today = new Date();
-        var day = String(today.getDate()).padStart(2, '0');
-        var month = String(today.getMonth() + 1).padStart(2, '0');
-        var year = today.getFullYear() + 543; // แปลงเป็น พ.ศ.
-        var thaiDate = day + '/' + month + '/' + year;
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear() + 543; // แปลงเป็น พ.ศ.
+        const thaiDate = day + '/' + month + '/' + year;
         newItem.find('.file-date').val(thaiDate);
         
         $('.document-repeater-list').append(newItem);
@@ -150,11 +150,11 @@ jQuery(document).ready(function($) {
     
     // เพิ่ม Row พร้อมข้อมูล
     function addRepeaterRowWithData(data) {
-        var template = document.getElementById('repeater-item-template').innerHTML;
-        var newItem = $(template);
+        const template = document.getElementById('repeater-item-template').innerHTML;
+        const newItem = $(template);
         
         // อัพเดตลำดับของ row ใหม่
-        var itemCount = $('.repeater-item').length + 1;
+        const itemCount = $('.repeater-item').length + 1;
         newItem.find('.item-number').text(itemCount);
         
         // ใส่ข้อมูลเข้าไปในฟอร์ม
@@ -174,7 +174,7 @@ jQuery(document).ready(function($) {
     
     // ตรวจสอบความถูกต้องของฟอร์ม
     function validateForm() {
-        var isValid = true;
+        let isValid = true;
         
         $('.file-name, .file-link').each(function() {
             if ($(this).val() === '') {
@@ -192,10 +192,10 @@ jQuery(document).ready(function($) {
     function saveRepeaterData() {
         showLoading();
         
-        var filesData = [];
+        const filesData = [];
         
         $('.repeater-item').each(function() {
-            var item = $(this);
+            const item = $(this);
             
             filesData.push({
                 name: item.find('.file-name').val(),
@@ -264,11 +264,11 @@ jQuery(document).ready(function($) {
     
     // Render documents in table
     function renderDocuments(documents) {
-        var tbody = $('#document-table-body');
+        const tbody = $('#document-table-body');
         tbody.empty();
         
         if (documents.length === 0) {
-            var colspan = '4';
+            const colspan = '4';
             tbody.append(
                 '<tr><td colspan="' + colspan + '" class="document-table-empty">' +
                 '<i class="fas fa-file-alt"></i><br>' +
@@ -277,7 +277,7 @@ jQuery(document).ready(function($) {
             );
         } else {
             documents.forEach(function(doc, index) {
-                var row = createDocumentRow(doc, index + 1);
+                const row = createDocumentRow(doc, index + 1);
                 tbody.append(row);
             });
         }
@@ -288,10 +288,10 @@ jQuery(document).ready(function($) {
     // Create document row
     function createDocumentRow(doc, number) {
         // Get file extension
-        var extension = doc.name.split('.').pop().toLowerCase();
-        var iconClass = getFileIconClass(extension);
+        const extension = doc.name.split('.').pop().toLowerCase();
+        const iconClass = getFileIconClass(extension);
         
-        var row = $('<tr>').append(
+        const row = $('<tr>').append(
             $('<td>').addClass('column-number').text(number),
             $('<td>').append(
                 $('<div>').addClass('file-icon').append(
@@ -315,7 +315,7 @@ jQuery(document).ready(function($) {
 
     // Get file icon class based on extension
     function getFileIconClass(extension) {
-        var iconMap = {
+        const iconMap = {
             'pdf': 'fa-file-pdf',
             'doc': 'fa-file-word',
             'docx': 'fa-file-word',
@@ -337,7 +337,7 @@ jQuery(document).ready(function($) {
     
     // Show skeleton loader
     function showSkeletonLoader() {
-        var tbody = $('#document-table-body');
+        const tbody = $('#document-table-body');
         if (tbody.children().length === 0) {
             tbody.html(
                 '<tr class="skeleton-row">' +
@@ -370,7 +370,7 @@ jQuery(document).ready(function($) {
         // ลบ toast เก่าถ้ามี
         $('.document-table-toast').remove();
         
-        var toast = $('<div>')
+        const toast = $('<div>')
             .addClass('document-table-toast')
             .text(message)
             .appendTo('body');

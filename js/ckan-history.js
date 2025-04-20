@@ -21,56 +21,58 @@ jQuery(document).ready(function($) {
         limit: parseInt(ckan_report.limit) || 10
     };
     
-    // Initialize report data
-    initializeReport();
+    // ------------- Event Handlers -------------
     
-    // Event handlers for filters
-    $('#ckan-apply-filters').on('click', function() {
+    // Apply filters
+    $('#ckan-apply-filters').on('click', handleApplyFilters);
+    
+    // Refresh report
+    $('#ckan-refresh-report').on('click', handleRefreshReport);
+    
+    // Print report
+    $('#ckan-print-report').on('click', handlePrintReport);
+    
+    // Export data
+    $('#ckan-export-activities').on('click', handleExportData);
+    
+    // ------------- Handler Functions -------------
+    
+    function handleApplyFilters() {
         filters.type = $('#ckan-report-type').val();
         filters.period = $('#ckan-report-period').val();
         
         // Update report with new filters
         updateReportData();
-    });
+    }
     
-    $('#ckan-refresh-report').on('click', function() {
+    function handleRefreshReport() {
         // Refresh all data with current filters
         updateReportData(true);
-    });
+    }
     
-    // Print report handler
-    $('#ckan-print-report').on('click', function() {
+    function handlePrintReport() {
         window.print();
-    });
+    }
     
-    // Export data handler
-    $('#ckan-export-activities').on('click', function() {
+    function handleExportData() {
         exportTableToCSV('ckan-recent-activities', 'ckan_activity_report.csv');
-    });
+    }
     
-    // Initialize the report dashboard
+    // ------------- Main Functions -------------
+    
+    // Initialize report data
     function initializeReport() {
         // Show loader
         $('.ckan-report-loader').show();
         
-        // Load dashboard summary data
+        // Load all components
         loadDashboardSummary();
-        
-        // Load activity trend chart
         loadActivityTrendChart();
-        
-        // Load action types chart
         loadActionTypesChart();
-        
-        // Load top users chart
         loadTopUsersChart();
-        
-        // Load recent activities table
         loadRecentActivities();
         
         // Hide main loader when all data is loaded
-        // This is simplified, ideally we'd track all AJAX requests
-        // and hide loader when all are complete
         setTimeout(function() {
             $('.ckan-report-loader').fadeOut();
         }, 1500);
@@ -98,6 +100,8 @@ jQuery(document).ready(function($) {
         }
     }
     
+    // ------------- Chart Loading Functions -------------
+    
     // Load dashboard summary data
     function loadDashboardSummary() {
         $.ajax({
@@ -107,23 +111,29 @@ jQuery(document).ready(function($) {
                 action: 'ckan_get_dashboard_summary',
                 nonce: ckan_report.nonce
             },
-            success: function(response) {
-                if (response.success) {
-                    const data = response.data;
-                    
-                    // Update dashboard card values with animation
-                    animateCounter('#total-terms-value', data.terms);
-                    animateCounter('#total-users-value', data.users);
-                    animateCounter('#total-datasets-value', data.datasets);
-                    animateCounter('#total-actions-value', data.actions);
-                }
-            },
-            error: function() {
-                // Display error message
-                $('#total-terms-value, #total-users-value, #total-datasets-value, #total-actions-value')
-                    .html('<span class="ckan-data-error">ข้อผิดพลาด</span>');
-            }
+            success: handleDashboardSummarySuccess,
+            error: handleDashboardSummaryError
         });
+    }
+    
+    // Handle dashboard summary success
+    function handleDashboardSummarySuccess(response) {
+        if (response.success) {
+            const data = response.data;
+            
+            // Update dashboard card values with animation
+            animateCounter('#total-terms-value', data.terms);
+            animateCounter('#total-users-value', data.users);
+            animateCounter('#total-datasets-value', data.datasets);
+            animateCounter('#total-actions-value', data.actions);
+        }
+    }
+    
+    // Handle dashboard summary error
+    function handleDashboardSummaryError() {
+        // Display error message
+        $('#total-terms-value, #total-users-value, #total-datasets-value, #total-actions-value')
+            .html('<span class="ckan-data-error">ข้อผิดพลาด</span>');
     }
     
     // Load activity trend chart
@@ -142,40 +152,155 @@ jQuery(document).ready(function($) {
                 type: filters.type
             },
             success: function(response) {
-                if (response.success) {
-                    const chartData = response.data;
-                    
-                    // Check if we have any data
-                    const hasData = chartData.datasets.some(dataset => 
-                        dataset.data.some(value => value > 0)
-                    );
-                    
-                    if (hasData) {
-                        renderActivityTrendChart(chartData);
-                    } else {
-                        // Show no data message
-                        chartContainer.find('.ckan-chart-no-data').show();
-                        
-                        // Destroy existing chart if any
-                        if (activityTrendChart) {
-                            activityTrendChart.destroy();
-                            activityTrendChart = null;
-                        }
-                    }
-                } else {
-                    chartContainer.find('.ckan-chart-no-data').show();
-                }
-                
-                chartContainer.find('.ckan-chart-loader').hide();
+                handleActivityTrendChartSuccess(response, chartContainer);
             },
             error: function() {
-                chartContainer.find('.ckan-chart-loader').hide();
-                chartContainer.find('.ckan-chart-no-data')
-                    .show()
-                    .html('<p>' + ckan_report.error_text + '</p>');
+                handleChartError(chartContainer);
             }
         });
     }
+    
+    // Handle activity trend chart success
+    function handleActivityTrendChartSuccess(response, chartContainer) {
+        if (response.success) {
+            const chartData = response.data;
+            
+            // Check if we have any data
+            const hasData = chartData.datasets.some(dataset => 
+                dataset.data.some(value => value > 0)
+            );
+            
+            if (hasData) {
+                renderActivityTrendChart(chartData);
+            } else {
+                // Show no data message
+                chartContainer.find('.ckan-chart-no-data').show();
+                
+                // Destroy existing chart if any
+                if (activityTrendChart) {
+                    activityTrendChart.destroy();
+                    activityTrendChart = null;
+                }
+            }
+        } else {
+            chartContainer.find('.ckan-chart-no-data').show();
+        }
+        
+        chartContainer.find('.ckan-chart-loader').hide();
+    }
+    
+    // Load action types chart
+    function loadActionTypesChart() {
+        const chartContainer = $('#ckan-action-types').parent();
+        chartContainer.find('.ckan-chart-loader').show();
+        chartContainer.find('.ckan-chart-no-data').hide();
+        
+        $.ajax({
+            url: ckan_report.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'ckan_get_action_types',
+                nonce: ckan_report.nonce,
+                period: filters.period,
+                type: filters.type
+            },
+            success: function(response) {
+                handleActionTypesChartSuccess(response, chartContainer);
+            },
+            error: function() {
+                handleChartError(chartContainer);
+            }
+        });
+    }
+    
+    // Handle action types chart success
+    function handleActionTypesChartSuccess(response, chartContainer) {
+        if (response.success) {
+            const chartData = response.data;
+            
+            // Check if we have any data
+            const hasData = chartData.datasets[0].data.some(value => value > 0);
+            
+            if (hasData) {
+                renderActionTypesChart(chartData);
+            } else {
+                // Show no data message
+                chartContainer.find('.ckan-chart-no-data').show();
+                
+                // Destroy existing chart if any
+                if (actionTypesChart) {
+                    actionTypesChart.destroy();
+                    actionTypesChart = null;
+                }
+            }
+        } else {
+            chartContainer.find('.ckan-chart-no-data').show();
+        }
+        
+        chartContainer.find('.ckan-chart-loader').hide();
+    }
+    
+    // Load top users chart
+    function loadTopUsersChart() {
+        const chartContainer = $('#ckan-top-users').parent();
+        chartContainer.find('.ckan-chart-loader').show();
+        chartContainer.find('.ckan-chart-no-data').hide();
+        
+        $.ajax({
+            url: ckan_report.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'ckan_get_top_users',
+                nonce: ckan_report.nonce,
+                period: filters.period,
+                type: filters.type,
+                limit: 5 // Top 5 users
+            },
+            success: function(response) {
+                handleTopUsersChartSuccess(response, chartContainer);
+            },
+            error: function() {
+                handleChartError(chartContainer);
+            }
+        });
+    }
+    
+    // Handle top users chart success
+    function handleTopUsersChartSuccess(response, chartContainer) {
+        if (response.success) {
+            const chartData = response.data;
+            
+            // Check if we have any data
+            const hasData = chartData.datasets[0].data.length > 0;
+            
+            if (hasData) {
+                renderTopUsersChart(chartData);
+            } else {
+                // Show no data message
+                chartContainer.find('.ckan-chart-no-data').show();
+                
+                // Destroy existing chart if any
+                if (topUsersChart) {
+                    topUsersChart.destroy();
+                    topUsersChart = null;
+                }
+            }
+        } else {
+            chartContainer.find('.ckan-chart-no-data').show();
+        }
+        
+        chartContainer.find('.ckan-chart-loader').hide();
+    }
+    
+    // Handle chart error (general)
+    function handleChartError(chartContainer) {
+        chartContainer.find('.ckan-chart-loader').hide();
+        chartContainer.find('.ckan-chart-no-data')
+            .show()
+            .html('<p>' + ckan_report.error_text + '</p>');
+    }
+    
+    // ------------- Chart Rendering Functions -------------
     
     // Render activity trend chart
     function renderActivityTrendChart(chartData) {
@@ -246,55 +371,6 @@ jQuery(document).ready(function($) {
         updateChartLegend('activity-trend-legend', chartData.datasets);
     }
     
-    // Load action types chart
-    function loadActionTypesChart() {
-        const chartContainer = $('#ckan-action-types').parent();
-        chartContainer.find('.ckan-chart-loader').show();
-        chartContainer.find('.ckan-chart-no-data').hide();
-        
-        $.ajax({
-            url: ckan_report.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'ckan_get_action_types',
-                nonce: ckan_report.nonce,
-                period: filters.period,
-                type: filters.type
-            },
-            success: function(response) {
-                if (response.success) {
-                    const chartData = response.data;
-                    
-                    // Check if we have any data
-                    const hasData = chartData.datasets[0].data.some(value => value > 0);
-                    
-                    if (hasData) {
-                        renderActionTypesChart(chartData);
-                    } else {
-                        // Show no data message
-                        chartContainer.find('.ckan-chart-no-data').show();
-                        
-                        // Destroy existing chart if any
-                        if (actionTypesChart) {
-                            actionTypesChart.destroy();
-                            actionTypesChart = null;
-                        }
-                    }
-                } else {
-                    chartContainer.find('.ckan-chart-no-data').show();
-                }
-                
-                chartContainer.find('.ckan-chart-loader').hide();
-            },
-            error: function() {
-                chartContainer.find('.ckan-chart-loader').hide();
-                chartContainer.find('.ckan-chart-no-data')
-                    .show()
-                    .html('<p>' + ckan_report.error_text + '</p>');
-            }
-        });
-    }
-    
     // Render action types chart
     function renderActionTypesChart(chartData) {
         const ctx = document.getElementById('ckan-action-types').getContext('2d');
@@ -341,56 +417,6 @@ jQuery(document).ready(function($) {
         } else {
             actionTypesChart = new Chart(ctx, config);
         }
-    }
-    
-    // Load top users chart
-    function loadTopUsersChart() {
-        const chartContainer = $('#ckan-top-users').parent();
-        chartContainer.find('.ckan-chart-loader').show();
-        chartContainer.find('.ckan-chart-no-data').hide();
-        
-        $.ajax({
-            url: ckan_report.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'ckan_get_top_users',
-                nonce: ckan_report.nonce,
-                period: filters.period,
-                type: filters.type,
-                limit: 5 // Top 5 users
-            },
-            success: function(response) {
-                if (response.success) {
-                    const chartData = response.data;
-                    
-                    // Check if we have any data
-                    const hasData = chartData.datasets[0].data.length > 0;
-                    
-                    if (hasData) {
-                        renderTopUsersChart(chartData);
-                    } else {
-                        // Show no data message
-                        chartContainer.find('.ckan-chart-no-data').show();
-                        
-                        // Destroy existing chart if any
-                        if (topUsersChart) {
-                            topUsersChart.destroy();
-                            topUsersChart = null;
-                        }
-                    }
-                } else {
-                    chartContainer.find('.ckan-chart-no-data').show();
-                }
-                
-                chartContainer.find('.ckan-chart-loader').hide();
-            },
-            error: function() {
-                chartContainer.find('.ckan-chart-loader').hide();
-                chartContainer.find('.ckan-chart-no-data')
-                    .show()
-                    .html('<p>' + ckan_report.error_text + '</p>');
-            }
-        });
     }
     
     // Render top users chart
@@ -450,6 +476,8 @@ jQuery(document).ready(function($) {
         }
     }
     
+    // ------------- Table Functions -------------
+    
     // Load recent activities table
     function loadRecentActivities() {
         const tableBody = $('#ckan-recent-activities tbody');
@@ -465,37 +493,48 @@ jQuery(document).ready(function($) {
                 type: filters.type,
                 limit: filters.limit
             },
-            success: function(response) {
-                if (response.success) {
-                    const activities = response.data.activities;
-                    
-                    if (activities.length > 0) {
-                        let tableHtml = '';
-                        
-                        activities.forEach(function(activity) {
-                            tableHtml += `
-                                <tr>
-                                    <td>${activity.time}</td>
-                                    <td><span class="ckan-badge ckan-badge-${activity.action_class}">${activity.action}</span></td>
-                                    <td>${activity.detail}</td>
-                                    <td>${activity.user}</td>
-                                </tr>
-                            `;
-                        });
-                        
-                        tableBody.html(tableHtml);
-                    } else {
-                        tableBody.html('<tr><td colspan="4" class="ckan-no-data">ไม่พบข้อมูลกิจกรรม</td></tr>');
-                    }
-                } else {
-                    tableBody.html('<tr><td colspan="4" class="ckan-data-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>');
-                }
-            },
-            error: function() {
-                tableBody.html('<tr><td colspan="4" class="ckan-data-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>');
-            }
+            success: handleActivitiesSuccess,
+            error: handleActivitiesError
         });
     }
+    
+    // Handle activities success
+    function handleActivitiesSuccess(response) {
+        const tableBody = $('#ckan-recent-activities tbody');
+        
+        if (response.success) {
+            const activities = response.data.activities;
+            
+            if (activities.length > 0) {
+                let tableHtml = '';
+                
+                activities.forEach(function(activity) {
+                    tableHtml += `
+                        <tr>
+                            <td>${activity.time}</td>
+                            <td><span class="ckan-badge ckan-badge-${activity.action_class}">${activity.action}</span></td>
+                            <td>${activity.detail}</td>
+                            <td>${activity.user}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.html(tableHtml);
+            } else {
+                tableBody.html('<tr><td colspan="4" class="ckan-no-data">ไม่พบข้อมูลกิจกรรม</td></tr>');
+            }
+        } else {
+            tableBody.html('<tr><td colspan="4" class="ckan-data-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>');
+        }
+    }
+    
+    // Handle activities error
+    function handleActivitiesError() {
+        const tableBody = $('#ckan-recent-activities tbody');
+        tableBody.html('<tr><td colspan="4" class="ckan-data-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>');
+    }
+    
+    // ------------- Helper Functions -------------
     
     // Helper function to animate counter
     function animateCounter(selector, targetValue) {
@@ -559,6 +598,8 @@ jQuery(document).ready(function($) {
         legendContainer.innerHTML = legendHtml;
     }
     
+    // ------------- Export Functions -------------
+    
     // Function to export table to CSV
     function exportTableToCSV(tableId, filename) {
         const table = document.getElementById(tableId);
@@ -614,4 +655,7 @@ jQuery(document).ready(function($) {
         // Clean up and remove the link
         document.body.removeChild(downloadLink);
     }
+    
+    // Start the report
+    initializeReport();
 });

@@ -243,8 +243,7 @@ select:focus,
 input[type="date"]:focus {
   outline: none;
   border-color: var(--stats-border-color-focus);
-  /* Consider removing ring if outline is sufficient */
-  /* box-shadow: 0 0 0 2px var(--stats-focus-ring-color); */
+  /* Removed commented-out box-shadow */
 }
 
 /* Buttons */
@@ -410,9 +409,7 @@ input[type="date"]:focus {
 
 .stats-loading .stats-card,
 .stats-loading .chart-container {
-  /* Uncomment to use pulse instead of overlay/spinner */
-  /* animation: stats-pulse 1.5s ease-in-out infinite; */
-  /* pointer-events: none; */ /* Already handled by .stats-loading */
+  /* Comments removed for pulse animation */
 }
 
 /* Tooltip Styles (Generic - Assumed external or base style) */
@@ -505,23 +502,23 @@ input[type="date"]:focus {
 
 @media screen and (max-width: 480px) {
    .stats-summary {
-      grid-template-columns: 1fr; /* Stack cards completely */
+     grid-template-columns: 1fr; /* Stack cards completely */
    }
    .stats-card {
-      text-align: left; /* Align text left */
-      display: flex;
-      align-items: center;
-      gap: var(--stats-spacing-lg);
+     text-align: left; /* Align text left */
+     display: flex;
+     align-items: center;
+     gap: var(--stats-spacing-lg);
    }
    .stats-card h3 {
-      margin-bottom: 0;
-      flex-grow: 1; /* Push number to the right */
+     margin-bottom: 0;
+     flex-grow: 1; /* Push number to the right */
    }
    .stats-number {
-      font-size: 1.5rem; /* Smaller number */
+     font-size: 1.5rem; /* Smaller number */
    }
    .date-range input[type="date"] {
-      width: 100%; /* Full width date inputs */
+     width: 100%; /* Full width date inputs */
    }
 }
 

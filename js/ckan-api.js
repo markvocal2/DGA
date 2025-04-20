@@ -5,18 +5,18 @@
  */
 jQuery(document).ready(function($) {
     // เก็บข้อมูลของไฟล์ปัจจุบัน
-    var currentFileIndex = -1;
-    var currentFileName = '';
-    var currentFileUrl = '';
-    var currentFileExt = '';
+    let currentFileIndex = -1;
+    let currentFileName = '';
+    let currentFileUrl = '';
+    let currentFileExt = '';
     
     // ตรวจสอบว่า modal มีอยู่แล้วหรือไม่
-    var apiModalExists = $('#ckan-api-modal').length > 0;
+    const apiModalExists = $('#ckan-api-modal').length > 0;
     
     // เมื่อคลิกปุ่มดูตัวอย่าง เก็บ index ของไฟล์และข้อมูลอื่นๆ ไว้
     $(document).on('click', '.ckan-preview-btn', function() {
         currentFileIndex = $(this).data('index');
-        var $assetItem = $(this).closest('.ckan-asset-item');
+        const $assetItem = $(this).closest('.ckan-asset-item');
         currentFileName = $assetItem.find('.ckan-asset-name').text();
         currentFileUrl = atob($(this).data('url')); // Decode base64 URL
         currentFileExt = currentFileUrl.split('.').pop().toLowerCase();
@@ -39,26 +39,23 @@ jQuery(document).ready(function($) {
         $('#ckan-api-modal').addClass('show');
         
         // ดึงข้อมูล Post ID จาก container
-        var postId = $('.ckan-assets-container').data('post-id');
+        const postId = $('.ckan-assets-container').data('post-id');
         
         // สร้าง endpoint URLs
-        var baseUrl = window.location.origin;
-        var endpointGet = baseUrl + '/wp-json/ckan/v1/data/' + postId;
-        var endpointSearch = baseUrl + '/wp-json/ckan/v1/search?q=' + postId;
-        var endpointFile = '';
+        const baseUrl = window.location.origin;
+        const endpointGet = `${baseUrl}/wp-json/ckan/v1/data/${postId}`;
+        const endpointSearch = `${baseUrl}/wp-json/ckan/v1/search?q=${postId}`;
+        let endpointFile = '';
         
         // สร้าง resource_id สำหรับใช้ในตัวอย่าง API
-        var resourceId = 'b8a8a6b5-' + md5(postId).substring(0, 4) + '-' + 
-                        md5(postId).substring(4, 8) + '-' + 
-                        md5(postId).substring(8, 12) + '-' + 
-                        md5(postId).substring(12, 24);
+        const resourceId = generateResourceId(postId);
         
         // ถ้ามี file index ให้สร้าง endpoint สำหรับไฟล์นั้น
         if (currentFileIndex >= 0) {
-            endpointFile = baseUrl + '/wp-json/ckan/v1/file/' + postId + '/' + currentFileIndex;
+            endpointFile = `${baseUrl}/wp-json/ckan/v1/file/${postId}/${currentFileIndex}`;
             
             // อัพเดทชื่อไฟล์ในหน้า API
-            $('.ckan-api-modal-title').text('Data API: ' + currentFileName);
+            $('.ckan-api-modal-title').text(`Data API: ${currentFileName}`);
         }
         
         // อัพเดทค่า URLs ใน Modal
@@ -68,8 +65,8 @@ jQuery(document).ready(function($) {
         $('#ckan-api-file-data-link').attr('href', endpointFile);
         
         // อัพเดท URL ของตัวอย่าง
-        var limitExample = baseUrl + '/wp-json/ckan/v1/search?limit=5&resource_id=' + resourceId;
-        var searchExample = baseUrl + '/wp-json/ckan/v1/search?q=jones&resource_id=' + resourceId;
+        const limitExample = `${baseUrl}/wp-json/ckan/v1/search?limit=5&resource_id=${resourceId}`;
+        const searchExample = `${baseUrl}/wp-json/ckan/v1/search?q=jones&resource_id=${resourceId}`;
         
         // อัพเดทลิงก์ตัวอย่าง
         $('.ckan-api-code a[href*="limit=5"]').attr('href', limitExample).text(limitExample);
@@ -99,31 +96,34 @@ jQuery(document).ready(function($) {
     
     // เปลี่ยน Tab เมื่อคลิก
     $(document).on('click', '.ckan-api-tab', function() {
-        var tabId = $(this).data('tab');
+        const tabId = $(this).data('tab');
         
         // ซ่อนทุก Tab Content และแสดงเฉพาะ Tab ที่คลิก
         $('.ckan-api-tab-content').removeClass('active');
-        $('#' + tabId).addClass('active');
+        $(`#${tabId}`).addClass('active');
         
         // เปลี่ยน Class ของ Tab
         $('.ckan-api-tab').removeClass('active');
         $(this).addClass('active');
     });
     
-    // อัพเดทการแสดงแท็บข้อมูลไฟล์ตามประเภทไฟล์
+    /**
+     * อัพเดทการแสดงแท็บข้อมูลไฟล์ตามประเภทไฟล์
+     * @param {string} fileExt - นามสกุลไฟล์
+     */
     function updateFileDataTab(fileExt) {
-        var $fileDataTab = $('.ckan-api-tab[data-tab="ckan-api-file-data"]');
-        var $fileDataContent = $('#ckan-api-file-data');
+        const $fileDataTab = $('.ckan-api-tab[data-tab="ckan-api-file-data"]');
+        const $fileDataContent = $('#ckan-api-file-data');
         
         // ตรวจสอบประเภทไฟล์ที่รองรับ
-        var supportedExtensions = ['csv', 'json', 'txt'];
+        const supportedExtensions = ['csv', 'json', 'txt'];
         
-        if (supportedExtensions.indexOf(fileExt) >= 0) {
+        if (supportedExtensions.includes(fileExt)) {
             // แสดงแท็บ
             $fileDataTab.show();
             
             // อัพเดทเนื้อหาตามประเภทไฟล์
-            var formatText = '';
+            let formatText = '';
             switch(fileExt) {
                 case 'csv':
                     formatText = 'CSV จะถูกแปลงเป็น JSON โดยใช้แถวแรกเป็นชื่อ fields';
@@ -137,10 +137,10 @@ jQuery(document).ready(function($) {
             }
             
             // อัพเดทคำอธิบาย
-            $fileDataContent.find('p:first').html('ข้อมูลจากไฟล์ <strong>' + currentFileName + '</strong> (' + fileExt.toUpperCase() + '): ' + formatText);
+            $fileDataContent.find('p:first').html(`ข้อมูลจากไฟล์ <strong>${currentFileName}</strong> (${fileExt.toUpperCase()}): ${formatText}`);
             
             // อัพเดทตัวอย่างโครงสร้าง JSON
-            var jsonExample = {
+            const jsonExample = {
                 success: true,
                 result: {
                     resource_id: currentFileIndex,
@@ -183,10 +183,14 @@ jQuery(document).ready(function($) {
         }
     }
     
-    // อัพเดทตัวอย่างโค้ดด้วย endpoint ปัจจุบัน
+    /**
+     * อัพเดทตัวอย่างโค้ดด้วย endpoint ปัจจุบัน
+     * @param {string} fileEndpoint - URL endpoint สำหรับไฟล์
+     * @param {string} dataEndpoint - URL endpoint สำหรับข้อมูล
+     */
     function updateCodeExamples(fileEndpoint, dataEndpoint) {
         // สร้างตัวอย่างโค้ด JavaScript
-        var jsExample = `// jQuery เริ่มต้น
+        const jsExample = `// jQuery เริ่มต้น
 $.ajax({
   url: '${dataEndpoint}',
   dataType: 'json',
@@ -212,7 +216,7 @@ fetch('${fileEndpoint}')
   });`;
         
         // สร้างตัวอย่างโค้ด Python
-        var pythonExample = `import urllib.request
+        const pythonExample = `import urllib.request
 import json
 import pprint
 
@@ -241,19 +245,32 @@ else:
         $('#ckan-api-examples .ckan-api-example:last-child pre').text(pythonExample);
     }
     
-    // ฟังก์ชันสำหรับสร้าง MD5 hash (ใช้สำหรับสร้าง resource_id)
+    /**
+     * สร้าง resource_id สำหรับใช้ในตัวอย่าง API
+     * @param {string} postId - ID ของ post
+     * @returns {string} resource ID
+     */
+    function generateResourceId(postId) {
+        const hash = md5(postId);
+        return `b8a8a6b5-${hash.substring(0, 4)}-${hash.substring(4, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 24)}`;
+    }
+    
+    /**
+     * สร้าง MD5 hash
+     * @param {string} string - ข้อความที่ต้องการทำ hash
+     * @returns {string} - MD5 hash
+     */
     function md5(string) {
         function RotateLeft(lValue, iShiftBits) {
             return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
         }
         
         function AddUnsigned(lX, lY) {
-            var lX4, lY4, lX8, lY8, lResult;
-            lX8 = (lX & 0x80000000);
-            lY8 = (lY & 0x80000000);
-            lX4 = (lX & 0x40000000);
-            lY4 = (lY & 0x40000000);
-            lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
+            const lX8 = (lX & 0x80000000);
+            const lY8 = (lY & 0x80000000);
+            const lX4 = (lX & 0x40000000);
+            const lY4 = (lY & 0x40000000);
+            const lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
             if (lX4 & lY4) {
                 return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
             }
@@ -294,14 +311,14 @@ else:
         }
         
         function ConvertToWordArray(string) {
-            var lWordCount;
-            var lMessageLength = string.length;
-            var lNumberOfWords_temp1 = lMessageLength + 8;
-            var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
-            var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
-            var lWordArray = Array(lNumberOfWords - 1);
-            var lBytePosition = 0;
-            var lByteCount = 0;
+            let lWordCount;
+            const lMessageLength = string.length;
+            const lNumberOfWords_temp1 = lMessageLength + 8;
+            const lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
+            const lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
+            const lWordArray = Array(lNumberOfWords - 1);
+            let lBytePosition = 0;
+            let lByteCount = 0;
             while (lByteCount < lMessageLength) {
                 lWordCount = (lByteCount - (lByteCount % 4)) / 4;
                 lBytePosition = (lByteCount % 4) * 8;
@@ -317,7 +334,9 @@ else:
         }
         
         function WordToHex(lValue) {
-            var WordToHexValue = "", WordToHexValue_temp = "", lByte, lCount;
+            let WordToHexValue = "";
+            let WordToHexValue_temp = "";
+            let lByte, lCount;
             for (lCount = 0; lCount <= 3; lCount++) {
                 lByte = (lValue >>> (lCount * 8)) & 255;
                 WordToHexValue_temp = "0" + lByte.toString(16);
@@ -328,10 +347,10 @@ else:
         
         function Utf8Encode(string) {
             string = string.replace(/\r\n/g, "\n");
-            var utftext = "";
+            let utftext = "";
             
-            for (var n = 0; n < string.length; n++) {
-                var c = string.charCodeAt(n);
+            for (let n = 0; n < string.length; n++) {
+                const c = string.charCodeAt(n);
                 
                 if (c < 128) {
                     utftext += String.fromCharCode(c);
@@ -350,12 +369,12 @@ else:
             return utftext;
         }
         
-        var x = Array();
-        var k, AA, BB, CC, DD, a, b, c, d;
-        var S11 = 7, S12 = 12, S13 = 17, S14 = 22;
-        var S21 = 5, S22 = 9, S23 = 14, S24 = 20;
-        var S31 = 4, S32 = 11, S33 = 16, S34 = 23;
-        var S41 = 6, S42 = 10, S43 = 15, S44 = 21;
+        const x = Array();
+        let k, AA, BB, CC, DD, a, b, c, d;
+        const S11 = 7, S12 = 12, S13 = 17, S14 = 22;
+        const S21 = 5, S22 = 9, S23 = 14, S24 = 20;
+        const S31 = 4, S32 = 11, S33 = 16, S34 = 23;
+        const S41 = 6, S42 = 10, S43 = 15, S44 = 21;
         
         string = Utf8Encode(string);
         
@@ -435,7 +454,7 @@ else:
             d = AddUnsigned(d, DD);
         }
         
-        var temp = WordToHex(a) + WordToHex(b) + WordToHex(c) + WordToHex(d);
+        const temp = WordToHex(a) + WordToHex(b) + WordToHex(c) + WordToHex(d);
         
         return temp.toLowerCase();
     }

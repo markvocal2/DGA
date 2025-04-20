@@ -3,12 +3,12 @@
  */
 jQuery(document).ready(function($) {
     // ตัวแปร global สำหรับ editor
-    var wpEditor;
+    let wpEditor;
     
     // เปิด Modal เมื่อคลิกที่ Icon ดินสอ
     $('.data-post-e-icon').on('click', function(e) {
         e.preventDefault();
-        var postId = $(this).data('post-id');
+        const postId = $(this).data('post-id');
         $('#data-post-e-modal-' + postId).fadeIn(300);
         $('body').addClass('modal-open');
         
@@ -27,7 +27,7 @@ jQuery(document).ready(function($) {
             }
             
             // กำหนดค่าเริ่มต้นสำหรับ editor
-            var editorSettings = {
+            const editorSettings = {
                 tinymce: {
                     wpautop: true,
                     plugins: 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview',
@@ -43,7 +43,7 @@ jQuery(document).ready(function($) {
             wpEditor = wp.editor.initialize('at_content', editorSettings);
             
             // เก็บค่าเนื้อหาเริ่มต้นไว้สำหรับการเปรียบเทียบ
-            var originalContent = $('#at_content').val();
+            const originalContent = $('#at_content').val();
             $('#at_content').data('original-content', originalContent);
         }
     }
@@ -98,11 +98,11 @@ jQuery(document).ready(function($) {
     
     // เพิ่ม Row ใหม่ใน Repeater
     $('#add-row-btn').on('click', function() {
-        var repeater = $('#at_file_standard_repeater');
-        var index = repeater.children('.repeater-row').length;
-        var currentDate = getCurrentDate();
+        const repeater = $('#at_file_standard_repeater');
+        const index = repeater.children('.repeater-row').length;
+        const currentDate = getCurrentDate();
         
-        var newRow = `
+        const newRow = `
             <div class="repeater-row">
                 <div class="repeater-field">
                     <label>ชื่อไฟล์:</label>
@@ -132,8 +132,8 @@ jQuery(document).ready(function($) {
     
     // ลบ Row ใน Repeater
     $(document).on('click', '.remove-row-btn', function() {
-        var repeater = $('#at_file_standard_repeater');
-        var rows = repeater.children('.repeater-row');
+        const repeater = $('#at_file_standard_repeater');
+        const rows = repeater.children('.repeater-row');
         
         // ถ้ามีแถวเดียว ให้คงไว้แต่เคลียร์ค่า
         if (rows.length === 1) {
@@ -149,14 +149,14 @@ jQuery(document).ready(function($) {
     
     // จัดการการอัพโหลดไฟล์
     $(document).on('click', '.upload-new-file-btn', function() {
-        var button = $(this);
-        var row = button.closest('.repeater-row');
-        var fileInput = row.find('.file-link-input');
-        var downloadBtn = row.find('.download-file-btn');
-        var fileNameInput = row.find('input[name*="[at_rp_file_name]"]');
-        var manualUrlInput = row.find('.manual-url-input'); // อัพเดต input URL ด้วย
+        const button = $(this);
+        const row = button.closest('.repeater-row');
+        const fileInput = row.find('.file-link-input');
+        const downloadBtn = row.find('.download-file-btn');
+        const fileNameInput = row.find('input[name*="[at_rp_file_name]"]');
+        const manualUrlInput = row.find('.manual-url-input'); // อัพเดต input URL ด้วย
         
-        var mediaUploader = wp.media({
+        const mediaUploader = wp.media({
             title: 'เลือกหรืออัพโหลดไฟล์',
             button: {
                 text: 'เลือกไฟล์นี้'
@@ -165,7 +165,7 @@ jQuery(document).ready(function($) {
         });
         
         mediaUploader.on('select', function() {
-            var attachment = mediaUploader.state().get('selection').first().toJSON();
+            const attachment = mediaUploader.state().get('selection').first().toJSON();
             
             // อัพเดต URL ไฟล์
             fileInput.val(attachment.url);
@@ -183,8 +183,8 @@ jQuery(document).ready(function($) {
     
     // เพิ่ม event handler สำหรับปุ่ม "ลิงค์"
     $(document).on('click', '.link-file-btn', function() {
-        var row = $(this).closest('.repeater-row');
-        var urlField = row.find('.url-field');
+        const row = $(this).closest('.repeater-row');
+        const urlField = row.find('.url-field');
         
         // สลับการแสดง/ซ่อน field URL
         if (urlField.is(':visible')) {
@@ -196,10 +196,10 @@ jQuery(document).ready(function($) {
     
     // เพิ่ม event handler สำหรับการอัพเดตค่า URL จาก manual input
     $(document).on('change', '.manual-url-input', function() {
-        var row = $(this).closest('.repeater-row');
-        var fileLink = row.find('.file-link-input');
-        var downloadBtn = row.find('.download-file-btn');
-        var url = $(this).val();
+        const row = $(this).closest('.repeater-row');
+        const fileLink = row.find('.file-link-input');
+        const downloadBtn = row.find('.download-file-btn');
+        const url = $(this).val();
         
         // อัพเดต hidden input และปุ่มดาวน์โหลด
         fileLink.val(url);
@@ -212,7 +212,7 @@ jQuery(document).ready(function($) {
     
     // ฟังก์ชันคลิกปุ่มลบโพส
     $('.delete-post-btn').on('click', function() {
-        var postId = $(this).closest('form').find('input[name="post_id"]').val();
+        const postId = $(this).closest('form').find('input[name="post_id"]').val();
         $('#delete-confirm-modal-' + postId).fadeIn(300);
     });
     
@@ -223,7 +223,7 @@ jQuery(document).ready(function($) {
     
     // ยืนยันการลบโพส
     $('.confirm-delete-btn').on('click', function() {
-        var postId = $(this).closest('.delete-confirm-modal').attr('id').replace('delete-confirm-modal-', '');
+        const postId = $(this).closest('.delete-confirm-modal').attr('id').replace('delete-confirm-modal-', '');
         
         // ส่งคำขอลบโพสไปยัง AJAX
         $.ajax({
@@ -282,9 +282,9 @@ jQuery(document).ready(function($) {
     $('.data-post-e-form').on('submit', function(e) {
         e.preventDefault();
         
-        var form = $(this);
-        var submitBtn = form.find('.save-post-btn');
-        var postId = form.find('input[name="post_id"]').val();
+        const form = $(this);
+        const submitBtn = form.find('.save-post-btn');
+        const postId = form.find('input[name="post_id"]').val();
         
         // อัพเดตข้อมูลจาก TinyMCE ไปยัง textarea
         if (typeof tinyMCE !== 'undefined' && tinyMCE.get('at_content')) {
@@ -295,18 +295,18 @@ jQuery(document).ready(function($) {
         submitBtn.prop('disabled', true).text('กำลังบันทึก...');
         
         // เก็บข้อมูลเนื้อหาที่แก้ไข
-        var contentTextarea = form.find('#at_content');
-        var newContent = contentTextarea.val();
-        var originalContent = contentTextarea.data('original-content');
+        const contentTextarea = form.find('#at_content');
+        const newContent = contentTextarea.val();
+        const originalContent = contentTextarea.data('original-content');
         
         // ไฮไลท์การเปลี่ยนแปลงถ้ามีการแก้ไข
         if (originalContent !== newContent) {
-            var highlightedContent = highlightChanges(originalContent, newContent);
+            const highlightedContent = highlightChanges(originalContent, newContent);
             contentTextarea.val(highlightedContent);
         }
         
         // เก็บข้อมูลฟอร์ม
-        var formData = form.serializeArray();
+        const formData = form.serializeArray();
         formData.push({
             name: 'action',
             value: 'data_post_e_save'
@@ -345,9 +345,9 @@ jQuery(document).ready(function($) {
     function reindexRepeaterFields() {
         $('#at_file_standard_repeater .repeater-row').each(function(index) {
             $(this).find('input, select').each(function() {
-                var name = $(this).attr('name');
+                const name = $(this).attr('name');
                 if (name) {
-                    var newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                    const newName = name.replace(/\[\d+\]/, '[' + index + ']');
                     $(this).attr('name', newName);
                 }
             });
@@ -356,7 +356,7 @@ jQuery(document).ready(function($) {
     
     // ฟังก์ชันแสดงการแจ้งเตือน
     function showNotification(message, type) {
-        var notification = $('<div class="data-post-e-notification ' + type + '">' + message + '</div>');
+        const notification = $('<div class="data-post-e-notification ' + type + '">' + message + '</div>');
         $('body').append(notification);
         
         notification.fadeIn(300);
@@ -370,10 +370,10 @@ jQuery(document).ready(function($) {
     
     // ฟังก์ชันรับวันที่ปัจจุบัน
     function getCurrentDate() {
-        var date = new Date();
-        var day = date.getDate();
-        var month = date.getMonth() + 1;
-        var year = date.getFullYear();
+        const date = new Date();
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        const year = date.getFullYear();
         
         day = day < 10 ? '0' + day : day;
         month = month < 10 ? '0' + month : month;

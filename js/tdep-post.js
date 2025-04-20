@@ -1,9 +1,82 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(($) => {
     const modal = $('#tdep-post-modal');
     const btn = $('#tdep-post-btn');
     const closeBtn = $('.tdep-close');
     const form = $('#tdep-post-form');
     let mediaUploader;
+
+    // ========== ฟังก์ชั่นช่วยเหลือ ==========
+
+    // Reset form
+    function resetForm() {
+        form[0].reset();
+        $('#tdep-featured-image-id').val('');
+        $('#tdep-image-preview').empty();
+        $('#tdep-upload-btn').show();
+    }
+
+    // แสดง Toast Message
+    function showToast(message, postUrl) {
+        const toast = $(`
+            <div class="tdep-toast">
+                <div class="tdep-toast-content">
+                    <div class="tdep-toast-message">${message}</div>
+                    ${postUrl ? `<a href="${postUrl}" class="tdep-toast-link" target="_blank">ดูเนื้อหา</a>` : ''}
+                </div>
+                <button class="tdep-toast-close">&times;</button>
+            </div>
+        `).appendTo('body');
+
+        setTimeout(() => {
+            toast.addClass('show');
+        }, 100);
+
+        // Auto close toast after 5 seconds
+        setTimeout(() => {
+            toast.removeClass('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+
+        // Close toast on button click
+        toast.find('.tdep-toast-close').on('click', function() {
+            toast.removeClass('show');
+            setTimeout(() => toast.remove(), 300);
+        });
+    }
+
+    // แสดงข้อความแจ้งเตือนข้อผิดพลาด
+    function showError(message) {
+        Swal.fire({
+            title: 'ข้อผิดพลาด!',
+            text: message,
+            icon: 'error',
+            confirmButtonColor: '#007bff'
+        });
+    }
+
+    // จัดการกับผลลัพธ์ AJAX ที่สำเร็จ
+    function handleAjaxSuccess(response) {
+        if (response.success) {
+            modal.fadeOut(300);
+            showToast('สร้างโพสสำเร็จ', response.data.post_url);
+            resetForm();
+        } else {
+            showError(response.data.message);
+        }
+    }
+
+    // จัดการกับการอัปโหลดรูปภาพที่ถูกเลือก
+    function handleImageSelection() {
+        const attachment = mediaUploader.state().get('selection').first().toJSON();
+        $('#tdep-featured-image-id').val(attachment.id);
+        $('#tdep-image-preview').html(`
+            <img src="${attachment.url}" alt="Preview">
+            <button type="button" class="tdep-remove-image">&times;</button>
+        `);
+        $('#tdep-upload-btn').hide();
+    }
+
+    // ========== Event Handlers ==========
 
     // Open modal
     btn.on('click', function() {
@@ -40,16 +113,7 @@ jQuery(document).ready(function($) {
             multiple: false
         });
 
-        mediaUploader.on('select', function() {
-            const attachment = mediaUploader.state().get('selection').first().toJSON();
-            $('#tdep-featured-image-id').val(attachment.id);
-            $('#tdep-image-preview').html(`
-                <img src="${attachment.url}" alt="Preview">
-                <button type="button" class="tdep-remove-image">&times;</button>
-            `);
-            $('#tdep-upload-btn').hide();
-        });
-
+        mediaUploader.on('select', handleImageSelection);
         mediaUploader.open();
     });
 
@@ -82,67 +146,12 @@ jQuery(document).ready(function($) {
                 department: $('#tdep-department').val(),
                 featured_image_id: $('#tdep-featured-image-id').val()
             },
-            success: function(response) {
-                if (response.success) {
-                    modal.fadeOut(300);
-                    
-                    // Show success toast with view link
-                    const toast = $(`
-                        <div class="tdep-toast">
-                            <div class="tdep-toast-content">
-                                <div class="tdep-toast-message">สร้างโพสสำเร็จ</div>
-                                <a href="${response.data.post_url}" class="tdep-toast-link" target="_blank">ดูเนื้อหา</a>
-                            </div>
-                            <button class="tdep-toast-close">&times;</button>
-                        </div>
-                    `).appendTo('body');
-
-                    setTimeout(() => {
-                        toast.addClass('show');
-                    }, 100);
-
-                    // Auto close toast after 5 seconds
-                    setTimeout(() => {
-                        toast.removeClass('show');
-                        setTimeout(() => toast.remove(), 300);
-                    }, 5000);
-
-                    // Close toast on button click
-                    toast.find('.tdep-toast-close').on('click', function() {
-                        toast.removeClass('show');
-                        setTimeout(() => toast.remove(), 300);
-                    });
-
-                    resetForm();
-                } else {
-                    Swal.fire({
-                        title: 'ข้อผิดพลาด!',
-                        text: response.data.message,
-                        icon: 'error',
-                        confirmButtonColor: '#007bff'
-                    });
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    title: 'ข้อผิดพลาด!',
-                    text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
-                    icon: 'error',
-                    confirmButtonColor: '#007bff'
-                });
-            },
-            complete: function() {
+            success: handleAjaxSuccess,
+            error: () => showError('เกิดข้อผิดพลาดในการเชื่อมต่อ'),
+            complete: () => {
                 loadingOverlay.remove();
                 submitBtn.prop('disabled', false).text('บันทึก');
             }
         });
     });
-
-    // Reset form
-    function resetForm() {
-        form[0].reset();
-        $('#tdep-featured-image-id').val('');
-        $('#tdep-image-preview').empty();
-        $('#tdep-upload-btn').show();
-    }
 });

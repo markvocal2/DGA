@@ -1,677 +1,1050 @@
-jQuery(document).ready(function($) {
-    // Track selected post types
-    let selectedPostTypes = [];
-    let hasSelectedNews = false;
-    let currentUploadedImageId = 0;
+/**
+ * wp-user-manager.css
+ * Stylesheet for WP User Manager with a modern blue-orange-black color scheme.
+ * Refactored for clarity and maintainability.
+ */
 
-    // --- Helper Functions ---
+/* ==========================================================================
+   CSS Variables (Color Palette, Sizing, Effects)
+   ========================================================================== */
+:root {
+    /* Primary Color Scheme */
+    --primary-blue: #2563eb;
+    --primary-blue-dark: #1d4ed8;
+    --primary-blue-light: #60a5fa;
+    --primary-blue-lighter: #dbeafe;
 
-    /**
-     * Gets the current date in YYYY-MM-DD format.
-     * @returns {string} The formatted date string.
-     */
-    function getCurrentDate() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+    --accent-orange: #f97316;
+    --accent-orange-dark: #ea580c;
+    --accent-orange-light: #fdba74;
+    --accent-orange-lighter: #ffedd5;
+
+    /* Base Colors */
+    --text-primary: #111827;     /* Dark Gray for main text */
+    --text-secondary: #4b5563;   /* Medium Gray for secondary text */
+    --text-muted: #9ca3af;       /* Light Gray for muted text */
+    --text-white: #ffffff;
+
+    --bg-white: #ffffff;
+    --bg-light: #f9fafb;         /* Very Light Gray background */
+    --bg-gray: #f3f4f6;          /* Light Gray background */
+
+    --border-light: #e5e7eb;     /* Light border color */
+    --border-medium: #d1d5db;    /* Medium border color */
+
+    /* Effects */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Borders & Radius */
+    --radius-sm: 0.25rem;
+    --radius: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+
+    /* Transitions */
+    --transition: all 0.2s ease;
+    --transition-slow: all 0.3s ease;
+}
+
+/* ==========================================================================
+   Reset and Base Styles
+   ========================================================================== */
+.wp-user-manager-container *,
+.wp-user-manager-container *::before,
+.wp-user-manager-container *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.wp-user-manager-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-primary);
+    margin: 2rem auto; /* Center the container */
+    padding: 0;
+    line-height: 1.5;
+    max-width: 1200px; /* Set a max-width for larger screens */
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+
+/* ==========================================================================
+   Header Section (Title, Search, Filters)
+   ========================================================================== */
+.user-table-header {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1.25rem; /* Spacing between elements */
+    padding: 0 0.5rem; /* Add slight horizontal padding */
+}
+
+/* Header Title */
+.user-table-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    position: relative;
+    padding-left: 1rem; /* Space for the accent line */
+}
+
+/* Accent line before the title */
+.user-table-header h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.25rem;
+    width: 4px;
+    background-color: var(--accent-orange);
+    border-radius: var(--radius-sm);
+}
+
+/* Container for search and filter */
+.table-actions {
+    display: flex;
+    flex-wrap: wrap; /* Allow actions to wrap */
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* Search Box Styling */
+.search-box {
+    position: relative; /* Needed for absolute positioning of the icon */
+}
+
+/* Search Icon */
+.search-box::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234b5563'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    pointer-events: none; /* Prevent icon from interfering with input */
+}
+
+#user-search-input {
+    padding: 0.625rem 0.75rem 0.625rem 2.25rem; /* Left padding for icon */
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    font-size: 0.9rem;
+    width: 250px; /* Default width */
+    transition: var(--transition);
+    background-color: var(--bg-white);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+#user-search-input:focus {
+    outline: none;
+    border-color: var(--primary-blue-light);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Focus ring */
+}
+
+#user-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Role Filter Dropdown */
+#role-filter {
+    padding: 0.625rem 2rem 0.625rem 0.75rem; /* Right padding for arrow */
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    font-size: 0.9rem;
+    background-color: var(--bg-white);
+    transition: var(--transition);
+    color: var(--text-primary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    appearance: none; /* Remove default system appearance */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234b5563'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); /* Custom dropdown arrow */
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.25rem;
+}
+
+#role-filter:focus {
+    outline: none;
+    border-color: var(--primary-blue-light);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Focus ring */
+}
+
+/* ==========================================================================
+   User Table Styles
+   ========================================================================== */
+.user-table-wrapper {
+    overflow: hidden; /* Ensures border-radius clips content */
+    background-color: var(--bg-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-light);
+    position: relative; /* For the top accent border */
+}
+
+/* Top accent border */
+.user-table-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px; /* Thickness of the accent border */
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-orange) 100%);
+}
+
+.wp-user-table {
+    width: 100%;
+    border-collapse: separate; /* Allows border-spacing */
+    border-spacing: 0;
+    /* overflow: hidden; /* Redundant due to wrapper */
+}
+
+/* Table Header Cells */
+.wp-user-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    background-color: var(--bg-light); /* Slightly different background for header */
+    border-bottom: 1px solid var(--border-light);
+    position: sticky; /* Make header sticky */
+    top: 0; /* Stick to the top */
+    z-index: 10; /* Ensure header is above table content */
+}
+
+.wp-user-table th:first-child {
+    padding-left: 1.5rem; /* More padding for the first column */
+}
+
+.wp-user-table th:last-child {
+    text-align: right;
+    padding-right: 1.5rem; /* More padding for the last column (Actions) */
+}
+
+/* Table Body Cells */
+.wp-user-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    vertical-align: middle; /* Align cell content vertically */
+}
+
+.wp-user-table td:first-child {
+    padding-left: 1.5rem;
+}
+
+.wp-user-table td:last-child {
+    text-align: right;
+    padding-right: 1.5rem;
+}
+
+/* Remove bottom border from the last row */
+.wp-user-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Table Row Hover Effect */
+.wp-user-table tr {
+    transition: var(--transition);
+}
+
+.wp-user-table tbody tr:hover { /* Apply hover only to body rows */
+    background-color: var(--primary-blue-lighter);
+}
+
+/* User Info Cell (Avatar + Name/Email) */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem; /* Space between avatar and text */
+}
+
+/* Avatar Styling */
+.avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent avatar from shrinking */
+    border-radius: 50%; /* Circular avatar */
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+    position: relative;
+    overflow: hidden; /* Clip potential ::after element */
+    color: var(--text-white); /* Text color for initial */
+}
+
+/* Subtle shine effect on avatar */
+.avatar::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 15px;
+    height: 15px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+/* Initial Letter inside Avatar */
+.initial {
+    font-weight: 700;
+    font-size: 1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Slight shadow for readability */
+}
+
+/* Container for Username and Email */
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem; /* Small space between username and email */
+}
+
+.email {
+    font-size: 0.8125rem; /* Smaller font size for email */
+    color: var(--text-secondary);
+}
+
+/* Role Badge Styling */
+.role-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background-color: var(--primary-blue-lighter);
+    color: var(--primary-blue-dark);
+    border-radius: var(--radius-2xl); /* Pill shape */
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.2); /* Subtle inner border */
+    white-space: nowrap; /* Prevent badge text from wrapping */
+}
+
+/* Action Buttons Cell */
+.actions-cell {
+    white-space: nowrap; /* Prevent buttons from wrapping within the cell */
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 0.5rem; /* Space between buttons */
+}
+
+/* Common styles for action buttons */
+.edit-role-btn,
+.delete-user-btn {
+    padding: 0.5rem 0.875rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex; /* Align icon and text */
+    align-items: center;
+    gap: 0.375rem; /* Space between icon and text */
+}
+
+/* Edit Button Specific Styles */
+.edit-role-btn {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: var(--text-white);
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
+}
+
+.edit-role-btn:hover {
+    /* background-color: var(--primary-blue-dark); No need, gradient handles it */
+    transform: translateY(-1px); /* Slight lift on hover */
+    box-shadow: 0 3px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* Delete Button Specific Styles */
+.delete-user-btn {
+    background-color: var(--bg-white); /* White background */
+    border: 1px solid #fecaca; /* Light red border */
+    color: #ef4444; /* Red text */
+    box-shadow: 0 1px 2px rgba(239, 68, 68, 0.1);
+}
+
+.delete-user-btn:hover {
+    background-color: #fee2e2; /* Lighter red background on hover */
+    border-color: #fca5a5; /* Slightly darker red border on hover */
+    transform: translateY(-1px); /* Slight lift */
+}
+
+/* Icon used within buttons */
+.icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor; /* Use the button's text color */
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Loading and Empty States
+   ========================================================================== */
+
+/* Row shown during loading */
+.loading-row {
+    height: 130px; /* Approximate height of a regular row */
+    /* Styles applied to the <tr> element */
+}
+
+/* Cell containing the loader */
+.loading-cell {
+    text-align: center;
+    color: var(--text-secondary);
+    /* Styles applied to the <td> element */
+    /* colspan should be set in HTML to span all columns */
+}
+
+/* Loader Animation */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--primary-blue-lighter);
+    border-radius: 50%;
+    border-top-color: var(--primary-blue); /* Different color for spinning part */
+    animation: spin 1s linear infinite;
+    margin: 1rem auto 0.75rem; /* Center the loader */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Message shown when table is empty */
+.empty-message {
+    text-align: center;
+    padding: 2.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    /* Styles applied to the <td> element */
+    /* colspan should be set in HTML to span all columns */
+}
+
+/* Icon for empty state */
+.empty-message::before {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.75rem; /* Center the icon */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+}
+
+/* ==========================================================================
+   Pagination Styles
+   ========================================================================== */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 1rem; /* Space between info and controls */
+    padding: 0 0.5rem; /* Consistent horizontal padding */
+}
+
+/* Hide pagination if needed (e.g., only one page) */
+.pagination-container.hidden {
+    display: none;
+}
+
+/* Text showing current page info (e.g., "Showing 1-10 of 50") */
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Container for pagination buttons */
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem; /* Space between buttons */
+}
+
+/* Previous/Next buttons */
+.pagination-button {
+    padding: 0.5rem 0.875rem;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex; /* Align icon/text */
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-button:not(:disabled):hover {
+    background-color: var(--bg-light);
+    border-color: var(--border-medium);
+    transform: translateY(-2px); /* Enhanced hover lift */
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.15);
+}
+
+.pagination-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none; /* Remove shadow when disabled */
+}
+
+/* Arrow character within prev/next buttons */
+.arrow {
+    font-size: 0.75rem; /* Can adjust if using icon fonts */
+}
+
+/* Container for page number buttons */
+.page-numbers {
+    display: flex;
+    gap: 0.25rem; /* Small space between page numbers */
+}
+
+/* Individual page number button */
+.page-number {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-light);
+    background-color: var(--bg-white);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.page-number:hover {
+    background-color: var(--bg-light);
+    transform: translateY(-2px); /* Enhanced hover lift */
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.15);
+}
+
+/* Active page number button */
+.page-number.active {
+    background-color: var(--primary-blue);
+    color: var(--text-white);
+    border-color: var(--primary-blue);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    cursor: default; /* Not clickable */
+    transform: none; /* No lift for active */
+}
+
+/* Ellipsis (...) for skipped page numbers */
+.page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Modal Styles (Edit Role / Delete Confirmation)
+   ========================================================================== */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    inset: 0; /* Covers the entire viewport (top, right, bottom, left = 0) */
+    background-color: rgba(17, 24, 39, 0.6); /* Dark semi-transparent overlay */
+    z-index: 1000; /* High z-index to appear above everything */
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px); /* Frosted glass effect */
+    /* Use JS to add a class (e.g., 'modal-active') to display: flex */
+}
+
+.modal.active { /* Add this class via JS to show the modal */
+    display: flex;
+}
+
+/* Modal Content Box */
+.modal-content {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-xl);
+    max-width: 500px; /* Max width of the modal */
+    width: 90%; /* Responsive width */
+    max-height: 90vh; /* Max height relative to viewport */
+    overflow-y: auto; /* Add scrollbar if content exceeds max-height */
+    box-shadow: var(--shadow-lg);
+    position: relative; /* Changed from absolute for flex alignment */
+    /* transform: translate(-50%, -50%); /* No longer needed with flex centering */
+    animation: modal-appear 0.3s ease; /* Fade-in animation */
+}
+
+/* Modal fade-in animation */
+@keyframes modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.95); /* Slight scale-up effect */
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Close Button (Top Right) */
+.close-modal {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 28px; /* Slightly larger hit area */
+    height: 28px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--bg-light);
+    border: none; /* Ensure it looks like a button */
+    padding: 0; /* Reset padding */
+}
+
+.close-modal:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-gray);
+    transform: rotate(90deg); /* Add a subtle rotation on hover */
+}
+
+/* Close icon (using SVG for better scaling) */
+.close-modal svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+
+/* Modal Title */
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.375rem;
+    font-weight: 700;
+}
+
+/* Modal Paragraph Text */
+.modal p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Info box for user being edited/deleted */
+#edit-user-info,
+#delete-user-info {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+}
+
+#edit-user-info {
+    background-color: var(--bg-light);
+    border-left: 3px solid var(--primary-blue);
+    color: var(--text-secondary);
+}
+
+#delete-user-info {
+    background-color: #fee2e2; /* Light red background */
+    border-left: 3px solid #ef4444; /* Red border */
+    color: #b91c1c; /* Darker red text */
+}
+
+/* Container for role selection options */
+.role-options {
+    display: grid; /* Use grid for potentially better alignment */
+    gap: 0.625rem;
+    margin-bottom: 1.5rem;
+    max-height: 300px; /* Limit height and enable scroll */
+    overflow-y: auto;
+    /* Custom scrollbar styles */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) transparent;
+    padding-right: 5px; /* Space for scrollbar */
+}
+
+/* Custom scrollbar for Webkit browsers */
+.role-options::-webkit-scrollbar {
+    width: 6px;
+}
+.role-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+.role-options::-webkit-scrollbar-thumb {
+    background-color: var(--border-medium);
+    border-radius: 20px;
+}
+
+/* Individual Role Option */
+.role-option {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative; /* For the checkmark */
+    overflow: hidden; /* Ensure checkmark stays within bounds */
+    display: flex; /* Align text nicely */
+    align-items: center;
+}
+
+.role-option:hover {
+    border-color: var(--primary-blue-light);
+    background-color: var(--primary-blue-lighter);
+}
+
+/* Selected Role Option */
+.role-option.selected {
+    border-color: var(--accent-orange); /* Use accent color for selection */
+    background-color: var(--accent-orange-lighter); /* Lighter accent background */
+    font-weight: 500; /* Slightly bolder text */
+}
+
+/* Checkmark for selected role */
+.role-option.selected::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    /* SVG Checkmark using accent color */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M5 13l4 4L19 7'%3E%3C/path%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* Container for modal action buttons (Save, Cancel, Delete) */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 0.75rem;
+    margin-top: 1rem; /* Space above buttons */
+    padding-top: 1rem; /* Add padding if border needed */
+    border-top: 1px solid var(--border-light); /* Separator line */
+}
+
+/* Common styles for modal buttons */
+.cancel-button,
+.save-button,
+.delete-button { /* Note: .delete-button here is for the modal confirmation */
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-lg);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
+    border: none; /* Reset border */
+}
+
+/* Cancel Button */
+.cancel-button {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+}
+
+.cancel-button:hover {
+    background-color: var(--bg-gray);
+    border-color: var(--border-medium);
+}
+
+/* Save Button */
+.save-button {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: var(--text-white);
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
+}
+
+.save-button:hover {
+    /* background-color: var(--primary-blue-dark); No need, gradient handles it */
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* Delete Confirmation Button (in modal) */
+.delete-button {
+    background-color: #ef4444; /* Red background */
+    color: var(--text-white);
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+}
+
+.delete-button:hover {
+    background-color: #dc2626; /* Darker red on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================================================
+   Notification System (Toast Messages)
+   ========================================================================== */
+.notification {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-white);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transform: translateY(120%); /* Start off-screen */
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.3s ease; /* Smooth slide-in */
+    z-index: 2000; /* Above modals */
+    max-width: 400px;
+    width: calc(100% - 3rem); /* Responsive width */
+    border-left: 4px solid transparent; /* Placeholder for status color */
+}
+
+/* State when notification is visible */
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+    /* animation: pulse 0.3s ease-in-out forwards; /* Optional pulse effect */
+}
+
+/* Status indicator colors */
+.notification.success { border-left-color: var(--accent-orange); } /* Using orange for success */
+.notification.error   { border-left-color: #ef4444; } /* Red for error */
+.notification.warning { border-left-color: #f59e0b; } /* Yellow/Amber for warning */
+
+/* Notification message text */
+.notification-message {
+    flex: 1; /* Allow message to take available space */
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+/* Notification close button */
+.notification-close {
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    padding: 0;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.notification-close:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-gray);
+}
+
+/* Close icon (using simple '×') */
+.notification-close::before {
+    content: '×';
+    font-size: 1.5rem; /* Adjust size as needed */
+    line-height: 1;
+}
+
+/* Optional pulse animation for notification */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+
+/* ==========================================================================
+   Responsive Styles
+   ========================================================================== */
+
+/* Medium screens (Tablets) */
+@media (max-width: 768px) {
+    .user-table-header {
+        flex-direction: column; /* Stack header items vertically */
+        align-items: flex-start; /* Align items to the left */
+        gap: 1rem;
     }
 
-    /**
-     * Shows a toast notification.
-     * @param {string} message - The message to display.
-     * @param {Array|Object|null} posts - Optional post data for links.
-     */
-    function showToast(message, posts = null) {
-        // Remove existing toast
-        $('.at-toast').remove();
-
-        // Create post links if available
-        let linksHTML = '';
-        const postTypeLabels = {
-            'article': 'บทความ',
-            'mpeople': 'คู่มือประชาชน',
-            'news': 'ข้อมูลทั่วไป',
-            'pha': 'ประชาพิจารณ์และกิจกรรม'
-        };
-
-        if (Array.isArray(posts)) {
-            linksHTML = posts.map(post =>
-                `<a href="${post.url}" class="at-toast-link" target="_blank">
-                    ดู${postTypeLabels[post.type] || 'รายการ'}
-                 </a>`
-            ).join('');
-        } else if (posts && posts.post_url) {
-            // Backward compatibility for single post URL
-            linksHTML = `<a href="${posts.post_url}" class="at-toast-link" target="_blank">ดูบทความ</a>`;
-        }
-
-        // Create toast HTML
-        const toastHTML = `
-            <div class="at-toast">
-                <div class="at-toast-message">${message}</div>
-                <div class="at-toast-links">${linksHTML}</div>
-            </div>
-        `;
-
-        $('body').append(toastHTML);
-
-        // Auto remove toast after 5 seconds
-        setTimeout(function() {
-            $('.at-toast').fadeOut(300, function() { $(this).remove(); });
-        }, 5000);
+    .table-actions {
+        width: 100%; /* Make actions take full width */
+        flex-direction: column; /* Stack search and filter */
+        align-items: stretch; /* Make inputs full width */
+        gap: 0.75rem;
     }
 
-    /**
-     * Resets the entire article submission form to its initial state.
-     */
-    function resetForm() {
-        $('#at-article-form')[0].reset();
-        $('#image-preview').empty();
-        $('.at-post-type-error').hide();
-
-        // รีเซ็ต featured image
-        currentUploadedImageId = 0;
-        $('#featured_image_id').val(0);
-
-        // รีเซ็ต taxonomy container
-        $('#taxonomy-terms-container').html('<div class="at-taxonomy-placeholder">กรุณาเลือกประเภทเนื้อหาก่อน เพื่อแสดงหมวดหมู่ที่เกี่ยวข้อง</div>');
-
-        // ซ่อน fields มาตรฐาน
-        $('#standards-fields-container').hide();
-        $('#dga-standard-field, #dgth-standard-field').hide();
-        $('#dga_standard_number, #dgth_standard_number').val('');
-
-        // Reset documents section
-        $('#documents-section').show();
-        $('#toggle-documents')
-            .data('state', 'show')
-            .removeClass('at-toggle-btn-active');
-
-        // Reset file repeater
-        $('#file-repeater-container').html(`
-            <div class="file-repeater-row">
-                <input type="text" name="file_name[]" placeholder="ชื่อไฟล์">
-                <input type="date" name="file_date[]" value="${getCurrentDate()}">
-                <input type="file" name="file_upload[]" accept=".pdf,.doc,.docx">
-                <button type="button" class="remove-row">ลบ</button>
-            </div>
-        `);
-
-        // Reset post type selections
-        selectedPostTypes = [];
-        hasSelectedNews = false;
-        $('input[name="post_types[]"]').prop('checked', false);
-
-        // Reset TinyMCE editor if available
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.get('article_content')) {
-            tinyMCE.get('article_content').setContent('');
-        }
+    #user-search-input,
+    #role-filter {
+        width: 100%; /* Full width inputs */
     }
 
-    // --- Taxonomy Handling ---
-
-    /**
-     * Loads taxonomy terms based on selected post types via AJAX.
-     */
-    function loadTaxonomyTerms() {
-        if (selectedPostTypes.length === 0) return;
-
-        // แสดง loading indicator
-        $('#taxonomy-terms-container').html('<div class="at-loading">กำลังโหลดหมวดหมู่...</div>');
-
-        $.ajax({
-            url: atAjax.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'get_post_type_taxonomies',
-                post_types: selectedPostTypes,
-                nonce: atAjax.nonce
-            },
-            success: handleTaxonomyLoadSuccess,
-            error: handleTaxonomyLoadError
-        });
+    /* Stack action buttons vertically in table on small screens */
+    .actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end; /* Keep buttons aligned right */
+        white-space: normal; /* Allow wrapping if needed */
     }
 
-    /**
-     * Handles the successful response from loading taxonomies.
-     * @param {Object} response - The AJAX response object.
-     */
-    function handleTaxonomyLoadSuccess(response) {
-        if (response.success) {
-            displayTaxonomyTerms(response.data);
-            // ตรวจสอบ terms หลังจากโหลดและแสดงผล
-            // Use setTimeout to allow the DOM to update before checking
-            setTimeout(checkStandardTerms, 100); // Small delay
-        } else {
-            $('#taxonomy-terms-container').html('<div class="at-taxonomy-error">ไม่สามารถโหลดหมวดหมู่ได้ กรุณาลองใหม่อีกครั้ง</div>');
-        }
+    .edit-role-btn,
+    .delete-user-btn {
+        width: auto; /* Allow buttons to size based on content */
+        justify-content: flex-start; /* Align text/icon left */
+        padding: 0.5rem 0.75rem; /* Adjust padding slightly */
     }
 
-    /**
-     * Handles errors during the taxonomy loading AJAX call.
-     */
-    function handleTaxonomyLoadError() {
-        $('#taxonomy-terms-container').html('<div class="at-taxonomy-error">การเชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง</div>');
+    .pagination-container {
+        flex-direction: column; /* Stack pagination info and controls */
+        align-items: center; /* Center items */
+        gap: 1rem;
     }
 
-    /**
-     * Displays the loaded taxonomy terms in the UI.
-     * @param {Object} taxonomiesData - Data containing taxonomies grouped by post type.
-     */
-    function displayTaxonomyTerms(taxonomiesData) {
-        const $container = $('#taxonomy-terms-container');
-        $container.empty();
-
-        if (Object.keys(taxonomiesData).length === 0) {
-            $container.html('<div class="at-taxonomy-empty">ไม่พบหมวดหมู่สำหรับประเภทเนื้อหาที่เลือก</div>');
-            return;
-        }
-
-        // ชื่อประเภทเนื้อหาในภาษาไทย
-        const postTypeLabels = {
-            'article': 'บทความ',
-            'mpeople': 'คู่มือประชาชน',
-            'news': 'ข้อมูลทั่วไป/มาตรฐาน',
-            'pha': 'ประชาพิจารณ์และกิจกรรม'
-        };
-
-        // Build HTML for each taxonomy and its terms
-        Object.keys(taxonomiesData).forEach(postType => {
-            const taxonomies = taxonomiesData[postType];
-            if (!taxonomies || taxonomies.length === 0) return;
-
-            taxonomies.forEach(taxonomy => {
-                const terms = taxonomy.terms;
-                if (!terms || terms.length === 0) return;
-
-                const taxonomyHeader = `<div class="at-taxonomy-header">
-                    <span class="at-taxonomy-post-type">${postTypeLabels[postType] || postType}</span>
-                    <span class="at-taxonomy-label">${taxonomy.label}</span>
-                </div>`;
-
-                const termsList = `<div class="at-terms-list">
-                    ${terms.map(term => `
-                        <label class="at-term-label" data-term-name="${term.name}">
-                            <input type="checkbox" name="tax_input[${taxonomy.name}][]" value="${parseInt(term.id)}" class="at-term-checkbox">
-                            <span class="at-term-name">${term.name}</span>
-                        </label>
-                    `).join('')}
-                </div>`;
-
-                $container.append(`
-                    <div class="at-taxonomy-group" data-post-type="${postType}" data-taxonomy="${taxonomy.name}">
-                        ${taxonomyHeader}
-                        ${termsList}
-                    </div>
-                `);
-            });
-        });
+    .pagination-info {
+        text-align: center;
     }
 
-    /**
-     * Checks selected taxonomy terms (specifically for 'news' post type)
-     * and shows/hides related standard number input fields.
-     */
-    function checkStandardTerms() {
-        // Start by hiding both fields
-        $('#dga-standard-field, #dgth-standard-field').hide();
+    .pagination-controls {
+        width: 100%;
+        justify-content: center; /* Center pagination buttons */
+    }
 
-        if (!hasSelectedNews) return; // Only proceed if 'news' is selected
+     /* Hide less important columns or reduce padding if needed */
+    /* Example: Hiding email column (adjust based on needs) */
+    /*
+    .wp-user-table th:nth-child(3),
+    .wp-user-table td:nth-child(3) {
+        display: none;
+    }
+    */
+}
 
-        // Check which standard terms are selected within the 'news' post type's taxonomies
-        $('.at-taxonomy-group[data-post-type="news"] .at-term-checkbox:checked').each(function() {
-            const termName = $(this).closest('.at-term-label').data('term-name');
+/* Small screens (Mobiles) */
+@media (max-width: 480px) {
+    .wp-user-manager-container {
+        margin: 1rem auto; /* Reduce margin on small screens */
+    }
 
-            if (termName === 'มาตรฐานสำนักงานพัฒนารัฐบาลดิจิทัล (มสพร.)') {
-                $('#dga-standard-field').slideDown(300);
-            }
+    /* Hide page numbers, keep prev/next */
+    .page-numbers {
+        display: none;
+    }
+    .page-ellipsis {
+        display: none;
+    }
 
-            if (termName === 'มาตรฐานรัฐบาลดิจิทัล (มรด.)') {
-                $('#dgth-standard-field').slideDown(300);
-            }
-        });
+    .pagination-controls {
+        justify-content: space-between; /* Space out prev/next buttons */
+        gap: 0.5rem; /* Ensure some gap */
+    }
+    .pagination-button {
+        flex-grow: 1; /* Allow prev/next to grow */
+        justify-content: center; /* Center text/icon */
     }
 
 
-    // --- Featured Image Upload Handling ---
-
-    /**
-     * Shows an error message in the image preview area.
-     * @param {string} message - The error message to display.
-     */
-    function showImageUploadError(message) {
-        $('#image-preview').html(`
-            <div class="preview-error">
-                <p>${message}</p>
-            </div>
-        `);
-        // Clear the file input
-        $('#article_images').val('');
-        currentUploadedImageId = 0; // Reset ID if upload failed
-        $('#featured_image_id').val(0);
+    /* Reduce padding in table cells */
+    .wp-user-table th,
+    .wp-user-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem; /* Slightly smaller font */
     }
 
-    /**
-     * Handles the progress event during image upload.
-     * @param {ProgressEvent} e - The progress event object.
-     */
-    function handleImageUploadProgress(e) {
-        if (e.lengthComputable) {
-            const percent = Math.round((e.loaded / e.total) * 100);
-            $('.upload-progress-bar').css('width', percent + '%');
-            $('.upload-message').text(`กำลังอัพโหลด... ${percent}%`);
-        }
+    .wp-user-table th:first-child,
+    .wp-user-table td:first-child {
+        padding-left: 0.75rem;
     }
 
-    /**
-     * Handles the successful response from the image upload AJAX call.
-     * @param {Object} response - The AJAX response object.
-     */
-    function handleImageUploadSuccess(response) {
-        if (response.success) {
-            // Save the ID of the uploaded image
-            currentUploadedImageId = response.data.attachment_id;
-            $('#featured_image_id').val(currentUploadedImageId);
-
-            // Display the preview of the uploaded image
-            $('#image-preview').html(`
-                <div class="preview-item">
-                    <img src="${response.data.thumbnail}" alt="ตัวอย่างภาพหน้าปก">
-                    <div class="preview-info">
-                        <div class="preview-name">${response.data.filename}</div>
-                        <div class="preview-size">${response.data.filesize}</div>
-                    </div>
-                    <button type="button" class="remove-image" title="ลบภาพ">×</button>
-                </div>
-            `);
-        } else {
-            showImageUploadError(response.data.message || 'เกิดข้อผิดพลาดในการอัพโหลดภาพ');
-        }
+    .wp-user-table th:last-child,
+    .wp-user-table td:last-child {
+        padding-right: 0.75rem;
     }
 
-    /**
-     * Handles errors during the image upload AJAX call.
-     */
-    function handleImageUploadError() {
-        showImageUploadError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
+    /* Adjust user info layout */
+    .user-info {
+        gap: 0.5rem;
+    }
+    .avatar {
+        width: 32px;
+        height: 32px;
+    }
+    .initial {
+        font-size: 0.875rem;
+    }
+    .username {
+        font-size: 0.9rem;
+    }
+    .email {
+        font-size: 0.75rem;
     }
 
-    /**
-     * Uploads the selected featured image file via AJAX.
-     * @param {File} file - The image file to upload.
-     */
-    function uploadFeaturedImage(file) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            showImageUploadError('กรุณาอัพโหลดไฟล์ภาพเท่านั้น (JPEG, PNG, GIF)');
-            return;
-        }
-
-        // Show uploading status
-        $('#image-preview').html(`
-            <div class="upload-status">
-                <div class="upload-progress">
-                    <div class="upload-progress-bar"></div>
-                </div>
-                <div class="upload-message">กำลังอัพโหลดภาพ...</div>
-            </div>
-        `);
-
-        // Create FormData
-        const formData = new FormData();
-        formData.append('action', 'at_upload_featured_image');
-        formData.append('nonce', atAjax.nonce);
-        formData.append('file', file);
-
-        // Perform AJAX upload
-        $.ajax({
-            url: atAjax.ajaxurl,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            xhr: function() {
-                const xhr = $.ajaxSettings.xhr();
-                if (xhr.upload) {
-                    xhr.upload.addEventListener('progress', handleImageUploadProgress, false);
-                }
-                return xhr;
-            },
-            success: handleImageUploadSuccess,
-            error: handleImageUploadError
-        });
+    /* Adjust modal padding */
+    .modal-content {
+        padding: 1.5rem;
+        width: calc(100% - 2rem); /* Ensure some margin */
+    }
+    .modal h2 {
+        font-size: 1.25rem;
+    }
+    .modal-actions {
+        flex-direction: column; /* Stack modal buttons */
+        gap: 0.5rem;
+    }
+    .cancel-button,
+    .save-button,
+    .delete-button {
+        width: 100%; /* Full width modal buttons */
     }
 
-    // --- Drag and Drop Image Upload ---
-
-    /**
-     * Prevents default browser behavior for drag/drop events.
-     * @param {Event} e - The event object.
-     */
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    /* Adjust notification position */
+    .notification {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        width: auto; /* Let it span */
+        max-width: none;
     }
-
-    /**
-     * Adds a highlight class to the drop area.
-     */
-    function highlightDropArea() {
-        $('#image-upload-area').addClass('highlight');
-    }
-
-    /**
-     * Removes the highlight class from the drop area.
-     */
-    function unhighlightDropArea() {
-        $('#image-upload-area').removeClass('highlight');
-    }
-
-    /**
-     * Handles the drop event, initiating the upload.
-     * @param {DragEvent} e - The drop event object.
-     */
-    function handleDrop(e) {
-        const dt = e.originalEvent.dataTransfer; // Use originalEvent for jQuery event
-        const files = dt.files;
-
-        if (files.length > 0) {
-            // Upload the first dropped file immediately
-            uploadFeaturedImage(files[0]);
-        }
-    }
-
-    // --- Form Submission Handling ---
-
-    /**
-     * Handles the successful response from the form submission AJAX call.
-     * @param {Object} response - The AJAX response object.
-     */
-    function handleFormSubmitSuccess(response) {
-        if (response.success) {
-            // Show success message with links to all created posts
-            let message = response.data.message;
-            showToast(message, response.data.posts);
-            resetForm();
-            $('#at-article-modal').removeClass('show');
-        } else {
-            showToast('เกิดข้อผิดพลาด: ' + (response.data || 'กรุณาลองใหม่อีกครั้ง'));
-        }
-    }
-
-    /**
-     * Handles errors during the form submission AJAX call.
-     * @param {jqXHR} xhr - The jQuery XHR object.
-     */
-    function handleFormSubmitError(xhr) {
-        let errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง';
-        try {
-            // Try to parse the response text for a more specific error
-            const response = JSON.parse(xhr.responseText);
-            if (response.data) {
-                errorMsg = 'เกิดข้อผิดพลาด: ' + response.data;
-            }
-        } catch (e) {
-            // Ignore parsing errors, use the default message
-        }
-        showToast(errorMsg);
-    }
-
-    /**
-     * Re-enables the submit button after the AJAX call completes.
-     */
-    function handleFormSubmitComplete() {
-        $('.at-submit-btn')
-            .prop('disabled', false)
-            .text('บันทึกข้อมูล');
-    }
-
-
-    // --- Initial Setup and Event Listeners ---
-
-    // Force scroll to top when page loads
-    $(window).scrollTop(0);
-
-    // Prevent automatic scrolling on history navigation
-    if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-    }
-
-    // Modal Handling
-    $('.at-add-article-btn').click(function(e) {
-        e.preventDefault();
-        $('#at-article-modal').addClass('show');
-        $(window).scrollTop(0); // Force scroll to top when modal opens
-        $('.at-post-type-error').hide(); // Reset error message
-    });
-
-    $('.at-close').click(function() {
-        $('#at-article-modal').removeClass('show');
-        resetForm();
-    });
-
-    $(window).click(function(e) {
-        if ($(e.target).is('#at-article-modal')) {
-            $('#at-article-modal').removeClass('show');
-            resetForm();
-        }
-    });
-
-    // Post Type Selection Handling
-    $('input[name="post_types[]"]').change(function() {
-        selectedPostTypes = $('input[name="post_types[]"]:checked').map(function() {
-            return $(this).val();
-        }).get();
-
-        hasSelectedNews = selectedPostTypes.includes('news');
-
-        // Show/hide standard fields container based on 'news' selection
-        if (hasSelectedNews) {
-            $('#standards-fields-container').slideDown(300);
-            // Check terms immediately in case 'news' was just selected
-            // and relevant terms might already be checked (e.g., if user unchecks/rechecks news)
-            checkStandardTerms();
-        } else {
-            $('#standards-fields-container').slideUp(300);
-            // Reset standard fields if 'news' is deselected
-            $('#dga_standard_number, #dgth_standard_number').val('');
-            $('#dga-standard-field, #dgth-standard-field').hide();
-        }
-
-        // Load taxonomies or show placeholder/error
-        if (selectedPostTypes.length > 0) {
-            $('.at-post-type-error').hide();
-            loadTaxonomyTerms();
-        } else {
-            $('.at-post-type-error').show().text('กรุณาเลือกอย่างน้อย 1 ประเภทเนื้อหา');
-            $('#taxonomy-terms-container').html('<div class="at-taxonomy-placeholder">กรุณาเลือกประเภทเนื้อหาก่อน เพื่อแสดงหมวดหมู่ที่เกี่ยวข้อง</div>');
-            // Hide standard fields container if no post types are selected
-             $('#standards-fields-container').slideUp(300);
-             $('#dga_standard_number, #dgth_standard_number').val('');
-             $('#dga-standard-field, #dgth-standard-field').hide();
-        }
-    });
-
-    // Taxonomy Term Selection Handling (Event Delegation)
-    $(document).on('change', '.at-term-checkbox', function() {
-        // Only run checkStandardTerms if 'news' is one of the selected post types
-        if (hasSelectedNews) {
-            checkStandardTerms();
-        }
-    });
-
-    // Toggle Documents Section
-    $('#toggle-documents').click(function() {
-        const $btn = $(this);
-        const $section = $('#documents-section');
-        const currentState = $btn.data('state') || 'show'; // Default to 'show' if not set
-
-        if (currentState === 'show') {
-            $section.slideUp(300);
-            $btn.data('state', 'hide').addClass('at-toggle-btn-active');
-            // Clear all file inputs and make them not required when hiding
-            $section.find('input[type="file"]').prop('required', false).val('');
-            $section.find('input[type="text"]').val(''); // Clear names too if desired
-            $section.find('input[type="date"]').val(getCurrentDate()); // Reset date
-        } else {
-            $section.slideDown(300);
-            $btn.data('state', 'show').removeClass('at-toggle-btn-active');
-            // Optionally make file inputs required again if needed when shown
-            // $section.find('input[type="file"]').prop('required', true);
-        }
-    });
-
-    // File Repeater Handling
-    $('#add-file-row').click(function() {
-        const newRow = `
-            <div class="file-repeater-row">
-                <input type="text" name="file_name[]" placeholder="ชื่อไฟล์">
-                <input type="date" name="file_date[]" value="${getCurrentDate()}">
-                <input type="file" name="file_upload[]" accept=".pdf,.doc,.docx">
-                <button type="button" class="remove-row">ลบ</button>
-            </div>
-        `;
-        $('#file-repeater-container').append(newRow);
-    });
-
-    // Remove File Row (Event Delegation)
-    $(document).on('click', '.remove-row', function() {
-        $(this).closest('.file-repeater-row').fadeOut(300, function() {
-            $(this).remove();
-        });
-    });
-
-    // Featured Image Input Change
-    $('#article_images').on('change', function(e) {
-        if (this.files && this.files.length > 0) {
-            uploadFeaturedImage(this.files[0]);
-        }
-    });
-
-    // Setup Drag and Drop for Image Upload
-    const dropArea = $('#image-upload-area'); // Use jQuery selector
-    if (dropArea.length) { // Check if element exists
-        // Prevent default behaviors
-        dropArea.on('dragenter dragover dragleave drop', preventDefaults);
-        // Highlight on drag over
-        dropArea.on('dragenter dragover', highlightDropArea);
-        // Unhighlight on drag leave or drop
-        dropArea.on('dragleave drop', unhighlightDropArea);
-        // Handle dropped files
-        dropArea.on('drop', handleDrop);
-    }
-
-    // Remove Featured Image (Event Delegation)
-    $(document).on('click', '.remove-image', function() {
-        $('#image-preview').empty();
-        $('#article_images').val(''); // Clear file input
-        currentUploadedImageId = 0;
-        $('#featured_image_id').val(0);
-    });
-
-    // Form Submission
-    $('#at-article-form').submit(function(e) {
-        e.preventDefault();
-
-        // Re-validate post type selection on submit
-        selectedPostTypes = $('input[name="post_types[]"]:checked').map(function() {
-            return $(this).val();
-        }).get();
-
-        if (selectedPostTypes.length === 0) {
-            $('.at-post-type-error')
-                .text('กรุณาเลือกอย่างน้อย 1 ประเภทเนื้อหา')
-                .show();
-            // Scroll to the error message for better visibility
-             $('html, body').animate({
-                scrollTop: $(".at-post-type-error").offset().top - 100 // Adjust offset as needed
-            }, 300);
-            return; // Stop submission
-        } else {
-             $('.at-post-type-error').hide(); // Hide error if fixed
-        }
-
-
-        // Validate article title
-        if (!$('#article_title').val().trim()) {
-             // Use the showToast function for consistency, or a more prominent alert
-            showToast('กรุณาระบุชื่อบทความ');
-            // alert('กรุณาระบุชื่อบทความ'); // Alternative
-            $('#article_title').focus();
-             $('html, body').animate({
-                scrollTop: $("#article_title").offset().top - 100 // Adjust offset as needed
-            }, 300);
-            return; // Stop submission
-        }
-
-        // Ensure featured_image_id is set correctly before creating FormData
-        $('#featured_image_id').val(currentUploadedImageId); // Set value just in case
-
-        const formData = new FormData(this);
-        formData.append('action', 'submit_article');
-        // Add nonce explicitly if not already part of the form
-        if (!formData.has('nonce')) {
-             formData.append('nonce', atAjax.nonce);
-        }
-
-
-        // Remove empty file uploads if documents section is hidden ('hide' state)
-        if ($('#toggle-documents').data('state') === 'hide') {
-            // Need to iterate and remove specifically named fields if using FormData directly
-            // A simpler approach might be to disable the inputs when hidden,
-            // as disabled inputs are not typically included in form submission.
-            // However, FormData captures current values, so explicit removal is safer here.
-
-            // Find indices of file inputs to remove corresponding name/date
-             const fileInputs = $('#documents-section').find('input[type="file"]');
-             const fileNames = formData.getAll('file_name[]');
-             const fileDates = formData.getAll('file_date[]');
-             const fileUploads = formData.getAll('file_upload[]'); // Get actual files
-
-             // Create new arrays excluding entries where the file input was empty
-             const newFileNames = [];
-             const newFileDates = [];
-             const newFileUploads = [];
-
-             fileInputs.each(function(index) {
-                 // Check if the corresponding file object has a name (meaning a file was selected)
-                 if (fileUploads[index] && fileUploads[index].name) {
-                     newFileNames.push(fileNames[index]);
-                     newFileDates.push(fileDates[index]);
-                     newFileUploads.push(fileUploads[index]);
-                 }
-             });
-
-             // Delete old arrays and append new ones
-             formData.delete('file_name[]');
-             formData.delete('file_date[]');
-             formData.delete('file_upload[]');
-
-             newFileNames.forEach(name => formData.append('file_name[]', name));
-             newFileDates.forEach(date => formData.append('file_date[]', date));
-             newFileUploads.forEach(file => formData.append('file_upload[]', file));
-
-        }
-
-
-        // Disable submit button and show loading state
-        $('.at-submit-btn')
-            .prop('disabled', true)
-            .html('<span class="spinner"></span> กำลังบันทึก...');
-
-        // Perform AJAX submission
-        $.ajax({
-            url: atAjax.ajaxurl,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: handleFormSubmitSuccess,
-            error: handleFormSubmitError,
-            complete: handleFormSubmitComplete
-        });
-    });
-
-});
+}

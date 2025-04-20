@@ -155,19 +155,16 @@
 
 /* --- Responsive --- */
 @media screen and (max-width: 782px) {
-    .ckan-log-wrapper .wp-list-table .column-user,
-    .ckan-log-wrapper .wp-list-table .column-timestamp {
-         /* Decide if you want to hide columns on smaller screens */
-         /* display: none; */
-    }
+    /* Removed commented-out display:none rule here */
+
      .ckan-log-wrapper .wp-list-table td,
      .ckan-log-wrapper .wp-list-table th {
-        font-size: 12px;
-        padding: 6px 8px;
-    }
+         font-size: 12px;
+         padding: 6px 8px;
+     }
      .ckan-log-wrapper h2 {
-        font-size: 18px;
-    }
+         font-size: 18px;
+     }
 }
 
 /* --- Activity Icon in Term List --- */

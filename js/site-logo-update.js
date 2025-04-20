@@ -1,53 +1,53 @@
 // site-logo-update.js
-jQuery(document).ready(function($) {
+jQuery(document).ready(($) => {
     // Variables
-    var mediaUploader;
-    var activeTab = 'white'; // Default tab is white background
+    let mediaUploader;
+    let activeTab = 'white'; // Default tab is white background
     
     // Maps for background types
-    var backgroundIdMap = {
+    const backgroundIdMap = {
         'white': '#site-logo-image-white',
         'dark': '#site-logo-image-dark',
         'transparent': '#site-logo-image-transparent'
     };
     
-    var placeholderIdMap = {
+    const placeholderIdMap = {
         'white': '#site-logo-placeholder-white',
         'dark': '#site-logo-placeholder-dark',
         'transparent': '#site-logo-placeholder-transparent'
     };
     
-    var containerIdMap = {
+    const containerIdMap = {
         'white': '#site-logo-container-white',
         'dark': '#site-logo-container-dark',
         'transparent': '#site-logo-container-transparent'
     };
     
-    var previewAreaIdMap = {
+    const previewAreaIdMap = {
         'white': '#site-logo-preview-white',
         'dark': '#site-logo-preview-dark',
         'transparent': '#site-logo-preview-transparent'
     };
     
-    var selectButtonIdMap = {
+    const selectButtonIdMap = {
         'white': '#site-logo-select-white',
         'dark': '#site-logo-select-dark',
         'transparent': '#site-logo-select-transparent'
     };
     
-    var saveButtonIdMap = {
+    const saveButtonIdMap = {
         'white': '#site-logo-save-white',
         'dark': '#site-logo-save-dark',
         'transparent': '#site-logo-save-transparent'
     };
     
-    var backgroundNameMap = {
+    const backgroundNameMap = {
         'white': 'ขาว',
         'dark': 'สีเข้ม',
         'transparent': 'โปร่งใส'
     };
     
-    var shortcodeModeMap = {
+    const shortcodeModeMap = {
         'white': 'dark',
         'dark': 'light',
         'transparent': 'transparent'
@@ -62,7 +62,7 @@ jQuery(document).ready(function($) {
     // Function to initialize tab switching
     function initTabSwitching() {
         $('.site-logo-tab').on('click', function() {
-            var tabId = $(this).data('tab');
+            const tabId = $(this).data('tab');
             
             // Update active tab
             $('.site-logo-tab').removeClass('active');
@@ -70,7 +70,7 @@ jQuery(document).ready(function($) {
             
             // Update active content
             $('.site-logo-content').removeClass('active');
-            $('.site-logo-content[data-content="' + tabId + '"]').addClass('active');
+            $(`.site-logo-content[data-content="${tabId}"]`).addClass('active');
             
             // Update active tab variable
             activeTab = tabId;
@@ -80,13 +80,13 @@ jQuery(document).ready(function($) {
     // Function to initialize select buttons
     function initSelectButtons() {
         // Initialize select buttons for each background type
-        Object.keys(selectButtonIdMap).forEach(function(bgType) {
-            $(selectButtonIdMap[bgType]).on('click', function() {
+        Object.keys(selectButtonIdMap).forEach((bgType) => {
+            $(selectButtonIdMap[bgType]).on('click', () => {
                 openMediaUploader(bgType);
             });
             
             // Make preview area clickable to select logo
-            $(previewAreaIdMap[bgType]).on('click', function() {
+            $(previewAreaIdMap[bgType]).on('click', () => {
                 openMediaUploader(bgType);
             });
         });
@@ -95,12 +95,12 @@ jQuery(document).ready(function($) {
     // Function to open media uploader for specific background type
     function openMediaUploader(bgType) {
         // Set active tab to match background type
-        $('.site-logo-tab[data-tab="' + bgType + '"]').click();
+        $(`.site-logo-tab[data-tab="${bgType}"]`).click();
         
         // Create media uploader if not exists
         if (!mediaUploader) {
             mediaUploader = wp.media({
-                title: 'เลือกโลโก้สำหรับพื้นหลัง' + backgroundNameMap[bgType],
+                title: `เลือกโลโก้สำหรับพื้นหลัง${backgroundNameMap[bgType]}`,
                 button: {
                     text: 'ใช้เป็นโลโก้'
                 },
@@ -111,14 +111,14 @@ jQuery(document).ready(function($) {
             });
             
             // When an image is selected
-            mediaUploader.on('select', function() {
-                var attachment = mediaUploader.state().get('selection').first().toJSON();
+            mediaUploader.on('select', () => {
+                const attachment = mediaUploader.state().get('selection').first().toJSON();
                 updateLogoPreview(bgType, attachment);
             });
         } else {
             // Update title
             mediaUploader.uploader.uploader.param('post_id', null);
-            mediaUploader.options.title = 'เลือกโลโก้สำหรับพื้นหลัง' + backgroundNameMap[bgType];
+            mediaUploader.options.title = `เลือกโลโก้สำหรับพื้นหลัง${backgroundNameMap[bgType]}`;
             mediaUploader.options.button.text = 'ใช้เป็นโลโก้';
         }
         
@@ -136,15 +136,15 @@ jQuery(document).ready(function($) {
             
             // Create container if not exists
             if (!$(containerIdMap[bgType]).length) {
-                $(previewAreaIdMap[bgType]).append('<div class="site-logo-image-container" id="' + containerIdMap[bgType].substring(1) + '"></div>');
+                $(previewAreaIdMap[bgType]).append(`<div class="site-logo-image-container" id="${containerIdMap[bgType].substring(1)}"></div>`);
             }
             
             // Add image to container
-            $(containerIdMap[bgType]).html('<img src="' + attachment.url + '" alt="โลโก้พื้นหลัง' + backgroundNameMap[bgType] + '" id="' + backgroundIdMap[bgType].substring(1) + '" />');
+            $(containerIdMap[bgType]).html(`<img src="${attachment.url}" alt="โลโก้พื้นหลัง${backgroundNameMap[bgType]}" id="${backgroundIdMap[bgType].substring(1)}" />`);
             
             // Add overlay if not exists
-            if (!$(previewAreaIdMap[bgType] + ' .site-logo-overlay').length) {
-                $(previewAreaIdMap[bgType]).append('<div class="site-logo-overlay"><span>โลโก้สำหรับพื้นหลัง' + backgroundNameMap[bgType] + '</span></div>');
+            if (!$(`${previewAreaIdMap[bgType]} .site-logo-overlay`).length) {
+                $(previewAreaIdMap[bgType]).append(`<div class="site-logo-overlay"><span>โลโก้สำหรับพื้นหลัง${backgroundNameMap[bgType]}</span></div>`);
             }
         }
         
@@ -158,8 +158,8 @@ jQuery(document).ready(function($) {
     // Function to initialize save buttons
     function initSaveButtons() {
         // Initialize save buttons for each background type
-        Object.keys(saveButtonIdMap).forEach(function(bgType) {
-            $(saveButtonIdMap[bgType]).on('click', function() {
+        Object.keys(saveButtonIdMap).forEach((bgType) => {
+            $(saveButtonIdMap[bgType]).on('click', () => {
                 saveLogoForBackground(bgType);
             });
         });
@@ -167,17 +167,17 @@ jQuery(document).ready(function($) {
     
     // Function to save logo for specific background
     function saveLogoForBackground(bgType) {
-        var $container = $(containerIdMap[bgType]);
+        const $container = $(containerIdMap[bgType]);
         
         if (!$container.length || !$container.data('attachment-id')) {
             showMessage('กรุณาเลือกรูปภาพก่อน', 'error');
             return;
         }
         
-        var attachmentId = $container.data('attachment-id');
+        const attachmentId = $container.data('attachment-id');
         
         // Show loading state
-        var $saveButton = $(saveButtonIdMap[bgType]);
+        const $saveButton = $(saveButtonIdMap[bgType]);
         $saveButton.prop('disabled', true).text('กำลังบันทึก...');
         
         // Send AJAX request
@@ -190,15 +190,15 @@ jQuery(document).ready(function($) {
                 nonce: siteLogoUpdateData.nonce,
                 background_type: bgType
             },
-            success: function(response) {
+            success: (response) => {
                 if (response.success) {
                     // Show success message
-                    showMessage('บันทึกโลโก้สำหรับพื้นหลัง' + backgroundNameMap[bgType] + 'เรียบร้อยแล้ว', 'success');
+                    showMessage(`บันทึกโลโก้สำหรับพื้นหลัง${backgroundNameMap[bgType]}เรียบร้อยแล้ว`, 'success');
                     
                     // Create success banner with shortcode info
-                    var successBanner = '<div class="site-logo-success-banner">';
+                    let successBanner = '<div class="site-logo-success-banner">';
                     successBanner += '<span>ใช้งานด้วย</span>';
-                    successBanner += '<code>' + response.data.shortcode + '</code>';
+                    successBanner += `<code>${response.data.shortcode}</code>`;
                     successBanner += '</div>';
                     
                     // Add success banner after save button
@@ -212,7 +212,7 @@ jQuery(document).ready(function($) {
                     $saveButton.text('บันทึกเรียบร้อย!');
                     
                     // After 2 seconds, reset the button text
-                    setTimeout(function() {
+                    setTimeout(() => {
                         $saveButton.text('บันทึกโลโก้').prop('disabled', false);
                     }, 2000);
                 } else {
@@ -220,7 +220,7 @@ jQuery(document).ready(function($) {
                     $saveButton.prop('disabled', false).text('บันทึกโลโก้');
                 }
             },
-            error: function() {
+            error: () => {
                 showMessage('เกิดข้อผิดพลาด โปรดลองอีกครั้ง', 'error');
                 $saveButton.prop('disabled', false).text('บันทึกโลโก้');
             }
@@ -230,8 +230,8 @@ jQuery(document).ready(function($) {
     // Function to initialize drag and drop
     function initDragAndDrop() {
         $('.site-logo-preview-area').each(function() {
-            var $dropArea = $(this);
-            var bgType = $dropArea.data('content') || $dropArea.attr('id').replace('site-logo-preview-', '');
+            const $dropArea = $(this);
+            const bgType = $dropArea.data('content') || $dropArea.attr('id').replace('site-logo-preview-', '');
             
             // Prevent default behaviors for drag events
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -245,19 +245,19 @@ jQuery(document).ready(function($) {
             
             // Highlight drop area when dragging over it
             ['dragenter', 'dragover'].forEach(eventName => {
-                $dropArea.on(eventName, function() {
+                $dropArea.on(eventName, () => {
                     $dropArea.addClass('highlight');
                 });
             });
             
             ['dragleave', 'drop'].forEach(eventName => {
-                $dropArea.on(eventName, function() {
+                $dropArea.on(eventName, () => {
                     $dropArea.removeClass('highlight');
                 });
             });
             
             // Handle dropped files
-            $dropArea.on('drop', function(e) {
+            $dropArea.on('drop', (e) => {
                 const dt = e.originalEvent.dataTransfer;
                 const files = dt.files;
                 
@@ -277,13 +277,13 @@ jQuery(document).ready(function($) {
         }
         
         // Create FormData
-        var formData = new FormData();
+        const formData = new FormData();
         formData.append('action', 'upload-attachment');
         formData.append('_wpnonce', siteLogoUpdateData.nonce);
         formData.append('async-upload', file);
         
         // Show loading state
-        var $dropArea = $(previewAreaIdMap[bgType]);
+        const $dropArea = $(previewAreaIdMap[bgType]);
         $dropArea.addClass('loading');
         showMessage('กำลังอัพโหลดรูปภาพ...', 'info');
         
@@ -294,9 +294,9 @@ jQuery(document).ready(function($) {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response) {
+            success: (response) => {
                 if (response.success) {
-                    var attachment = {
+                    const attachment = {
                         id: response.data.id,
                         url: response.data.url
                     };
@@ -306,7 +306,7 @@ jQuery(document).ready(function($) {
                 }
                 $dropArea.removeClass('loading');
             },
-            error: function() {
+            error: () => {
                 showMessage('เกิดข้อผิดพลาดระหว่างการอัพโหลด โปรดลองอีกครั้ง', 'error');
                 $dropArea.removeClass('loading');
             }
@@ -315,11 +315,11 @@ jQuery(document).ready(function($) {
     
     // Function to show messages
     function showMessage(message, type) {
-        var $messageArea = $('#site-logo-update-message');
+        const $messageArea = $('#site-logo-update-message');
         $messageArea.removeClass('success error info').addClass(type).text(message).fadeIn();
         
         // Auto hide after 5 seconds
-        setTimeout(function() {
+        setTimeout(() => {
             $messageArea.fadeOut();
         }, 5000);
     }

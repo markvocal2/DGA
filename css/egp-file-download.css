@@ -3,13 +3,19 @@
     font-family: 'Prompt', 'Sarabun', Arial, sans-serif;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 25px rgba(26, 75, 139, 0.1), 0 0 0 1px rgba(26, 75, 139, 0.05); /* Consolidated box-shadow */
     margin: 30px 0;
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(26, 75, 139, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Consolidated transition */
+}
+
+.egp-file-container:hover {
+    box-shadow: 0 15px 35px rgba(26, 75, 139, 0.15), 0 0 0 1px rgba(26, 75, 139, 0.1); /* Consolidated hover box-shadow */
+    transform: translateY(-2px); /* Consolidated hover transform */
 }
 
 /* ==================== ส่วนหัว ==================== */
@@ -53,8 +59,10 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* transition: all 0.2s ease; - Covered by universal selector */
     outline: none;
+    position: relative; /* For glow effect */
+    overflow: hidden; /* For glow effect */
 }
 
 .egp-add-file-btn:hover {
@@ -87,7 +95,7 @@
     border: 1px solid rgba(26, 75, 139, 0.2);
     border-radius: 6px;
     font-size: 14px;
-    transition: all 0.3s;
+    /* transition: all 0.3s; - Covered by universal selector */
     outline: none;
     background-color: white;
     color: #333;
@@ -144,7 +152,7 @@
 }
 
 .egp-file-table tbody tr {
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
     border-bottom: 1px solid rgba(26, 75, 139, 0.1);
 }
 
@@ -211,12 +219,14 @@
     border-radius: 6px;
     text-decoration: none;
     font-weight: 500;
-    transition: all 0.3s;
+    /* transition: all 0.3s; - Covered by universal selector */
     border: none;
     cursor: pointer;
     text-align: center;
     font-size: 13px;
     box-shadow: 0 2px 6px rgba(255, 127, 39, 0.3);
+    position: relative; /* For glow effect */
+    overflow: hidden; /* For glow effect */
 }
 
 .egp-download-button:hover {
@@ -251,7 +261,7 @@
     border: 1px solid rgba(26, 75, 139, 0.2);
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
     margin: 0 3px;
     color: #1a4b8b;
 }
@@ -344,7 +354,7 @@
     z-index: 9999;
     visibility: hidden;
     opacity: 0;
-    transition: all 0.3s;
+    /* transition: all 0.3s; - Covered by universal selector */
 }
 
 .egp-modal.open {
@@ -371,7 +381,7 @@
     border-radius: 12px;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
     transform: translateY(20px);
-    transition: transform 0.3s;
+    /* transition: transform 0.3s; - Covered by universal selector */
     overflow: hidden;
 }
 
@@ -406,7 +416,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    transition: background-color 0.2s;
+    /* transition: background-color 0.2s; - Covered by universal selector */
 }
 
 .egp-modal-close:hover {
@@ -441,7 +451,7 @@
     border: 1px solid rgba(26, 75, 139, 0.2);
     border-radius: 6px;
     font-size: 14px;
-    transition: all 0.3s;
+    /* transition: all 0.3s; - Covered by universal selector */
     outline: none;
     background-color: white;
 }
@@ -472,7 +482,7 @@
     font-weight: 500;
     color: #666;
     cursor: pointer;
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
     outline: none;
 }
 
@@ -502,7 +512,7 @@
     padding: 25px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
     position: relative;
     background-color: #f8f9fa;
 }
@@ -549,7 +559,9 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
+    position: relative; /* For glow effect */
+    overflow: hidden; /* For glow effect */
 }
 
 .egp-browse-btn:hover {
@@ -591,9 +603,11 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
     display: inline-flex;
     align-items: center;
+    position: relative; /* For glow effect */
+    overflow: hidden; /* For glow effect */
 }
 
 .egp-select-media-btn:hover {
@@ -660,7 +674,7 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    /* transition: all 0.2s; - Covered by universal selector */
 }
 
 .egp-cancel-btn {
@@ -679,6 +693,8 @@
     color: white;
     border: none;
     box-shadow: 0 2px 6px rgba(255, 127, 39, 0.3);
+    position: relative; /* For glow effect */
+    overflow: hidden; /* For glow effect */
 }
 
 .egp-save-btn:hover {
@@ -700,32 +716,32 @@
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .egp-add-file-btn {
         margin-top: 10px;
         align-self: flex-start;
     }
-    
-    .egp-file-table thead th, 
+
+    .egp-file-table thead th,
     .egp-file-table tbody td {
         padding: 12px 15px;
         font-size: 13px;
     }
-    
+
     .egp-btn-text {
         display: none;
     }
-    
+
     .egp-download-button {
         padding: 8px;
         width: 36px;
         height: 36px;
     }
-    
+
     .egp-download-button .dashicons {
         margin-right: 0;
     }
-    
+
     .egp-modal-container {
         width: 95%;
         max-width: 450px;
@@ -736,33 +752,33 @@
     .egp-file-name {
         width: 40%;
     }
-    
+
     .egp-file-date {
         width: 30%;
     }
-    
+
     .egp-file-action,
     .egp-file-manage {
         width: 15%;
     }
-    
-    .egp-file-table thead th, 
+
+    .egp-file-table thead th,
     .egp-file-table tbody td {
         padding: 10px 12px;
         font-size: 12px;
     }
-    
+
     .egp-form-actions {
         flex-direction: column;
     }
-    
+
     .egp-cancel-btn,
     .egp-save-btn {
         width: 100%;
         margin-right: 0;
         text-align: center;
     }
-    
+
     .egp-cancel-btn {
         margin-bottom: 10px;
     }
@@ -770,8 +786,8 @@
 
 /* เพิ่มเอฟเฟกต์เรืองแสงสำหรับสไตล์ไฮเทค */
 .egp-add-file-btn, .egp-download-button, .egp-save-btn, .egp-browse-btn, .egp-select-media-btn {
-    position: relative;
-    overflow: hidden;
+    /* position: relative; - Already added */
+    /* overflow: hidden; - Already added */
 }
 
 .egp-add-file-btn:before, .egp-download-button:before, .egp-save-btn:before, .egp-browse-btn:before, .egp-select-media-btn:before {
@@ -787,23 +803,12 @@
         rgba(255, 255, 255, 0.1) 100%
     );
     transform: rotate(30deg);
-    transition: transform 0.6s;
+    /* transition: transform 0.6s; - Covered by universal selector */
     pointer-events: none;
 }
 
 .egp-add-file-btn:hover:before, .egp-download-button:hover:before, .egp-save-btn:hover:before, .egp-browse-btn:hover:before, .egp-select-media-btn:hover:before {
     transform: rotate(0deg);
-}
-
-/* เพิ่ม box-shadow เพื่อความรู้สึกลอยตัว */
-.egp-file-container {
-    box-shadow: 0 10px 25px rgba(26, 75, 139, 0.1), 0 0 0 1px rgba(26, 75, 139, 0.05);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.egp-file-container:hover {
-    box-shadow: 0 15px 35px rgba(26, 75, 139, 0.15), 0 0 0 1px rgba(26, 75, 139, 0.1);
-    transform: translateY(-2px);
 }
 
 /* เพิ่ม transition สำหรับทุก element */

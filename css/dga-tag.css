@@ -23,6 +23,7 @@
 
 /* Container Styles */
 .dga-tag-container {
+    /* Added generic font family fallback */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
     margin: 2rem 0;
     padding: 1.5rem;
@@ -55,8 +56,8 @@
     background-color: var(--dga-blue-light);
     border-radius: 20px;
     padding: 0.5rem 1rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-right: 0.5rem; /* Keep for spacing between tags */
+    margin-bottom: 0.5rem; /* Keep for spacing between rows */
     transition: var(--dga-transition);
     cursor: pointer;
     border: 1px solid transparent;
@@ -68,9 +69,11 @@
     color: var(--dga-text-light);
 }
 
+/* Merged styles for selected tag */
 .dga-tag-selected {
     background-color: var(--dga-blue-primary);
     color: var(--dga-text-light);
+    animation: tagSelected 0.3s ease-in-out; /* Added animation */
 }
 
 .dga-tag-name {
@@ -173,7 +176,7 @@
     border-radius: var(--dga-border-radius);
     font-size: 0.875rem;
     margin-top: 1rem;
-    display: none;
+    display: none; /* Hidden by default */
 }
 
 .dga-tag-message-success {
@@ -229,15 +232,16 @@
     .dga-tag-form {
         flex-direction: column;
     }
-    
+
     .dga-tag-button {
         width: 100%;
     }
 }
 
 /* ARIA and Accessibility Enhancements */
-.dga-tag-item:focus-within {
+.dga-tag-item:focus-within { /* Use focus-within for container focus */
     outline: 2px solid var(--dga-blue-primary);
+    outline-offset: 2px; /* Add offset for better visibility */
 }
 
 .dga-tag-link:focus,
@@ -253,6 +257,5 @@
     100% { transform: scale(1); }
 }
 
-.dga-tag-selected {
-    animation: tagSelected 0.3s ease-in-out;
-}
+/* Removed duplicate .dga-tag-selected block from here */
+

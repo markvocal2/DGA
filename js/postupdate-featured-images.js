@@ -34,165 +34,208 @@
         console.log('Found ' + $wrappers.length + ' postupdate-featured-wrap elements');
         
         // ตั้งค่า event handlers สำหรับแต่ละ instance
-        $wrappers.each(function() {
-            const $wrapper = $(this);
-            const $modal = $wrapper.find('.postupdate-modal');
-            const $openBtn = $wrapper.find('.postupdate-featured-btn');
-            const $closeBtn = $wrapper.find('.postupdate-modal-close');
-            const $cancelBtn = $wrapper.find('.postupdate-cancel-btn');
-            const $updateBtn = $wrapper.find('.postupdate-update-btn');
-            const $uploadZone = $wrapper.find('.postupdate-upload-zone');
-            const $fileInput = $wrapper.find('.postupdate-file-input');
-            const $removeBtn = $wrapper.find('.postupdate-remove-image');
-            const $uploadPrompt = $wrapper.find('.postupdate-upload-prompt');
-            const $uploadPreview = $wrapper.find('.postupdate-upload-preview');
-            const $progressWrap = $wrapper.find('.postupdate-progress-wrap');
-            const $progressBar = $wrapper.find('.postupdate-progress-bar');
-            const $statusMsg = $wrapper.find('.postupdate-status');
-            const postId = $wrapper.data('post-id');
+        $wrappers.each(setupImageUpdaterInstance);
+    }
+    
+    /**
+     * ตั้งค่า event handlers สำหรับแต่ละ instance
+     */
+    function setupImageUpdaterInstance() {
+        const $wrapper = $(this);
+        const $modal = $wrapper.find('.postupdate-modal');
+        const $openBtn = $wrapper.find('.postupdate-featured-btn');
+        const $closeBtn = $wrapper.find('.postupdate-modal-close');
+        const $cancelBtn = $wrapper.find('.postupdate-cancel-btn');
+        const $updateBtn = $wrapper.find('.postupdate-update-btn');
+        const $uploadZone = $wrapper.find('.postupdate-upload-zone');
+        const $fileInput = $wrapper.find('.postupdate-file-input');
+        const $removeBtn = $wrapper.find('.postupdate-remove-image');
+        const $uploadPrompt = $wrapper.find('.postupdate-upload-prompt');
+        const $uploadPreview = $wrapper.find('.postupdate-upload-preview');
+        const $progressWrap = $wrapper.find('.postupdate-progress-wrap');
+        const $progressBar = $wrapper.find('.postupdate-progress-bar');
+        const $statusMsg = $wrapper.find('.postupdate-status');
+        const postId = $wrapper.data('post-id');
+        
+        console.log('Initializing postupdate for post ID: ' + postId);
+        
+        // ถ้ามีภาพอยู่แล้ว ให้แสดงตัวอย่างและเปิดใช้งานปุ่มอัพเดต
+        initializeExistingImage($uploadPreview, $uploadZone, $updateBtn);
+        
+        // ตั้งค่า Event Listeners
+        setupModalEvents($openBtn, $closeBtn, $cancelBtn, $modal);
+        setupUploadEvents($uploadPrompt, $uploadZone, $fileInput, $uploadPreview, $updateBtn, $statusMsg);
+        setupRemoveButtonEvent($removeBtn, $uploadZone, $uploadPreview, $updateBtn, $statusMsg, postId);
+        setupUpdateButtonEvent($updateBtn, $progressWrap, $progressBar, $statusMsg, postId, $modal);
+    }
+    
+    /**
+     * ตั้งค่าสำหรับรูปภาพที่มีอยู่แล้ว
+     */
+    function initializeExistingImage($uploadPreview, $uploadZone, $updateBtn) {
+        if ($uploadPreview.is(':visible')) {
+            $uploadZone.addClass('has-preview');
+            $updateBtn.prop('disabled', false);
             
-            console.log('Initializing postupdate for post ID: ' + postId);
-            
-            // ถ้ามีภาพอยู่แล้ว ให้แสดงตัวอย่างและเปิดใช้งานปุ่มอัพเดต
-            if ($uploadPreview.is(':visible')) {
-                $uploadZone.addClass('has-preview');
-                $updateBtn.prop('disabled', false);
-                
-                // ดึง ID ของภาพปัจจุบัน (ถ้ามี) - จะได้ใช้ในกรณีที่ไม่ได้อัพโหลดภาพใหม่
-                const currentImageSrc = $uploadPreview.find('img').attr('src');
-                if (currentImageSrc) {
-                    // พยายามดึง attachment ID จาก URL หรือ data attribute
-                    const attachmentId = $uploadPreview.find('img').data('attachment-id') || 
-                                        getAttachmentIdFromUrl(currentImageSrc);
-                    if (attachmentId) {
-                        currentAttachmentId = attachmentId;
-                    }
+            // ดึง ID ของภาพปัจจุบัน (ถ้ามี) - จะได้ใช้ในกรณีที่ไม่ได้อัพโหลดภาพใหม่
+            const currentImageSrc = $uploadPreview.find('img').attr('src');
+            if (currentImageSrc) {
+                // พยายามดึง attachment ID จาก URL หรือ data attribute
+                const attachmentId = $uploadPreview.find('img').data('attachment-id') || 
+                                    getAttachmentIdFromUrl(currentImageSrc);
+                if (attachmentId) {
+                    currentAttachmentId = attachmentId;
                 }
             }
-            
-            // เปิด Modal (แก้ไขให้ใช้ click แทน)
-            $openBtn.on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Open button clicked');
-                openModal($modal);
-                return false;
-            });
-            
-            // ปิด Modal (แก้ไขให้ใช้ click แทน)
-            $closeBtn.on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Close button clicked');
+        }
+    }
+    
+    /**
+     * ตั้งค่า Event Listeners สำหรับ Modal
+     */
+    function setupModalEvents($openBtn, $closeBtn, $cancelBtn, $modal) {
+        // เปิด Modal
+        $openBtn.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Open button clicked');
+            openModal($modal);
+            return false;
+        });
+        
+        // ปิด Modal
+        $closeBtn.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Close button clicked');
+            closeModal($modal);
+            return false;
+        });
+        
+        // ปิด Modal ด้วยปุ่มยกเลิก
+        $cancelBtn.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Cancel button clicked');
+            closeModal($modal);
+            return false;
+        });
+        
+        // ปิด Modal เมื่อคลิกที่ overlay
+        $modal.on('click', function(e) {
+            if ($(e.target).hasClass('postupdate-modal-overlay')) {
+                console.log('Overlay clicked');
                 closeModal($modal);
-                return false;
-            });
-            
-            // ปิด Modal ด้วยปุ่มยกเลิก
-            $cancelBtn.on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Cancel button clicked');
+            }
+        });
+        
+        // เปิดใช้ ESC key เพื่อปิด modal
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $modal.attr('aria-hidden') === 'false') {
                 closeModal($modal);
-                return false;
-            });
-            
-            // ปิด Modal เมื่อคลิกที่ overlay
-            $modal.on('click', function(e) {
-                if ($(e.target).hasClass('postupdate-modal-overlay')) {
-                    console.log('Overlay clicked');
-                    closeModal($modal);
-                }
-            });
-            
-            // คลิกที่ upload zone เพื่อเลือกไฟล์
-            $uploadPrompt.on('click', function(e) {
+            }
+        });
+    }
+    
+    /**
+     * ตั้งค่า Event Listeners สำหรับการอัพโหลดไฟล์
+     */
+    function setupUploadEvents($uploadPrompt, $uploadZone, $fileInput, $uploadPreview, $updateBtn, $statusMsg) {
+        // คลิกที่ upload prompt เพื่อเลือกไฟล์
+        $uploadPrompt.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Upload prompt clicked');
+            $fileInput.trigger('click');
+            return false;
+        });
+        
+        // คลิกที่ upload zone เพื่อเลือกไฟล์ (สำรอง)
+        $uploadZone.on('click', function(e) {
+            if (!$(e.target).closest('.postupdate-upload-preview').length && 
+                !$(e.target).closest('.postupdate-remove-image').length) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Upload prompt clicked');
+                console.log('Upload zone clicked');
                 $fileInput.trigger('click');
                 return false;
-            });
+            }
+        });
+        
+        // จัดการกับการเลือกไฟล์
+        $fileInput.on('change', function(e) {
+            console.log('File selected');
+            handleFileSelect(e, $uploadZone, $uploadPreview, $updateBtn, $statusMsg);
+        });
+        
+        // จัดการกับการลาก & วาง
+        setupDragAndDropEvents($uploadZone, $uploadPreview, $updateBtn, $statusMsg);
+    }
+    
+    /**
+     * ตั้งค่า Drag & Drop Events
+     */
+    function setupDragAndDropEvents($uploadZone, $uploadPreview, $updateBtn, $statusMsg) {
+        $uploadZone.on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Drag over');
+            $(this).addClass('is-dragover');
+        });
+        
+        $uploadZone.on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Drag leave');
+            $(this).removeClass('is-dragover');
+        });
+        
+        $uploadZone.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Drop');
+            $(this).removeClass('is-dragover');
             
-            // คลิกที่ upload zone เพื่อเลือกไฟล์ (สำรอง)
-            $uploadZone.on('click', function(e) {
-                if (!$(e.target).closest('.postupdate-upload-preview').length && 
-                    !$(e.target).closest('.postupdate-remove-image').length) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Upload zone clicked');
-                    $fileInput.trigger('click');
-                    return false;
-                }
-            });
+            if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
+                handleFileSelect({
+                    target: {
+                        files: e.originalEvent.dataTransfer.files
+                    }
+                }, $uploadZone, $uploadPreview, $updateBtn, $statusMsg);
+            }
+        });
+    }
+    
+    /**
+     * ตั้งค่า Event สำหรับปุ่มลบรูปภาพ
+     */
+    function setupRemoveButtonEvent($removeBtn, $uploadZone, $uploadPreview, $updateBtn, $statusMsg, postId) {
+        $removeBtn.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Remove button clicked');
             
-            // จัดการกับการเลือกไฟล์
-            $fileInput.on('change', function(e) {
-                console.log('File selected');
-                handleFileSelect(e, $uploadZone, $uploadPreview, $updateBtn, $statusMsg);
-            });
+            const confirmMsg = typeof postupdateData !== 'undefined' && postupdateData.strings ? 
+                postupdateData.strings.confirm_delete : 'คุณต้องการลบภาพนี้ใช่หรือไม่?';
             
-            // จัดการกับการลาก & วาง
-            $uploadZone.on('dragover', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Drag over');
-                $(this).addClass('is-dragover');
-            });
+            if (confirm(confirmMsg)) {
+                removeImage($uploadZone, $uploadPreview, $updateBtn, $statusMsg, postId);
+            }
             
-            $uploadZone.on('dragleave', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Drag leave');
-                $(this).removeClass('is-dragover');
-            });
-            
-            $uploadZone.on('drop', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Drop');
-                $(this).removeClass('is-dragover');
-                
-                if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
-                    handleFileSelect({
-                        target: {
-                            files: e.originalEvent.dataTransfer.files
-                        }
-                    }, $uploadZone, $uploadPreview, $updateBtn, $statusMsg);
-                }
-            });
-            
-            // ลบไฟล์ภาพ
-            $removeBtn.on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Remove button clicked');
-                
-                const confirmMsg = typeof postupdateData !== 'undefined' && postupdateData.strings ? 
-                    postupdateData.strings.confirm_delete : 'คุณต้องการลบภาพนี้ใช่หรือไม่?';
-                
-                if (confirm(confirmMsg)) {
-                    removeImage($uploadZone, $uploadPreview, $updateBtn, $statusMsg, postId);
-                }
-                
-                return false;
-            });
-            
-            // อัพเดตภาพหน้าปก
-            $updateBtn.on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Update button clicked');
-                updateFeaturedImage($progressWrap, $progressBar, $statusMsg, postId, $modal);
-                return false;
-            });
-            
-            // เปิดใช้ ESC key เพื่อปิด modal
-            $(document).on('keydown', function(e) {
-                if (e.key === 'Escape' && $modal.attr('aria-hidden') === 'false') {
-                    closeModal($modal);
-                }
-            });
+            return false;
+        });
+    }
+    
+    /**
+     * ตั้งค่า Event สำหรับปุ่มอัพเดตรูปภาพ
+     */
+    function setupUpdateButtonEvent($updateBtn, $progressWrap, $progressBar, $statusMsg, postId, $modal) {
+        $updateBtn.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Update button clicked');
+            updateFeaturedImage($progressWrap, $progressBar, $statusMsg, postId, $modal);
+            return false;
         });
     }
     
@@ -285,6 +328,8 @@
         };
         reader.readAsDataURL(file);
     }
+
+    // ฟังก์ชันอื่นๆ ยังคงเหมือนเดิม...
     
     /**
      * อัพโหลดไฟล์ไปยัง WordPress Media Library (แก้ไขสมบูรณ์)

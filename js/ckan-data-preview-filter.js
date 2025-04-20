@@ -2,9 +2,9 @@
  * CKAN Data Preview Filter JavaScript
  * เพิ่มความสามารถในการกรองข้อมูลและการค้นหาสำหรับตารางไฟล์ในตัวอย่าง
  */
-jQuery(document).ready(function($) {
+jQuery(document).ready(($) => {
     // ตัวแปรสำหรับการจัดการข้อมูล
-    var tableData = {
+    const tableData = {
         allRows: [],           // เก็บข้อมูลทั้งหมด
         filteredRows: [],      // เก็บข้อมูลหลังกรอง
         columns: [],           // เก็บชื่อคอลัมน์
@@ -15,13 +15,13 @@ jQuery(document).ready(function($) {
     };
     
     // ติดตั้ง event handlers หลังจากโหลด preview
-    $(document).on('ckan_preview_loaded', function() {
+    $(document).on('ckan_preview_loaded', () => {
         initializeDataTable();
         setupEventHandlers();
     });
     
     // ฟังก์ชั่นเริ่มต้นสำหรับจัดการข้อมูลตาราง
-    function initializeDataTable() {
+    const initializeDataTable = () => {
         // รับข้อมูลจากตาราง
         extractTableData();
         
@@ -32,11 +32,11 @@ jQuery(document).ready(function($) {
         
         // เริ่มต้นแสดงหน้าแรก
         renderCurrentPage();
-    }
+    };
     
     // ดึงข้อมูลจากตารางที่แสดงอยู่
-    function extractTableData() {
-        var table = $('.ckan-preview-table, #excel-preview-table');
+    const extractTableData = () => {
+        const table = $('.ckan-preview-table, #excel-preview-table');
         tableData.allRows = [];
         tableData.columns = [];
         
@@ -47,7 +47,7 @@ jQuery(document).ready(function($) {
         
         // ดึงข้อมูลแถว (rows)
         table.find('tbody tr').each(function() {
-            var rowData = [];
+            const rowData = [];
             $(this).find('td').each(function() {
                 rowData.push($(this).text().trim());
             });
@@ -58,77 +58,77 @@ jQuery(document).ready(function($) {
         if (!table.data('originalTable')) {
             table.data('originalTable', table.find('tbody').html());
         }
-    }
+    };
     
     // ตั้งค่า event handlers สำหรับปุ่มและการควบคุมต่างๆ
-    function setupEventHandlers() {
+    const setupEventHandlers = () => {
         // ปุ่มค้นหา
-        $('.ckan-preview-search button:not(.filters-btn)').on('click', function() {
+        $('.ckan-preview-search button:not(.filters-btn)').on('click', () => {
             searchTable();
         });
         
         // ค้นหาเมื่อกด Enter
-        $('.ckan-preview-search input').on('keypress', function(e) {
+        $('.ckan-preview-search input').on('keypress', (e) => {
             if (e.which === 13) {
                 searchTable();
             }
         });
         
         // ปุ่ม Add Filter
-        $('.ckan-preview-filter-btn').on('click', function() {
+        $('.ckan-preview-filter-btn').on('click', () => {
             showFilterDialog();
         });
         
         // ปุ่ม Filters
-        $('.ckan-preview-search .filters-btn').on('click', function() {
+        $('.ckan-preview-search .filters-btn').on('click', () => {
             showFilterDialog();
         });
         
         // ปุ่มเปลี่ยนหน้า
-        $('.ckan-preview-pagination span:contains("«")').on('click', function() {
+        $('.ckan-preview-pagination span:contains("«")').on('click', () => {
             navigateToPage('first');
         });
         
-        $('.ckan-preview-pagination span:contains("»")').on('click', function() {
+        $('.ckan-preview-pagination span:contains("»")').on('click', () => {
             navigateToPage('last');
         });
         
         // อัพเดทเมื่อใส่หมายเลขหน้าโดยตรง
         $('.ckan-preview-pagination input').on('change', function() {
-            var inputPage = parseInt($(this).val());
+            const inputPage = parseInt($(this).val());
             if (!isNaN(inputPage)) {
                 navigateToPage(inputPage);
             }
         });
-    }
+    };
     
     // แสดงหน้าต่างสำหรับตั้งค่ากรอง
-    function showFilterDialog() {
+    const showFilterDialog = () => {
         // ถ้ามีหน้าต่างอยู่แล้ว ให้ลบทิ้งก่อน
         $('.ckan-filter-dialog').remove();
         
         // สร้างหน้าต่างสำหรับกรอง
-        var dialogHtml = '<div class="ckan-filter-dialog">';
+        let dialogHtml = '<div class="ckan-filter-dialog">';
         dialogHtml += '<div class="ckan-filter-dialog-content">';
         dialogHtml += '<span class="ckan-filter-dialog-close">&times;</span>';
         dialogHtml += '<h3>Add Filter</h3>';
         
         // สร้าง filter options สำหรับแต่ละคอลัมน์
         dialogHtml += '<div class="ckan-filter-options">';
-        tableData.columns.forEach(function(column, index) {
-            dialogHtml += '<div class="ckan-filter-option">';
-            dialogHtml += '<div class="filter-column-name">' + column + '</div>';
-            dialogHtml += '<select class="filter-operator" data-column="' + index + '">';
-            dialogHtml += '<option value="contains">Contains</option>';
-            dialogHtml += '<option value="equals">Equals</option>';
-            dialogHtml += '<option value="starts">Starts with</option>';
-            dialogHtml += '<option value="ends">Ends with</option>';
-            dialogHtml += '<option value="greater">Greater than</option>';
-            dialogHtml += '<option value="less">Less than</option>';
-            dialogHtml += '</select>';
-            dialogHtml += '<input type="text" class="filter-value" data-column="' + index + '" placeholder="Filter value">';
-            dialogHtml += '<button class="apply-filter" data-column="' + index + '">Apply</button>';
-            dialogHtml += '</div>';
+        tableData.columns.forEach((column, index) => {
+            dialogHtml += `<div class="ckan-filter-option">
+                <div class="filter-column-name">${column}</div>
+                <select class="filter-operator" data-column="${index}">
+                    <option value="contains">Contains</option>
+                    <option value="equals">Equals</option>
+                    <option value="starts">Starts with</option>
+                    <option value="ends">Ends with</option>
+                    <option value="greater">Greater than</option>
+                    <option value="less">Less than</option>
+                </select>
+                <input type="text" class="filter-value" data-column="${index}" placeholder="Filter value">
+                <button class="apply-filter" data-column="${index}">Apply</button>
+            </div>`;
         });
         dialogHtml += '</div>';
         
@@ -136,7 +136,7 @@ jQuery(document).ready(function($) {
         dialogHtml += '<div class="active-filters-container">';
         dialogHtml += '<h4>Active Filters</h4>';
         dialogHtml += '<div class="active-filters-list"></div>';
-        dialogHtml += '<button class="clear-all-filters" ' + (Object.keys(tableData.activeFilters).length === 0 ? 'disabled' : '') + '>Clear All Filters</button>';
+        dialogHtml += `<button class="clear-all-filters" ${Object.keys(tableData.activeFilters).length === 0 ? 'disabled' : ''}>Clear All Filters</button>`;
         dialogHtml += '</div>';
         
         dialogHtml += '</div>'; // End filter dialog content
@@ -150,17 +150,17 @@ jQuery(document).ready(function($) {
         
         // ตั้งค่า event handlers สำหรับหน้าต่างกรอง
         setupFilterDialogHandlers();
-    }
+    };
     
     // ตั้งค่า event handlers สำหรับหน้าต่างกรอง
-    function setupFilterDialogHandlers() {
+    const setupFilterDialogHandlers = () => {
         // ปิดหน้าต่างกรอง
-        $('.ckan-filter-dialog-close').on('click', function() {
+        $('.ckan-filter-dialog-close').on('click', () => {
             $('.ckan-filter-dialog').remove();
         });
         
         // คลิกนอกหน้าต่างกรองเพื่อปิด
-        $(document).on('click', function(e) {
+        $(document).on('click', (e) => {
             if ($(e.target).is('.ckan-filter-dialog')) {
                 $('.ckan-filter-dialog').remove();
             }
@@ -168,15 +168,15 @@ jQuery(document).ready(function($) {
         
         // ปุ่ม Apply filter
         $('.apply-filter').on('click', function() {
-            var columnIndex = $(this).data('column');
-            var operator = $('.filter-operator[data-column="' + columnIndex + '"]').val();
-            var value = $('.filter-value[data-column="' + columnIndex + '"]').val().trim();
+            const columnIndex = $(this).data('column');
+            const operator = $(`.filter-operator[data-column="${columnIndex}"]`).val();
+            const value = $(`.filter-value[data-column="${columnIndex}"]`).val().trim();
             
             if (value !== '') {
                 // เพิ่มกรอง
                 tableData.activeFilters[columnIndex] = {
-                    operator: operator,
-                    value: value
+                    operator,
+                    value
                 };
                 
                 // ใช้กรองและแสดงผล
@@ -189,7 +189,7 @@ jQuery(document).ready(function($) {
         });
         
         // ปุ่ม Clear All Filters
-        $('.clear-all-filters').on('click', function() {
+        $('.clear-all-filters').on('click', () => {
             tableData.activeFilters = {};
             applyFilters();
             updateActiveFiltersList();
@@ -197,22 +197,22 @@ jQuery(document).ready(function($) {
             // ปิดหน้าต่างกรอง
             $('.ckan-filter-dialog').remove();
         });
-    }
+    };
     
     // อัพเดทรายการกรองที่ใช้งานอยู่
-    function updateActiveFiltersList() {
-        var filtersList = $('.active-filters-list');
+    const updateActiveFiltersList = () => {
+        const filtersList = $('.active-filters-list');
         filtersList.empty();
         
         // แสดงรายการกรองที่ใช้งานอยู่
-        $.each(tableData.activeFilters, function(columnIndex, filter) {
-            var columnName = tableData.columns[columnIndex];
-            var operatorText = getOperatorDisplayText(filter.operator);
+        $.each(tableData.activeFilters, (columnIndex, filter) => {
+            const columnName = tableData.columns[columnIndex];
+            const operatorText = getOperatorDisplayText(filter.operator);
             
-            var filterHtml = '<div class="active-filter">';
-            filterHtml += '<span class="filter-desc">' + columnName + ' ' + operatorText + ' "' + filter.value + '"</span>';
-            filterHtml += '<button class="remove-filter" data-column="' + columnIndex + '">×</button>';
-            filterHtml += '</div>';
+            const filterHtml = `<div class="active-filter">
+                <span class="filter-desc">${columnName} ${operatorText} "${filter.value}"</span>
+                <button class="remove-filter" data-column="${columnIndex}">×</button>
+            </div>`;
             
             filtersList.append(filterHtml);
         });
@@ -227,30 +227,30 @@ jQuery(document).ready(function($) {
         
         // ตั้งค่า event handler สำหรับปุ่มลบกรอง
         $('.remove-filter').on('click', function() {
-            var columnIndex = $(this).data('column');
+            const columnIndex = $(this).data('column');
             delete tableData.activeFilters[columnIndex];
             applyFilters();
             updateActiveFiltersList();
         });
-    }
+    };
     
     // ค้นหาข้อมูลในตาราง
-    function searchTable() {
-        var searchText = $('.ckan-preview-search input').val().trim().toLowerCase();
+    const searchTable = () => {
+        const searchText = $('.ckan-preview-search input').val().trim().toLowerCase();
         
         if (searchText === '') {
             // ถ้าไม่มีข้อความค้นหา ใช้เฉพาะกรอง
             applyFilters();
         } else {
             // กรองข้อมูลด้วยข้อความค้นหาและกรองที่ใช้งานอยู่
-            tableData.filteredRows = tableData.allRows.filter(function(rowData) {
+            tableData.filteredRows = tableData.allRows.filter((rowData) => {
                 // ตรวจสอบว่าแถวนี้ตรงกับกรองหรือไม่
                 if (!rowMatchesFilters(rowData)) {
                     return false;
                 }
                 
                 // ตรวจสอบว่าแถวนี้มีข้อความที่ค้นหาหรือไม่
-                for (var i = 0; i < rowData.length; i++) {
+                for (let i = 0; i < rowData.length; i++) {
                     if (rowData[i].toLowerCase().includes(searchText)) {
                         return true;
                     }
@@ -263,10 +263,10 @@ jQuery(document).ready(function($) {
             updatePaginationInfo();
             renderCurrentPage();
         }
-    }
+    };
     
     // ใช้กรองกับข้อมูล
-    function applyFilters() {
+    const applyFilters = () => {
         if (Object.keys(tableData.activeFilters).length === 0) {
             // ถ้าไม่มีกรอง ใช้ข้อมูลทั้งหมด
             tableData.filteredRows = tableData.allRows.slice();
@@ -279,14 +279,14 @@ jQuery(document).ready(function($) {
         tableData.currentPage = 1;
         updatePaginationInfo();
         renderCurrentPage();
-    }
+    };
     
     // ตรวจสอบว่าแถวตรงกับกรองหรือไม่
-    function rowMatchesFilters(rowData) {
-        for (var columnIndex in tableData.activeFilters) {
-            var filter = tableData.activeFilters[columnIndex];
-            var cellValue = rowData[columnIndex] || '';
-            var filterValue = filter.value;
+    const rowMatchesFilters = (rowData) => {
+        for (const columnIndex in tableData.activeFilters) {
+            const filter = tableData.activeFilters[columnIndex];
+            const cellValue = rowData[columnIndex] || '';
+            const filterValue = filter.value;
             
             // ตรวจสอบตามประเภทของกรอง
             switch (filter.operator) {
@@ -311,26 +311,26 @@ jQuery(document).ready(function($) {
                     }
                     break;
                 case 'greater':
-                    var numCell = parseFloat(cellValue);
-                    var numFilter = parseFloat(filterValue);
-                    if (isNaN(numCell) || isNaN(numFilter) || numCell <= numFilter) {
+                    const numCellGreater = parseFloat(cellValue);
+                    const numFilterGreater = parseFloat(filterValue);
+                    if (isNaN(numCellGreater) || isNaN(numFilterGreater) || numCellGreater <= numFilterGreater) {
                         return false;
                     }
                     break;
                 case 'less':
-                    var numCell = parseFloat(cellValue);
-                    var numFilter = parseFloat(filterValue);
-                    if (isNaN(numCell) || isNaN(numFilter) || numCell >= numFilter) {
+                    const numCellLess = parseFloat(cellValue);
+                    const numFilterLess = parseFloat(filterValue);
+                    if (isNaN(numCellLess) || isNaN(numFilterLess) || numCellLess >= numFilterLess) {
                         return false;
                     }
                     break;
             }
         }
         return true;
-    }
+    };
     
     // แปลงรหัสตัวดำเนินการเป็นข้อความที่แสดง
-    function getOperatorDisplayText(operator) {
+    const getOperatorDisplayText = (operator) => {
         switch (operator) {
             case 'contains': return 'contains';
             case 'equals': return 'equals';
@@ -340,68 +340,69 @@ jQuery(document).ready(function($) {
             case 'less': return 'is less than';
             default: return operator;
         }
-    }
+    };
     
     // นำไปยังหน้าที่ระบุ
-    function navigateToPage(page) {
-        var totalPages = Math.ceil(tableData.totalRows / tableData.rowsPerPage);
+    const navigateToPage = (page) => {
+        const totalPages = Math.ceil(tableData.totalRows / tableData.rowsPerPage);
         
         if (page === 'first') {
             tableData.currentPage = 1;
         } else if (page === 'last') {
             tableData.currentPage = totalPages;
         } else {
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
-            tableData.currentPage = page;
+            let currentPage = page;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            tableData.currentPage = currentPage;
         }
         
         updatePaginationInfo();
         renderCurrentPage();
-    }
+    };
     
     // อัพเดทข้อมูลการแบ่งหน้า
-    function updatePaginationInfo() {
-        var totalPages = Math.max(1, Math.ceil(tableData.totalRows / tableData.rowsPerPage));
+    const updatePaginationInfo = () => {
+        const totalPages = Math.max(1, Math.ceil(tableData.totalRows / tableData.rowsPerPage));
         
         // อัพเดทข้อความจำนวนแถว
-        $('.ckan-preview-pagination span').first().text(tableData.totalRows + ' records');
+        $('.ckan-preview-pagination span').first().text(`${tableData.totalRows} records`);
         
         // อัพเดทช่องป้อนหมายเลขหน้า
         $('.ckan-preview-pagination input').first().val(tableData.currentPage);
         $('.ckan-preview-pagination input').last().val(totalPages);
-    }
+    };
     
     // แสดงข้อมูลสำหรับหน้าปัจจุบัน
-    function renderCurrentPage() {
-        var table = $('.ckan-preview-table, #excel-preview-table');
-        var tbody = table.find('tbody');
+    const renderCurrentPage = () => {
+        const table = $('.ckan-preview-table, #excel-preview-table');
+        const tbody = table.find('tbody');
         
         // คำนวณแถวที่จะแสดง
-        var startIndex = (tableData.currentPage - 1) * tableData.rowsPerPage;
-        var endIndex = Math.min(startIndex + tableData.rowsPerPage, tableData.totalRows);
+        const startIndex = (tableData.currentPage - 1) * tableData.rowsPerPage;
+        const endIndex = Math.min(startIndex + tableData.rowsPerPage, tableData.totalRows);
         
         // ล้างตาราง
         tbody.empty();
         
         // ไม่มีข้อมูลให้แสดง
         if (tableData.filteredRows.length === 0) {
-            var colSpan = tableData.columns.length || 1;
-            tbody.append('<tr><td colspan="' + colSpan + '" class="no-data">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>');
+            const colSpan = tableData.columns.length || 1;
+            tbody.append(`<tr><td colspan="${colSpan}" class="no-data">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`);
             return;
         }
         
         // เพิ่มแถวสำหรับหน้าปัจจุบัน
-        for (var i = startIndex; i < endIndex; i++) {
-            var rowData = tableData.filteredRows[i];
-            var rowHtml = '<tr>';
+        for (let i = startIndex; i < endIndex; i++) {
+            const rowData = tableData.filteredRows[i];
+            let rowHtml = '<tr>';
             
-            for (var j = 0; j < rowData.length; j++) {
-                rowHtml += '<td>' + rowData[j] + '</td>';
+            for (let j = 0; j < rowData.length; j++) {
+                rowHtml += `<td>${rowData[j]}</td>`;
             }
             
             rowHtml += '</tr>';
             tbody.append(rowHtml);
         }
-    }
+    };
 });

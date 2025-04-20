@@ -1,71 +1,101 @@
 /**
  * JavaScript สำหรับ Welcome User Widget
  */
-
-
 jQuery(document).ready(function($) {
+
+    // Cache frequently used selectors
+    const $guestButtons = $('.guest-user-buttons');
+    const $loginFormContainer = $('.login-form-container');
+    const $loginForm = $('#ajax-login-form');
+    const $loginUsername = $('#login-username');
+    const $loginPassword = $('#login-password');
+    const $loginMessage = $('.login-message');
+
+    // --- Logout Handler ---
     // จัดการการคลิกปุ่มออกจากระบบ (สำหรับผู้ใช้ที่ล็อกอินแล้ว)
-    $('#welcome-user-logout-btn').on('click', function(e) {
+    $('#welcome-user-logout-btn').on('click', (e) => { // Use arrow function
         e.preventDefault();
-        
-        // สร้างตัวแปรเก็บ URL ปัจจุบัน
-        var currentURL = window.location.href;
-        
+
+        // สร้างตัวแปรเก็บ URL ปัจจุบัน (ใช้ const เพราะกำหนดค่าครั้งเดียว)
+        const currentURL = window.location.href;
+
+        // Add visual feedback (optional)
+        $(e.currentTarget).text('กำลังออกจากระบบ...').prop('disabled', true);
+
         // ส่ง AJAX request เพื่อออกจากระบบ
         $.ajax({
             type: 'POST',
-            url: welcome_user_widget_ajax.ajax_url,
+            url: welcome_user_widget_ajax.ajax_url, // Ensure this object is available
             data: {
                 action: 'welcome_user_logout',
-                nonce: welcome_user_widget_ajax.logout_nonce
+                nonce: welcome_user_widget_ajax.logout_nonce // Ensure nonce is correct
             },
-            success: function(response) {
-                // รีโหลดหน้าปัจจุบันไม่ว่าจะได้ response อะไรกลับมา
+            dataType: 'json', // Expect a JSON response from WordPress AJAX
+            timeout: 8000, // Increase timeout slightly
+            // success/error are less critical here as we always reload
+            // success: (response) => {
+            //     console.log('Logout successful:', response);
+            // },
+            // error: (jqXHR, textStatus, errorThrown) => {
+            //     console.error('AJAX error during logout:', textStatus, errorThrown);
+            // },
+            complete: () => { // Use complete callback to ensure reload happens once
+                // รีโหลดหน้าปัจจุบันเสมอหลังจาก AJAX request เสร็จสิ้น (สำเร็จหรือล้มเหลว)
+                // Using href assignment might be slightly cleaner than reload()
                 window.location.href = currentURL;
-            },
-            error: function() {
-                // กรณีมี error ก็ให้รีโหลดหน้าเว็บเช่นกัน
-                console.log('AJAX error occurred during logout. Reloading page anyway.');
-                window.location.href = currentURL;
-            },
-            // เพิ่ม timeout เพื่อป้องกันการรอนานเกินไป
-            timeout: 5000
+                // Failsafe reload in case href assignment doesn't work immediately in some browsers
+                // setTimeout(() => { window.location.reload(); }, 100);
+            }
         });
-        
-        // เพิ่มการรีโหลดหน้าเว็บหลังจาก timeout (เผื่อกรณี AJAX มีปัญหา)
-        setTimeout(function() {
-            window.location.href = currentURL;
-        }, 2000);
+
+        // Removed the potentially problematic setTimeout reload here
+        // The 'complete' callback is more reliable.
     });
-    
+
+    // --- Login Trigger ---
     // จัดการการคลิกปุ่ม "ลงชื่อเข้าใช้งาน" (สำหรับผู้ใช้ที่ยังไม่ได้ล็อกอิน)
-    $('#login-trigger-btn').on('click', function(e) {
+    $('#login-trigger-btn').on('click', (e) => { // Use arrow function
         e.preventDefault();
-        
+
         // ซ่อนปุ่มทั้งหมดใน guest-user-buttons
-        $('.guest-user-buttons').hide();
-        
+        $guestButtons.hide();
+
         // แสดงฟอร์มล็อกอิน
-        $('.login-form-container').fadeIn(200);
-        
+        $loginFormContainer.fadeIn(200);
+
         // โฟกัสที่ช่องกรอกชื่อผู้ใช้
-        $('#login-username').focus();
+        // Use setTimeout to ensure focus happens after fadeIn completes
+        setTimeout(() => {
+             $loginUsername.focus();
+        }, 210);
     });
-    
+
+    // --- Login Form Submission ---
     // จัดการการส่งฟอร์มล็อกอิน
-    $('#ajax-login-form').on('submit', function(e) {
+    $loginForm.on('submit', (e) => { // Use arrow function
         e.preventDefault();
-        
-        // เก็บข้อมูลจากฟอร์ม
-        var username = $('#login-username').val();
-        var password = $('#login-password').val();
-        
-        // แสดงข้อความกำลังประมวลผล
-        $('.login-message')
+
+        // เก็บข้อมูลจากฟอร์ม (ใช้ const)
+        const username = $loginUsername.val();
+        const password = $loginPassword.val();
+
+        // Basic validation (optional but recommended)
+        if (!username || !password) {
+             $loginMessage
+                .removeClass('success')
+                .addClass('error')
+                .text('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน')
+                .show();
+             return;
+        }
+
+        // แสดงข้อความกำลังประมวลผล และ disable form elements
+        $loginMessage
             .removeClass('error success')
             .text('กำลังเข้าสู่ระบบ...')
             .show();
-        
+        $loginForm.find('input, button').prop('disabled', true);
+
         // ส่ง AJAX request เพื่อล็อกอิน
         $.ajax({
             type: 'POST',
@@ -76,49 +106,61 @@ jQuery(document).ready(function($) {
                 password: password,
                 nonce: welcome_user_widget_ajax.login_nonce
             },
-            success: function(response) {
-                if (response.success) {
+            dataType: 'json', // Expect JSON response
+            success: (response) => { // Use arrow function
+                if (response && response.success) {
                     // แสดงข้อความสำเร็จ
-                    $('.login-message')
+                    $loginMessage
                         .removeClass('error')
                         .addClass('success')
-                        .text(response.data.message);
-                    
-                    // รีโหลดหน้าหลังจากล็อกอินสำเร็จ โดยเปลี่ยนเป็นการ redirect แทน
-                    setTimeout(function() {
-                        // ใช้ window.location.href แทน window.location.reload()
+                        .text(response.data?.message || 'เข้าสู่ระบบสำเร็จ กำลังรีเฟรช...'); // Use optional chaining and default text
+
+                    // รีโหลดหน้าหลังจากล็อกอินสำเร็จ
+                    setTimeout(() => {
+                        // ใช้ window.location.href เพื่อลบ hash (ถ้ามี) และรีโหลด
                         window.location.href = window.location.href.split('#')[0];
-                    }, 1000);
+                    }, 1000); // Delay for user to see the message
                 } else {
                     // แสดงข้อความผิดพลาด
-                    $('.login-message')
+                    $loginMessage
                         .removeClass('success')
                         .addClass('error')
-                        .text(response.data.message);
+                        .text(response?.data?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'); // Use optional chaining and default text
+                    // Re-enable form on error
+                    $loginForm.find('input, button').prop('disabled', false);
+                     $loginPassword.val(''); // Clear password field on error
+                     $loginUsername.select().focus(); // Focus username again
                 }
             },
-            error: function() {
+            error: (jqXHR, textStatus, errorThrown) => { // Use arrow function
+                console.error("Login AJAX Error:", textStatus, errorThrown);
                 // แสดงข้อความผิดพลาดกรณีเกิดปัญหาการเชื่อมต่อ
-                $('.login-message')
+                $loginMessage
                     .removeClass('success')
                     .addClass('error')
                     .text('เกิดข้อผิดพลาดในการเชื่อมต่อ โปรดลองอีกครั้งภายหลัง');
+                // Re-enable form on error
+                $loginForm.find('input, button').prop('disabled', false);
             }
         });
     });
-    
+
+    // --- Close Login Form on Outside Click ---
     // ปิดฟอร์มล็อกอินเมื่อคลิกนอกพื้นที่ฟอร์ม
-    $(document).on('click', function(e) {
+    $(document).on('click', (e) => { // Use arrow function
+        // Check if the click is outside the form container AND outside the trigger button
         if (
-            !$(e.target).closest('#ajax-login-form').length && 
-            !$(e.target).closest('#login-trigger-btn').length && 
-            $('.login-form-container').is(':visible')
+            !$(e.target).closest($loginFormContainer).length &&
+            !$(e.target).closest('#login-trigger-btn').length &&
+            $loginFormContainer.is(':visible')
         ) {
             // ซ่อนฟอร์มล็อกอิน
-            $('.login-form-container').hide();
-            
+            $loginFormContainer.hide();
+            $loginMessage.hide().text(''); // Hide and clear message
+            $loginForm.find('input, button').prop('disabled', false); // Ensure form is enabled
+
             // แสดงปุ่มทั้งหมดของผู้ใช้ที่ยังไม่ได้ล็อกอิน
-            $('.guest-user-buttons').show();
+            $guestButtons.show();
         }
     });
 });

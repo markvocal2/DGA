@@ -1,5 +1,8 @@
+/* complaint-management/assets/css/cpm-list.css (Consolidated) */
+
 /* Container Styles */
 .complaint-list-container {
+    /* Kept styles from the first block, seems more comprehensive */
     padding: 1.5rem;
     background: #fff;
     border-radius: 0.5rem;
@@ -12,6 +15,19 @@
     padding: 1.5rem;
     border-radius: 0.5rem;
     margin-bottom: 2rem;
+}
+
+.status-summary .card { /* Style from second source */
+    transition: all 0.3s ease;
+}
+
+.status-summary .card:hover { /* Style from second source */
+    transform: translateY(-5px);
+}
+
+.status-summary .card-icon { /* Style from second source */
+    font-size: 2rem;
+    opacity: 0.8;
 }
 
 .status-dot {
@@ -39,18 +55,33 @@
     margin-bottom: 2rem;
 }
 
+.complaint-filters .card { /* Style from second source */
+    background-color: #f8f9fa;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
 /* Table Styles */
 .table {
-    margin-bottom: 0;
+    margin-bottom: 0; /* From first source */
 }
 
 .table th {
-    background: #f8f9fa;
-    border-bottom-width: 1px;
+    background: #f8f9fa; /* From first source */
+    border-bottom-width: 1px; /* From first source */
 }
 
+.table-responsive { /* Style from second source */
+    background: #fff;
+    padding: 20px; /* Approx 1.25rem */
+    border-radius: 8px; /* 0.5rem */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Badge Styles (Merged) */
 .badge {
-    padding: 0.5em 0.75em;
+    padding: 0.5em 0.75em; /* Using em from first source */
     font-weight: 500;
 }
 
@@ -64,10 +95,23 @@
     padding: 1.5rem;
 }
 
-.complaint-actions {
-    background: #f8f9fa;
+/* Card Styles in Modal */
+.modal .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    margin-bottom: 1rem;
+}
+
+.modal .card-body {
     padding: 1rem;
-    border-radius: 0.5rem;
+}
+
+/* Complaint Actions (Merged) */
+.complaint-actions {
+    background-color: #f8f9fa;
+    padding: 1rem; /* Kept rem unit */
+    border-radius: 0.5rem; /* 8px is 0.5rem */
+    margin-top: 20px; /* Added from second source */
 }
 
 /* Loading State */
@@ -102,19 +146,32 @@
     border-radius: 0.25rem;
 }
 
-/* Alert Styles */
+/* Alert Styles (Merged) */
 .alert-container {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
+    top: 20px; /* Using px value from second source (1.25rem) */
+    right: 20px; /* Using px value from second source (1.25rem) */
     z-index: 1050;
+    min-width: 300px; /* Added from second source */
 }
 
 .alert {
-    min-width: 300px;
-    max-width: 500px;
-    margin-bottom: 1rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    min-width: 300px; /* From first source */
+    max-width: 500px; /* From first source */
+    margin-bottom: 10px; /* Using px value from second source (0.625rem) */
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); /* From first source */
+    animation: slideIn 0.3s ease-out; /* Added from second source */
+}
+
+@keyframes slideIn { /* Added from second source */
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 /* Status Colors */
@@ -143,15 +200,37 @@
     color: #fff;
 }
 
+/* DataTables Custom Styles */
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .dt-buttons {
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .btn-group > .btn {
+    margin-right: 0.5rem;
+}
+
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .complaint-list-container {
-        padding: 1rem;
+        /* Kept more specific px value from second source */
+        padding: 10px;
     }
 
     .status-summary .row {
         flex-direction: column;
         gap: 1rem;
+    }
+    .status-summary .card { /* Added from second source */
+        margin-bottom: 15px;
     }
 
     .complaint-filters {
@@ -159,8 +238,12 @@
     }
 
     .alert-container {
-        left: 1rem;
-        right: 1rem;
+        /* Kept styles from second source, seem more appropriate for mobile */
+        width: 100%;
+        right: 0;
+        padding: 0 10px;
+        /* Explicitly reset left if needed, though width:100%/right:0 usually handles it */
+        left: auto;
     }
 
     .alert {
@@ -196,120 +279,5 @@
         border: 1px solid #000;
         color: #000 !important;
         background: none !important;
-    }
-}
-
-/* DataTables Custom Styles */
-.dataTables_wrapper .dataTables_filter {
-    margin-bottom: 1rem;
-}
-
-.dataTables_wrapper .dataTables_length {
-    margin-bottom: 1rem;
-}
-
-.dataTables_wrapper .dt-buttons {
-    margin-bottom: 1rem;
-}
-
-.dataTables_wrapper .btn-group > .btn {
-    margin-right: 0.5rem;
-}
-
-/* Card Styles in Modal */
-.modal .card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
-    margin-bottom: 1rem;
-}
-
-.modal .card-body {
-    padding: 1rem;
-}
-
-/* complaint-management/assets/css/cpm-list.css */
-
-.complaint-list-container {
-    padding: 20px;
-}
-
-.status-summary .card {
-    transition: all 0.3s ease;
-}
-
-.status-summary .card:hover {
-    transform: translateY(-5px);
-}
-
-.status-summary .card-icon {
-    font-size: 2rem;
-    opacity: 0.8;
-}
-
-.complaint-filters .card {
-    background-color: #f8f9fa;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.table-responsive {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.complaint-actions {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-}
-
-/* Status badge styles */
-.badge {
-    padding: 8px 12px;
-    font-weight: 500;
-}
-
-/* Alert styles */
-.alert-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    min-width: 300px;
-}
-
-.alert {
-    margin-bottom: 10px;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .complaint-list-container {
-        padding: 10px;
-    }
-    
-    .status-summary .card {
-        margin-bottom: 15px;
-    }
-    
-    .alert-container {
-        width: 100%;
-        right: 0;
-        padding: 0 10px;
     }
 }

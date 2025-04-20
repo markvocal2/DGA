@@ -73,50 +73,73 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // ติดตั้ง event listeners
+        setupTypeSelectListener(typeSelect, typeOtherContainer, typeOtherInput);
+        setupTypeOtherListener(typeOtherInput);
+        setupAnonymousCheckboxListener(anonymousCheckbox, personalInfoSection);
+        setupDetailsTextareaListener(detailsTextarea, detailsCount);
+        setupInputListeners(form);
         
-        // Type Select Change
-        if (typeSelect) {
-            typeSelect.addEventListener('change', function() {
-                formState.type = this.value;
-                if (this.value === 'other') {
-                    showElement(typeOtherContainer);
-                    if (typeOtherInput) typeOtherInput.required = true;
-                } else {
-                    hideElement(typeOtherContainer);
-                    if (typeOtherInput) {
-                        typeOtherInput.required = false;
-                        typeOtherInput.value = '';
-                    }
-                    formState.typeOther = '';
+        // Form Submit
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleSubmit(e);
+        });
+        
+        console.log('Event listeners set up successfully');
+    }
+    
+    // Setup Type Select Listener
+    function setupTypeSelectListener(typeSelect, typeOtherContainer, typeOtherInput) {
+        if (!typeSelect) return;
+        
+        typeSelect.addEventListener('change', function() {
+            formState.type = this.value;
+            if (this.value === 'other') {
+                showElement(typeOtherContainer);
+                if (typeOtherInput) typeOtherInput.required = true;
+            } else {
+                hideElement(typeOtherContainer);
+                if (typeOtherInput) {
+                    typeOtherInput.required = false;
+                    typeOtherInput.value = '';
                 }
-                validateField('type');
-            });
-        }
+                formState.typeOther = '';
+            }
+            validateField('type');
+        });
+    }
+    
+    // Setup Type Other Listener
+    function setupTypeOtherListener(typeOtherInput) {
+        if (!typeOtherInput) return;
         
-        // Type Other Input
-        if (typeOtherInput) {
-            typeOtherInput.addEventListener('input', function() {
-                formState.typeOther = this.value.trim();
-                validateField('typeOther');
-            });
-        }
+        typeOtherInput.addEventListener('input', function() {
+            formState.typeOther = this.value.trim();
+            validateField('typeOther');
+        });
+    }
+    
+    // Setup Anonymous Checkbox Listener
+    function setupAnonymousCheckboxListener(anonymousCheckbox, personalInfoSection) {
+        if (!anonymousCheckbox) return;
         
-        // Anonymous Checkbox Change
-        if (anonymousCheckbox) {
-            anonymousCheckbox.addEventListener('change', function() {
-                formState.isAnonymous = this.checked;
-                if (this.checked) {
-                    hideElement(personalInfoSection);
-                    clearPersonalInfo();
-                } else {
-                    showElement(personalInfoSection);
-                }
-                validateForm();
-            });
-        }
+        anonymousCheckbox.addEventListener('change', function() {
+            formState.isAnonymous = this.checked;
+            if (this.checked) {
+                hideElement(personalInfoSection);
+                clearPersonalInfo();
+            } else {
+                showElement(personalInfoSection);
+            }
+            validateForm();
+        });
+    }
+    
+    // Setup Details Textarea Listener
+    function setupDetailsTextareaListener(detailsTextarea, detailsCount) {
+        if (!detailsTextarea) return;
         
-        // Details Character Count
-        if (detailsTextarea && detailsCount) {
+        if (detailsCount) {
             detailsTextarea.addEventListener('input', function() {
                 const count = this.value.length;
                 detailsCount.textContent = count;
@@ -127,13 +150,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 validateField('details');
             });
-        } else if (detailsTextarea) {
+        } else {
             detailsTextarea.addEventListener('input', function() {
                 formState.details = this.value;
                 validateField('details');
             });
         }
-        
+    }
+    
+    // Setup Input Listeners
+    function setupInputListeners(form) {
         // Department Input
         const departmentInput = form.querySelector('#department');
         if (departmentInput) {
@@ -179,70 +205,111 @@ document.addEventListener('DOMContentLoaded', function() {
                 validateField('email');
             });
         }
-        
-        // Form Submit
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleSubmit(e);
-        });
-        
-        console.log('Event listeners set up successfully');
     }
 
-    // Field Validation
+    // Field Validation - แยกการตรวจสอบเป็นฟังก์ชันย่อย
     function validateField(fieldName) {
         const errors = {};
         
+        // ตรวจสอบฟิลด์ตามประเภท
+        validateFieldByType(fieldName, errors);
+        
+        // ตรวจสอบข้อมูลติดต่อ
+        validateContactField(fieldName, errors);
+
+        displayErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
+    
+    // Validate field by type
+    function validateFieldByType(fieldName, errors) {
         switch(fieldName) {
             case 'type':
-                if (!formState.type) {
-                    errors.type = 'กรุณาเลือกประเภทเรื่องร้องเรียน';
-                } else if (formState.type === 'other' && !formState.typeOther) {
-                    errors.typeOther = 'กรุณาระบุประเภทเรื่องร้องเรียนอื่นๆ';
-                }
+                validateTypeField(errors);
                 break;
                 
             case 'typeOther':
-                if (formState.type === 'other' && !formState.typeOther) {
-                    errors.typeOther = 'กรุณาระบุประเภทเรื่องร้องเรียนอื่นๆ';
-                }
+                validateTypeOtherField(errors);
                 break;
                 
             case 'department':
-                if (!formState.department) {
-                    errors.department = 'กรุณาเลือกหน่วยงานที่ถูกร้องเรียน';
-                }
+                validateDepartmentField(errors);
                 break;
                 
             case 'details':
-                if (!formState.details) {
-                    errors.details = 'กรุณาระบุรายละเอียด';
-                } else if (formState.details.length < CONFIG.MIN_DETAILS_LENGTH) {
-                    errors.details = `กรุณาระบุรายละเอียดอย่างน้อย ${CONFIG.MIN_DETAILS_LENGTH} ตัวอักษร`;
-                }
+                validateDetailsField(errors);
                 break;
                 
             case 'name':
-                if (!formState.isAnonymous && !formState.name) {
-                    errors.name = 'กรุณาระบุชื่อ-นามสกุล';
-                }
+                validateNameField(errors);
                 break;
                 
             case 'email':
-                if (formState.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
-                    errors.email = 'กรุณาระบุอีเมลให้ถูกต้อง';
-                }
+                validateEmailField(errors);
                 break;
                 
             case 'phone':
-                if (formState.phone && !/^[0-9]{9,10}$/.test(formState.phone)) {
-                    errors.phone = 'กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง';
-                }
+                validatePhoneField(errors);
                 break;
         }
-
-        // ตรวจสอบว่าต้องระบุช่องทางติดต่ออย่างน้อย 1 ช่องทาง
-        if (!formState.isAnonymous && fieldName === 'phone' || fieldName === 'email') {
+    }
+    
+    // Validate type field
+    function validateTypeField(errors) {
+        if (!formState.type) {
+            errors.type = 'กรุณาเลือกประเภทเรื่องร้องเรียน';
+        } else if (formState.type === 'other' && !formState.typeOther) {
+            errors.typeOther = 'กรุณาระบุประเภทเรื่องร้องเรียนอื่นๆ';
+        }
+    }
+    
+    // Validate typeOther field
+    function validateTypeOtherField(errors) {
+        if (formState.type === 'other' && !formState.typeOther) {
+            errors.typeOther = 'กรุณาระบุประเภทเรื่องร้องเรียนอื่นๆ';
+        }
+    }
+    
+    // Validate department field
+    function validateDepartmentField(errors) {
+        if (!formState.department) {
+            errors.department = 'กรุณาเลือกหน่วยงานที่ถูกร้องเรียน';
+        }
+    }
+    
+    // Validate details field
+    function validateDetailsField(errors) {
+        if (!formState.details) {
+            errors.details = 'กรุณาระบุรายละเอียด';
+        } else if (formState.details.length < CONFIG.MIN_DETAILS_LENGTH) {
+            errors.details = `กรุณาระบุรายละเอียดอย่างน้อย ${CONFIG.MIN_DETAILS_LENGTH} ตัวอักษร`;
+        }
+    }
+    
+    // Validate name field
+    function validateNameField(errors) {
+        if (!formState.isAnonymous && !formState.name) {
+            errors.name = 'กรุณาระบุชื่อ-นามสกุล';
+        }
+    }
+    
+    // Validate email field
+    function validateEmailField(errors) {
+        if (formState.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+            errors.email = 'กรุณาระบุอีเมลให้ถูกต้อง';
+        }
+    }
+    
+    // Validate phone field
+    function validatePhoneField(errors) {
+        if (formState.phone && !/^[0-9]{9,10}$/.test(formState.phone)) {
+            errors.phone = 'กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง';
+        }
+    }
+    
+    // Validate contact field
+    function validateContactField(fieldName, errors) {
+        if (!formState.isAnonymous && (fieldName === 'phone' || fieldName === 'email')) {
             if (!formState.phone && !formState.email) {
                 errors.contact = 'กรุณาระบุเบอร์โทรศัพท์หรืออีเมล อย่างน้อย 1 ช่องทาง';
             } else {
@@ -254,9 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-
-        displayErrors(errors);
-        return Object.keys(errors).length === 0;
     }
 
     // Display form errors
@@ -280,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validate entire form
     function validateForm() {
         let isValid = true;
-        let errors = {};
+        const errors = {};
         
         // ตรวจสอบฟิลด์ที่จำเป็น
         CONFIG.REQUIRED_FIELDS.forEach(field => {
@@ -289,18 +353,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // ตรวจสอบข้อมูลส่วนตัว (ถ้าไม่ใช่การร้องเรียนแบบไม่ระบุตัวตน)
-        if (!formState.isAnonymous) {
-            if (!formState.name) {
-                errors.name = 'กรุณาระบุชื่อ-นามสกุล';
-                isValid = false;
-            }
-            
-            if (!formState.phone && !formState.email) {
-                errors.contact = 'กรุณาระบุเบอร์โทรศัพท์หรืออีเมล อย่างน้อย 1 ช่องทาง';
-                isValid = false;
-            }
-        }
+        // ตรวจสอบข้อมูลส่วนตัว
+        validatePersonalInfoFields(errors);
         
         // ตรวจสอบประเภทอื่นๆ
         if (formState.type === 'other' && !formState.typeOther) {
@@ -311,14 +365,34 @@ document.addEventListener('DOMContentLoaded', function() {
         displayErrors(errors);
 
         if (!isValid) {
-            // เลื่อนไปยังข้อผิดพลาดแรก
-            const firstError = document.querySelector('.error-message:not(:empty)');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            scrollToFirstError();
         }
 
         return isValid;
+    }
+    
+    // Validate personal info fields
+    function validatePersonalInfoFields(errors) {
+        if (!formState.isAnonymous) {
+            if (!formState.name) {
+                errors.name = 'กรุณาระบุชื่อ-นามสกุล';
+                return false;
+            }
+            
+            if (!formState.phone && !formState.email) {
+                errors.contact = 'กรุณาระบุเบอร์โทรศัพท์หรืออีเมล อย่างน้อย 1 ช่องทาง';
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    // Scroll to first error
+    function scrollToFirstError() {
+        const firstError = document.querySelector('.error-message:not(:empty)');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
     // Clear personal information fields
@@ -332,6 +406,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // ล้างข้อความผิดพลาดที่เกี่ยวข้อง
+        clearPersonalInfoErrors();
+    }
+    
+    // Clear personal info errors
+    function clearPersonalInfoErrors() {
         const nameError = getElement('name-error');
         if (nameError) nameError.textContent = '';
         
@@ -352,6 +431,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // รีเซ็ตฟอร์มและข้อมูล
         form.reset();
+        resetFormState();
+        resetFormUI(form);
+    }
+    
+    // Reset form state
+    function resetFormState() {
         formState = {
             type: '',
             typeOther: '',
@@ -363,7 +448,10 @@ document.addEventListener('DOMContentLoaded', function() {
             email: '',
             isAnonymous: false
         };
-
+    }
+    
+    // Reset form UI
+    function resetFormUI(form) {
         // คืนค่า UI กลับสู่สถานะเริ่มต้น
         const typeOtherContainer = form.querySelector('.type-other-field');
         if (typeOtherContainer) hideElement(typeOtherContainer);
@@ -415,82 +503,115 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // อัพเดต UI เพื่อแสดงสถานะกำลังส่งข้อมูล
-            submitButton.disabled = true;
-            if (loadingDiv) showElement(loadingDiv);
-            showElement(messageDiv);
-            messageDiv.className = 'message info';
-            messageDiv.textContent = 'กำลังดำเนินการ...';
-
-            console.log('Submitting complaint form...');
+            updateUIForSubmission(submitButton, loadingDiv, messageDiv);
 
             // ตรวจสอบการตั้งค่า AJAX
-            if (!window.complaintFormAjax?.ajaxurl || !window.complaintFormAjax?.nonce) {
-                console.error('AJAX configuration missing:', window.complaintFormAjax);
-                throw new Error('ไม่พบการตั้งค่า AJAX ที่จำเป็น โปรดรีเฟรชหน้าเว็บและลองใหม่อีกครั้ง');
-            }
+            validateAJAXConfig();
             
-            // เตรียมข้อมูลสำหรับส่ง
-            const submissionData = {
-                ...formState,
-                timestamp: new Date().toISOString()
-            };
-
-            console.log('Sending data:', { 
-                action: 'submit_complaint',
-                nonce: '***', // ไม่แสดง nonce ในบันทึก
-                data: submissionData 
-            });
-
             // ส่งข้อมูลผ่าน AJAX
-            const response = await fetch(CONFIG.SUBMIT_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    action: 'submit_complaint',
-                    nonce: window.complaintFormAjax.nonce,
-                    data: JSON.stringify(submissionData)
-                })
-            });
-
-            // ตรวจสอบสถานะการตอบกลับ
-            if (!response.ok) {
-                throw new Error(`เกิดข้อผิดพลาดในการส่งข้อมูล: ${response.status}`);
-            }
-
-            // แปลงข้อมูลการตอบกลับเป็น JSON
-            const result = await response.json();
-            console.log('Server response:', result);
+            const result = await submitComplaintData();
             
-            if (result.success) {
-                // แสดงข้อความเมื่อส่งสำเร็จ
-                messageDiv.className = 'message success';
-                messageDiv.innerHTML = `
-                    <h3>ขอบคุณสำหรับการแจ้งเรื่องร้องเรียน</h3>
-                    <p>${result.data?.message || 'เราได้รับเรื่องร้องเรียนของท่านเรียบร้อยแล้ว'}</p>
-                    ${result.data?.ref_number ? `<p>เลขที่เรื่องร้องเรียนของท่าน: <strong>${result.data.ref_number}</strong></p>` : ''}
-                `;
-                // รีเซ็ตฟอร์ม
-                resetForm();
-                // เลื่อนไปยังข้อความแจ้งเตือน
-                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                // แสดงข้อความเมื่อเกิดข้อผิดพลาด
-                throw new Error(result.data?.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
-            }
+            // จัดการผลลัพธ์
+            handleSubmissionResult(result, messageDiv);
 
         } catch (error) {
-            console.error('Form submission error:', error);
-            messageDiv.className = 'message error';
-            messageDiv.textContent = error.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง';
-            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
+            handleSubmissionError(error, messageDiv);
         } finally {
             // คืนสถานะ UI หลังจากส่งข้อมูล
-            if (submitButton) submitButton.disabled = false;
-            if (loadingDiv) hideElement(loadingDiv);
+            resetUIAfterSubmission(submitButton, loadingDiv);
         }
+    }
+    
+    // Update UI for submission
+    function updateUIForSubmission(submitButton, loadingDiv, messageDiv) {
+        submitButton.disabled = true;
+        if (loadingDiv) showElement(loadingDiv);
+        showElement(messageDiv);
+        messageDiv.className = 'message info';
+        messageDiv.textContent = 'กำลังดำเนินการ...';
+
+        console.log('Submitting complaint form...');
+    }
+    
+    // Validate AJAX config
+    function validateAJAXConfig() {
+        if (!window.complaintFormAjax?.ajaxurl || !window.complaintFormAjax?.nonce) {
+            console.error('AJAX configuration missing:', window.complaintFormAjax);
+            throw new Error('ไม่พบการตั้งค่า AJAX ที่จำเป็น โปรดรีเฟรชหน้าเว็บและลองใหม่อีกครั้ง');
+        }
+    }
+    
+    // Submit complaint data
+    async function submitComplaintData() {
+        // เตรียมข้อมูลสำหรับส่ง
+        const submissionData = {
+            ...formState,
+            timestamp: new Date().toISOString()
+        };
+
+        console.log('Sending data:', { 
+            action: 'submit_complaint',
+            nonce: '***', // ไม่แสดง nonce ในบันทึก
+            data: submissionData 
+        });
+
+        // ส่งข้อมูลผ่าน AJAX
+        const response = await fetch(CONFIG.SUBMIT_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                action: 'submit_complaint',
+                nonce: window.complaintFormAjax.nonce,
+                data: JSON.stringify(submissionData)
+            })
+        });
+
+        // ตรวจสอบสถานะการตอบกลับ
+        if (!response.ok) {
+            throw new Error(`เกิดข้อผิดพลาดในการส่งข้อมูล: ${response.status}`);
+        }
+
+        // แปลงข้อมูลการตอบกลับเป็น JSON
+        const result = await response.json();
+        console.log('Server response:', result);
+        
+        return result;
+    }
+    
+    // Handle submission result
+    function handleSubmissionResult(result, messageDiv) {
+        if (result.success) {
+            // แสดงข้อความเมื่อส่งสำเร็จ
+            messageDiv.className = 'message success';
+            messageDiv.innerHTML = `
+                <h3>ขอบคุณสำหรับการแจ้งเรื่องร้องเรียน</h3>
+                <p>${result.data?.message || 'เราได้รับเรื่องร้องเรียนของท่านเรียบร้อยแล้ว'}</p>
+                ${result.data?.ref_number ? `<p>เลขที่เรื่องร้องเรียนของท่าน: <strong>${result.data.ref_number}</strong></p>` : ''}
+            `;
+            // รีเซ็ตฟอร์ม
+            resetForm();
+            // เลื่อนไปยังข้อความแจ้งเตือน
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            // แสดงข้อความเมื่อเกิดข้อผิดพลาด
+            throw new Error(result.data?.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
+        }
+    }
+    
+    // Handle submission error
+    function handleSubmissionError(error, messageDiv) {
+        console.error('Form submission error:', error);
+        messageDiv.className = 'message error';
+        messageDiv.textContent = error.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง';
+        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Reset UI after submission
+    function resetUIAfterSubmission(submitButton, loadingDiv) {
+        if (submitButton) submitButton.disabled = false;
+        if (loadingDiv) hideElement(loadingDiv);
     }
 
     // Handle browser back/forward navigation
@@ -506,7 +627,11 @@ document.addEventListener('DOMContentLoaded', function() {
         initForm();
     } catch (error) {
         console.error('Form initialization error:', error);
-        // แสดงข้อความแจ้งเตือนเมื่อเกิดข้อผิดพลาด
+        displayInitializationError();
+    }
+    
+    // Display initialization error
+    function displayInitializationError() {
         const container = document.querySelector('.complaint-form-container');
         if (container) {
             container.innerHTML = `

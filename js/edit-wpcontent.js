@@ -5,7 +5,7 @@ jQuery(document).ready(function($) {
     // เปิดฟอร์มแก้ไข
     $(document).on('click', '.edit-wpcontent-button', function(e) {
         e.preventDefault();
-        var container = $(this).closest('.edit-wpcontent-container');
+        const container = $(this).closest('.edit-wpcontent-container');
         container.find('.edit-wpcontent-content').hide();
         container.find('.edit-wpcontent-form').fadeIn();
         container.find('.edit-wpcontent-button').hide();
@@ -15,7 +15,7 @@ jQuery(document).ready(function($) {
     // ยกเลิกการแก้ไข
     $(document).on('click', '.edit-wpcontent-cancel', function(e) {
         e.preventDefault();
-        var container = $(this).closest('.edit-wpcontent-container');
+        const container = $(this).closest('.edit-wpcontent-container');
         container.find('.edit-wpcontent-form').hide();
         container.find('.edit-wpcontent-content').fadeIn();
         container.find('.edit-wpcontent-button').fadeIn();
@@ -24,12 +24,12 @@ jQuery(document).ready(function($) {
     // บันทึกการแก้ไข
     $(document).on('click', '.edit-wpcontent-save', function(e) {
         e.preventDefault();
-        var container = $(this).closest('.edit-wpcontent-container');
-        var saveButton = $(this);
-        var content = container.find('.edit-wpcontent-textarea').val();
-        var postId = container.data('id');
-        var field = container.data('field');
-        var nonce = container.data('nonce');
+        const container = $(this).closest('.edit-wpcontent-container');
+        const saveButton = $(this);
+        const content = container.find('.edit-wpcontent-textarea').val();
+        const postId = container.data('id');
+        const field = container.data('field');
+        const nonce = container.data('nonce');
         
         // แสดงสถานะกำลังโหลด
         saveButton.text('กำลังบันทึก...');
@@ -52,7 +52,7 @@ jQuery(document).ready(function($) {
                     container.find('.edit-wpcontent-content').html(response.data.formatted_content);
                     
                     // แสดงข้อความสำเร็จ
-                    var notification = $('<div class="edit-wpcontent-notification success">' + editWpContent.messages.success + '</div>');
+                    const notification = $('<div class="edit-wpcontent-notification success">' + editWpContent.messages.success + '</div>');
                     container.append(notification);
                     
                     // ซ่อนฟอร์ม แสดงเนื้อหา
@@ -68,7 +68,7 @@ jQuery(document).ready(function($) {
                     }, 3000);
                 } else {
                     // แสดงข้อความผิดพลาด
-                    var notification = $('<div class="edit-wpcontent-notification error">' + editWpContent.messages.error + '</div>');
+                    const notification = $('<div class="edit-wpcontent-notification error">' + editWpContent.messages.error + '</div>');
                     container.append(notification);
                     
                     // ซ่อนการแจ้งเตือนหลังจาก 3 วินาที
@@ -81,7 +81,7 @@ jQuery(document).ready(function($) {
             },
             error: function() {
                 // แสดงข้อความผิดพลาด
-                var notification = $('<div class="edit-wpcontent-notification error">' + editWpContent.messages.error + '</div>');
+                const notification = $('<div class="edit-wpcontent-notification error">' + editWpContent.messages.error + '</div>');
                 container.append(notification);
                 
                 // ซ่อนการแจ้งเตือนหลังจาก 3 วินาที

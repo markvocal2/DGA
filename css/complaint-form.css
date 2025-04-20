@@ -49,11 +49,13 @@
   margin-bottom: 1.25rem;
 }
 
+/* Merged styles for label */
 .complaint-form label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: var(--text-color);
+  cursor: pointer; /* Added from the duplicate block */
 }
 
 .complaint-form .required {
@@ -132,7 +134,7 @@
   color: var(--error-color);
   font-size: 0.875rem;
   margin-top: 0.25rem;
-  display: block;
+  display: block; /* Ensure error messages are displayed */
 }
 
 /* ===== Message Boxes ===== */
@@ -187,13 +189,13 @@
 
 /* ===== Loading ===== */
 .complaint-form .loading {
-  display: none;
+  display: none; /* Hidden by default */
   text-align: center;
   margin: 1rem 0;
   color: var(--primary-color);
   font-weight: 500;
   position: relative;
-  padding-left: 20px;
+  padding-left: 20px; /* Space for the spinner */
 }
 
 .complaint-form .loading:before {
@@ -203,7 +205,7 @@
   top: 50%;
   width: 15px;
   height: 15px;
-  margin-top: -8px;
+  margin-top: -8px; /* Center vertically */
   border: 2px solid var(--primary-color);
   border-top-color: transparent;
   border-radius: 50%;
@@ -216,7 +218,7 @@
 
 /* ===== Type Other Field ===== */
 .complaint-form .type-other-field {
-  margin-top: -1rem;
+  margin-top: -1rem; /* Adjust spacing when shown */
   padding-top: 0;
   animation: fadeIn 0.3s ease-out;
 }
@@ -231,7 +233,7 @@
   .complaint-form {
       padding: 1.25rem;
   }
-  
+
   .complaint-form .personal-info {
       padding: 1rem;
   }
@@ -251,16 +253,14 @@
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
 }
 
-.complaint-form label {
-    cursor: pointer;
-}
+/* Removed duplicate .complaint-form label block from here */
 
 .complaint-form [aria-hidden="true"] {
     display: none;
 }
 
 .complaint-form [aria-hidden="false"] {
-    display: block;
+    display: block; /* Or inline, inline-block, etc., depending on the element */
 }
 
 /* สำหรับ screen readers */
@@ -285,9 +285,10 @@
 
 /* เพิ่มข้อความบอกภาคบังคับ */
 .complaint-form label .required:after {
-    content: " (จำเป็น)";
+    content: " (จำเป็น)"; /* Required indicator text */
     font-size: 0.9em;
     color: var(--error-color);
+    margin-left: 2px; /* Add small space */
 }
 
 /* คำแนะนำสำหรับฟิลด์ */
@@ -298,13 +299,21 @@
 }
 
 /* สถานะผิดพลาด */
-.complaint-form .error .error-message {
+/* Add class="error" to the .form-group to trigger these styles */
+.complaint-form .form-group.error .error-message {
     display: block;
 }
 
-.complaint-form .error input,
-.complaint-form .error select,
-.complaint-form .error textarea {
+.complaint-form .form-group.error input,
+.complaint-form .form-group.error select,
+.complaint-form .form-group.error textarea {
     border-color: var(--error-color);
-    background-color: #fef2f2;
+    background-color: #fef2f2; /* Light red background */
 }
+
+/* Note on "No tags": CSS applies styles to HTML elements (tags).
+   This CSS file defines the styles, but it needs corresponding HTML
+   with matching classes (e.g., <form class="complaint-form">...</form>)
+   for the styles to take effect. The "No tags" message might originate
+   from a linter checking the HTML context where this CSS is used,
+   or it might be unrelated to the CSS code itself. */

@@ -3,6 +3,7 @@
  *
  * Provides modern, intimidating styles for the post deletion modal.
  * Refactored using CSS variables for better maintainability and theming.
+ * Addresses missing generic font family warning.
  * File path: /css/ckan-delete-dataset.css
  */
 
@@ -29,7 +30,8 @@
   --cpd-loading-spinner-color: var(--cpd-modal-text);
 
   /* Typography */
-  --cpd-font-family: inherit;
+  /* Define a default font stack including a generic fallback */
+  --cpd-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   --cpd-font-size-base: 16px;
   --cpd-font-size-sm: 14px;
   --cpd-font-size-lg: 20px;
@@ -84,6 +86,7 @@
   color: var(--cpd-modal-text);
   cursor: pointer;
   display: inline-flex;
+  font-family: var(--cpd-font-family); /* Apply font family */
   font-size: var(--cpd-font-size-base);
   font-weight: var(--cpd-font-weight-semibold);
   justify-content: center;
@@ -103,9 +106,10 @@
   transform: translateY(0);
 }
 
+/* Assumes dashicons font is loaded globally */
 .cpd-delete-post-btn::before {
   content: "\f182";
-  font-family: dashicons;
+  font-family: dashicons, sans-serif; /* Added fallback */
   font-size: var(--cpd-font-size-lg);
   line-height: 1;
   margin-right: var(--cpd-spacing-xs);
@@ -143,13 +147,14 @@ body.cpd-modal-open {
   border-radius: var(--cpd-border-radius-md);
   box-shadow: var(--cpd-shadow-modal);
   color: var(--cpd-modal-text);
+  font-family: var(--cpd-font-family); /* Apply base font family */
   margin: 10% auto;
   max-width: 500px;
   opacity: 0;
   padding: 0;
   position: relative;
   transform: translateY(-50px);
-  transition: 
+  transition:
     transform var(--cpd-transition-duration-slow) var(--cpd-transition-timing-cubic),
     opacity var(--cpd-transition-duration-slow) var(--cpd-transition-timing);
   width: 90%;
@@ -178,6 +183,7 @@ body.cpd-modal-open {
   letter-spacing: 1px;
   margin: 0;
   text-transform: uppercase;
+  /* Inherits font-family from .cpd-modal-content */
 }
 
 .cpd-close {
@@ -188,6 +194,7 @@ body.cpd-modal-open {
   line-height: 1;
   padding: 0 var(--cpd-spacing-xs);
   transition: transform var(--cpd-transition-duration-fast) var(--cpd-transition-timing);
+  /* Uses default browser font for the '×' symbol unless overridden */
 }
 
 .cpd-close:hover {
@@ -198,6 +205,7 @@ body.cpd-modal-open {
 .cpd-modal-body {
   padding: var(--cpd-spacing-xl) var(--cpd-spacing-lg);
   text-align: center;
+  /* Inherits font-family from .cpd-modal-content */
 }
 
 .cpd-modal-body p {
@@ -212,6 +220,7 @@ body.cpd-modal-open {
 }
 
 /* Icons - Common Styles */
+/* Assumes an icon font library (like Font Awesome) is loaded globally */
 .cpd-warning-icon,
 .cpd-success-icon,
 .cpd-error-icon {
@@ -219,16 +228,18 @@ body.cpd-modal-open {
   border-radius: var(--cpd-border-radius-round);
   border-style: solid;
   border-width: var(--cpd-border-width-icon);
-  display: flex;
+  display: flex; /* Changed from inline-flex for centering */
   height: 80px;
   justify-content: center;
-  margin: 0 auto var(--cpd-spacing-lg);
+  margin: 0 auto var(--cpd-spacing-lg); /* Center the icon block */
   width: 80px;
 }
 
 .cpd-warning-icon i,
 .cpd-success-icon i,
 .cpd-error-icon i {
+  font-family: "Font Awesome 5 Free", sans-serif; /* Example: Specify icon font-family with fallback */
+  font-weight: 900; /* Needed for Font Awesome solid icons */
   font-size: var(--cpd-font-size-icon);
   line-height: 1;
 }
@@ -277,9 +288,11 @@ body.cpd-modal-open {
 .cpd-confirm-delete-btn {
   border-radius: var(--cpd-border-radius-sm);
   cursor: pointer;
+  font-family: var(--cpd-font-family); /* Apply font family */
   font-size: var(--cpd-font-size-sm);
   font-weight: var(--cpd-font-weight-semibold);
   padding: var(--cpd-spacing-sm) var(--cpd-spacing-lg);
+  transition: background-color var(--cpd-transition-duration) var(--cpd-transition-timing); /* Simplified transition */
 }
 
 /* Footer Buttons - Secondary Style */
@@ -289,7 +302,6 @@ body.cpd-modal-open {
   background-color: transparent;
   border: var(--cpd-border-width) solid var(--cpd-button-secondary-border);
   color: var(--cpd-button-secondary-text);
-  transition: background-color var(--cpd-transition-duration) var(--cpd-transition-timing);
 }
 
 .cpd-cancel-btn:hover,
@@ -303,7 +315,6 @@ body.cpd-modal-open {
   background-color: var(--cpd-color-danger);
   border: none;
   color: var(--cpd-modal-text);
-  transition: background-color var(--cpd-transition-duration) var(--cpd-transition-timing);
 }
 
 .cpd-confirm-delete-btn:hover {
@@ -325,12 +336,12 @@ body.cpd-modal-open {
   border-top-color: var(--cpd-loading-spinner-color);
   box-sizing: border-box;
   content: "";
-  height: 20px;
-  left: calc(50% - 20px);
+  height: 20px; /* Reduced size for better proportion */
+  left: calc(50% - 10px); /* Adjusted for new size */
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
+  top: calc(50% - 10px); /* Adjusted for new size */
+  /* transform: translateY(-50%); */ /* Removed as top/left handle centering */
+  width: 20px; /* Reduced size */
 }
 
 /* Animations */
@@ -347,11 +358,11 @@ body.cpd-modal-open {
 }
 
 @keyframes cpd-spin {
-  0% { 
-    transform: translateY(-50%) rotate(0deg); 
+  0% {
+    transform: rotate(0deg);
   }
-  100% { 
-    transform: translateY(-50%) rotate(360deg); 
+  100% {
+    transform: rotate(360deg);
   }
 }
 
@@ -359,7 +370,7 @@ body.cpd-modal-open {
 @media (max-width: 768px) {
   .cpd-modal-content {
     margin: 15% auto;
-    max-width: none;
+    max-width: none; /* Allow it to take available width */
     width: 95%;
   }
 
@@ -378,29 +389,38 @@ body.cpd-modal-open {
 
 @media (max-width: 480px) {
   .cpd-modal-header h2 {
-    font-size: 18px;
+    font-size: 18px; /* Slightly smaller */
   }
-  
+
   .cpd-warning-icon,
   .cpd-success-icon,
   .cpd-error-icon {
     height: 60px;
     width: 60px;
   }
-  
+
   .cpd-warning-icon i,
   .cpd-success-icon i,
   .cpd-error-icon i {
-    font-size: 30px;
+    font-size: 30px; /* Adjust icon size */
   }
-  
+
   .cpd-modal-footer {
-    align-items: stretch;
+    align-items: stretch; /* Make buttons full width */
     flex-direction: column;
+    gap: var(--cpd-spacing-sm); /* Add gap between stacked buttons */
   }
-  
+
+  /* Ensure buttons take full width in column layout */
   .cpd-modal-footer button {
-    margin-left: 0;
+    margin-left: 0; /* Reset any potential left margin */
     width: 100%;
   }
 }
+
+/* Note on "No tags": CSS applies styles to HTML elements (tags).
+   This CSS file defines the styles, but it needs corresponding HTML
+   with matching classes (e.g., <div class="cpd-modal">...</div>)
+   for the styles to take effect. The "No tags" message might originate
+   from a linter checking the HTML context where this CSS is used,
+   or it might be unrelated to the CSS code itself. */

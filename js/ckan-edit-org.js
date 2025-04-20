@@ -1,7 +1,7 @@
 jQuery(document).ready(function($) {
     // เปิด modal เมื่อคลิกปุ่ม "แก้ไขข้อมูล"
     $('.ckan-edit-corg-btn').on('click', function() {
-        var postId = $(this).data('post-id');
+        const postId = $(this).data('post-id');
         
         // โหลด terms ทั้งหมดผ่าน AJAX
         $.ajax({
@@ -18,14 +18,14 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    var terms = response.data.terms;
-                    var currentTermId = response.data.current_term_id;
-                    var optionsHtml = '<option value="">-- เลือกองค์กร --</option>';
+                    const terms = response.data.terms;
+                    const currentTermId = response.data.current_term_id;
+                    let optionsHtml = '<option value="">-- เลือกองค์กร --</option>';
                     
                     // สร้าง options สำหรับ select
                     if (terms.length > 0) {
-                        for (var i = 0; i < terms.length; i++) {
-                            var selected = terms[i].selected ? ' selected="selected"' : '';
+                        for (let i = 0; i < terms.length; i++) {
+                            const selected = terms[i].selected ? ' selected="selected"' : '';
                             optionsHtml += '<option value="' + terms[i].id + '"' + selected + '>' + terms[i].name + '</option>';
                         }
                     }
@@ -70,8 +70,8 @@ jQuery(document).ready(function($) {
     
     // จัดการคลิกปุ่มอัพเดต
     $('.ckan-update-corg-btn').on('click', function() {
-        var postId = $('#ckan-corg-modal').data('post-id');
-        var termId = $('#ckan-corg-select').val();
+        const postId = $('#ckan-corg-modal').data('post-id');
+        const termId = $('#ckan-corg-select').val();
         
         // อัพเดต term ของโพสต์ผ่าน AJAX
         $.ajax({
@@ -116,7 +116,7 @@ jQuery(document).ready(function($) {
     // Function สำหรับแสดงการแจ้งเตือน
     function showNotification(message) {
         // สร้าง notification element
-        var notification = $('<div class="ckan-notification">' + message + '</div>');
+        const notification = $('<div class="ckan-notification">' + message + '</div>');
         $('body').append(notification);
         
         // แสดง notification

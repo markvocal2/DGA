@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(($) => {
     console.log('EGP File Download JS loaded');
     
     // ============= ส่วนของการจัดการตาราง =============
@@ -7,7 +7,14 @@ jQuery(document).ready(function($) {
     $('.egp-file-container').each(function() {
         const container = $(this);
         if (container.find('.egp-file-table tbody tr').not('.egp-no-files-row').length > 5) {
-            const searchBox = $('<div class="egp-search-container"><div class="egp-search-wrapper"><input type="text" class="egp-search-input" placeholder="ค้นหาเอกสาร..."><span class="egp-search-icon dashicons dashicons-search"></span></div></div>');
+            const searchBox = $(`
+                <div class="egp-search-container">
+                    <div class="egp-search-wrapper">
+                        <input type="text" class="egp-search-input" placeholder="ค้นหาเอกสาร...">
+                        <span class="egp-search-icon dashicons dashicons-search"></span>
+                    </div>
+                </div>
+            `);
             container.find('.egp-file-header').after(searchBox);
             
             // ฟังก์ชันค้นหา
@@ -22,7 +29,16 @@ jQuery(document).ready(function($) {
                 if (visibleRows === 0) {
                     if (container.find('.egp-no-search-results').length === 0) {
                         const colSpan = container.find('.egp-file-table thead th').length;
-                        container.find('.egp-file-table tbody').append('<tr class="egp-no-search-results"><td colspan="' + colSpan + '"><div class="egp-empty-search"><span class="dashicons dashicons-search"></span><p>ไม่พบเอกสารที่ค้นหา</p></div></td></tr>');
+                        container.find('.egp-file-table tbody').append(`
+                            <tr class="egp-no-search-results">
+                                <td colspan="${colSpan}">
+                                    <div class="egp-empty-search">
+                                        <span class="dashicons dashicons-search"></span>
+                                        <p>ไม่พบเอกสารที่ค้นหา</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
                     }
                     container.find('.egp-no-search-results').show();
                 } else {
@@ -46,7 +62,7 @@ jQuery(document).ready(function($) {
         
         // เปลี่ยน active content
         $tabContainer.find('.egp-tab-content').removeClass('active');
-        $tabContainer.find('.egp-tab-content[data-tab="' + tab + '"]').addClass('active');
+        $tabContainer.find(`.egp-tab-content[data-tab="${tab}"]`).addClass('active');
         
         // อัพเดตค่า upload_type
         $tabContainer.closest('form').find('input[name="upload_type"]').val(tab === 'upload' ? 'direct' : 'media');
@@ -77,7 +93,12 @@ jQuery(document).ready(function($) {
             const fileExt = fileName.split('.').pop().toLowerCase();
             const iconClass = getFileIconClass(fileExt);
             
-            $fileNameDisplay.html('<div class="egp-selected-file"><span class="dashicons ' + iconClass + '"></span><span class="egp-file-name-text">' + fileName + '</span></div>');
+            $fileNameDisplay.html(`
+                <div class="egp-selected-file">
+                    <span class="dashicons ${iconClass}"></span>
+                    <span class="egp-file-name-text">${fileName}</span>
+                </div>
+            `);
             
             // ตั้งชื่อไฟล์อัตโนมัติถ้ายังไม่ได้กรอก
             const form = $(this).closest('form');
@@ -98,19 +119,19 @@ jQuery(document).ready(function($) {
         const $input = $dropArea.find('.egp-file-input');
         const $fileNameDisplay = $dropArea.siblings('.egp-file-name-display');
         
-        $dropArea.on('dragover', function(e) {
+        $dropArea.on('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
             $(this).addClass('dragging');
         });
         
-        $dropArea.on('dragleave', function(e) {
+        $dropArea.on('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
             $(this).removeClass('dragging');
         });
         
-        $dropArea.on('drop', function(e) {
+        $dropArea.on('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
             $(this).removeClass('dragging');
@@ -130,7 +151,7 @@ jQuery(document).ready(function($) {
         const uniqueId = container.attr('id');
         
         // ค้นหา modal ที่มี ID ที่ถูกต้อง
-        const modal = $('#egp-file-modal-' + uniqueId.split('-').pop());
+        const modal = $(`#egp-file-modal-${uniqueId.split('-').pop()}`);
         
         // รีเซ็ตฟอร์ม
         resetFileForm(modal);
@@ -149,7 +170,7 @@ jQuery(document).ready(function($) {
         const uniqueId = container.attr('id');
         
         // ค้นหา modal ที่มี ID ที่ถูกต้อง
-        const modal = $('#egp-file-modal-' + uniqueId.split('-').pop());
+        const modal = $(`#egp-file-modal-${uniqueId.split('-').pop()}`);
         
         const fileIndex = $(this).data('index');
         const fileName = $(this).data('name');
@@ -170,10 +191,15 @@ jQuery(document).ready(function($) {
         filePreview.empty();
         
         if (isImageFile(fileUrl)) {
-            filePreview.html('<img src="' + fileUrl + '" alt="' + fileName + '">');
+            filePreview.html(`<img src="${fileUrl}" alt="${fileName}">`);
         } else {
             const fileExt = fileUrl.split('.').pop().toLowerCase();
-            filePreview.html('<div class="egp-file-icon-preview"><span class="dashicons ' + getFileIconClass(fileExt) + '"></span><span class="egp-file-ext">' + fileExt + '</span></div>');
+            filePreview.html(`
+                <div class="egp-file-icon-preview">
+                    <span class="dashicons ${getFileIconClass(fileExt)}"></span>
+                    <span class="egp-file-ext">${fileExt}</span>
+                </div>
+            `);
         }
         
         // เปลี่ยนชื่อ Modal
@@ -209,7 +235,7 @@ jQuery(document).ready(function($) {
         });
         
         // เมื่อเลือกไฟล์แล้ว
-        mediaUploader.on('select', function() {
+        mediaUploader.on('select', () => {
             const attachment = mediaUploader.state().get('selection').first().toJSON();
             form.find('input[name="file_url"]').val(attachment.url);
             
@@ -223,10 +249,15 @@ jQuery(document).ready(function($) {
             filePreview.empty();
             
             if (isImageFile(attachment.url)) {
-                filePreview.html('<img src="' + attachment.url + '" alt="' + attachment.title + '">');
+                filePreview.html(`<img src="${attachment.url}" alt="${attachment.title}">`);
             } else {
                 const fileExt = attachment.url.split('.').pop().toLowerCase();
-                filePreview.html('<div class="egp-file-icon-preview"><span class="dashicons ' + getFileIconClass(fileExt) + '"></span><span class="egp-file-ext">' + fileExt + '</span></div>');
+                filePreview.html(`
+                    <div class="egp-file-icon-preview">
+                        <span class="dashicons ${getFileIconClass(fileExt)}"></span>
+                        <span class="egp-file-ext">${fileExt}</span>
+                    </div>
+                `);
             }
         });
         
@@ -240,7 +271,7 @@ jQuery(document).ready(function($) {
         const form = $(this);
         const formId = form.attr('id');
         const uniqueId = formId.split('-').pop();
-        const container = $('.egp-file-container[id$="' + uniqueId + '"]');
+        const container = $(`.egp-file-container[id$="${uniqueId}"]`);
         const modal = form.closest('.egp-modal');
         const submitBtn = form.find('.egp-save-btn');
         const uploadType = form.find('input[name="upload_type"]').val();
@@ -273,12 +304,12 @@ jQuery(document).ready(function($) {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response) {
+            success: (response) => {
                 console.log('AJAX Response:', response);
                 
                 // แสดงข้อมูล debug (เฉพาะเมื่อมีปัญหา)
                 if (!response.success) {
-                    debugInfo.html('<pre style="font-size: 12px; color: #f00;">' + JSON.stringify(response.debug, null, 2) + '</pre>').show();
+                    debugInfo.html(`<pre style="font-size: 12px; color: #f00;">${JSON.stringify(response.debug, null, 2)}</pre>`).show();
                 } else {
                     debugInfo.hide();
                 }
@@ -298,16 +329,16 @@ jQuery(document).ready(function($) {
                     showNotification(container, 'error', response.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: (jqXHR, textStatus, errorThrown) => {
                 console.error('AJAX Error:', textStatus, errorThrown);
                 
                 // แสดงข้อมูล debug
-                debugInfo.html('<pre style="font-size: 12px; color: #f00;">' + textStatus + ': ' + errorThrown + '</pre>').show();
+                debugInfo.html(`<pre style="font-size: 12px; color: #f00;">${textStatus}: ${errorThrown}</pre>`).show();
                 
                 // แสดงข้อความผิดพลาด
                 showNotification(container, 'error', 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
             },
-            complete: function() {
+            complete: () => {
                 // คืนค่าปุ่ม
                 submitBtn.prop('disabled', false).text('บันทึก');
             }
@@ -339,7 +370,7 @@ jQuery(document).ready(function($) {
                 post_id: postId,
                 file_index: fileIndex
             },
-            success: function(response) {
+            success: (response) => {
                 console.log('Delete Response:', response);
                 
                 if (response.success) {
@@ -356,7 +387,7 @@ jQuery(document).ready(function($) {
                     button.prop('disabled', false);
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: (jqXHR, textStatus, errorThrown) => {
                 console.error('Delete Error:', textStatus, errorThrown);
                 
                 // แสดงข้อความผิดพลาด
@@ -371,7 +402,7 @@ jQuery(document).ready(function($) {
     // ============= ฟังก์ชันช่วยเหลือ =============
     
     // ฟังก์ชันรีเซ็ตฟอร์ม
-    function resetFileForm(modal) {
+    const resetFileForm = (modal) => {
         const form = modal.find('form');
         
         // ตรวจสอบว่าพบฟอร์มหรือไม่
@@ -395,17 +426,17 @@ jQuery(document).ready(function($) {
         } else {
             console.error('Form not found in modal');
         }
-    }
+    };
     
     // ฟังก์ชันตรวจสอบว่าเป็นไฟล์รูปภาพหรือไม่
-    function isImageFile(url) {
+    const isImageFile = (url) => {
         if (!url) return false;
         const ext = url.split('.').pop().toLowerCase();
         return ['jpg', 'jpeg', 'png', 'gif', 'svg'].indexOf(ext) !== -1;
-    }
+    };
     
     // ฟังก์ชันรับ class ของไอคอนตามประเภทไฟล์
-    function getFileIconClass(fileExt) {
+    const getFileIconClass = (fileExt) => {
         let iconClass = 'dashicons-media-default';
         
         switch (fileExt) {
@@ -439,10 +470,10 @@ jQuery(document).ready(function($) {
         }
         
         return iconClass;
-    }
+    };
     
     // ฟังก์ชันอัปเดตตาราง
-    function updateFileTable(container, files) {
+    const updateFileTable = (container, files) => {
         const tbody = container.find('.egp-file-table tbody');
         const canEdit = container.find('.egp-file-manage').length > 0;
         const colSpan = canEdit ? 4 : 3;
@@ -452,36 +483,54 @@ jQuery(document).ready(function($) {
         
         // แสดงข้อมูลใหม่
         if (files && files.length > 0) {
-            $.each(files, function(index, file) {
+            files.forEach((file, index) => {
                 if (file.egp_rp_name && file.egp_rp_date && file.egp_rp_link) {
                     // เข้ารหัส URL
                     const encodedUrl = btoa(file.egp_rp_link);
-                    const downloadUrl = '?egp_download=' + encodedUrl;
+                    const downloadUrl = `?egp_download=${encodedUrl}`;
                     
                     // สร้างแถวใหม่
-                    const newRow = $('<tr data-index="' + index + '">');
+                    const newRow = $(`<tr data-index="${index}">`);
                     
                     // สร้างเซลล์ชื่อไฟล์
                     const nameCell = $('<td class="egp-file-name">');
                     const fileExt = file.egp_rp_link.split('.').pop().toLowerCase();
                     const iconClass = getFileIconClass(fileExt);
-                    nameCell.append('<span class="egp-file-icon"><span class="dashicons ' + iconClass + '"></span></span>');
+                    nameCell.append(`<span class="egp-file-icon"><span class="dashicons ${iconClass}"></span></span>`);
                     nameCell.append(file.egp_rp_name);
                     newRow.append(nameCell);
                     
                     // สร้างเซลล์วันที่
-                    newRow.append('<td class="egp-file-date">' + file.egp_rp_date + '</td>');
+                    newRow.append(`<td class="egp-file-date">${file.egp_rp_date}</td>`);
                     
                     // สร้างเซลล์ปุ่มดาวน์โหลด
                     const actionCell = $('<td class="egp-file-action">');
-                    actionCell.append('<a href="' + downloadUrl + '" class="egp-download-button"><span class="dashicons dashicons-download"></span><span class="egp-btn-text">ดาวน์โหลด</span></a>');
+                    actionCell.append(`
+                        <a href="${downloadUrl}" class="egp-download-button">
+                            <span class="dashicons dashicons-download"></span>
+                            <span class="egp-btn-text">ดาวน์โหลด</span>
+                        </a>
+                    `);
                     newRow.append(actionCell);
                     
                     // สร้างเซลล์จัดการ (ถ้ามีสิทธิ์)
                     if (canEdit) {
                         const manageCell = $('<td class="egp-file-manage">');
-                        manageCell.append('<button type="button" class="egp-edit-file-btn" data-index="' + index + '" data-name="' + file.egp_rp_name + '" data-date="' + file.egp_rp_date + '" data-url="' + file.egp_rp_link + '"><span class="dashicons dashicons-edit"></span></button>');
-                        manageCell.append('<button type="button" class="egp-delete-file-btn" data-index="' + index + '"><span class="dashicons dashicons-trash"></span></button>');
+                        manageCell.append(`
+                            <button type="button" class="egp-edit-file-btn" 
+                                data-index="${index}" 
+                                data-name="${file.egp_rp_name}" 
+                                data-date="${file.egp_rp_date}" 
+                                data-url="${file.egp_rp_link}">
+                                <span class="dashicons dashicons-edit"></span>
+                            </button>
+                        `);
+                        manageCell.append(`
+                            <button type="button" class="egp-delete-file-btn" 
+                                data-index="${index}">
+                                <span class="dashicons dashicons-trash"></span>
+                            </button>
+                        `);
                         newRow.append(manageCell);
                     }
                     
@@ -491,7 +540,16 @@ jQuery(document).ready(function($) {
             });
         } else {
             // แสดงข้อความว่าไม่มีข้อมูล
-            tbody.append('<tr class="egp-no-files-row"><td colspan="' + colSpan + '" class="egp-no-files"><div class="egp-empty-state"><span class="dashicons dashicons-media-document"></span><p>ไม่พบไฟล์เอกสาร</p></div></td></tr>');
+            tbody.append(`
+                <tr class="egp-no-files-row">
+                    <td colspan="${colSpan}" class="egp-no-files">
+                        <div class="egp-empty-state">
+                            <span class="dashicons dashicons-media-document"></span>
+                            <p>ไม่พบไฟล์เอกสาร</p>
+                        </div>
+                    </td>
+                </tr>
+            `);
         }
         
         // หาก container มีช่องค้นหา ให้ตรวจสอบว่าควรแสดงหรือไม่
@@ -504,27 +562,40 @@ jQuery(document).ready(function($) {
             }
         } else if (files && files.length > 5) {
             // หากยังไม่มีช่องค้นหา แต่มีข้อมูลมากกว่า 5 รายการ ให้เพิ่มช่องค้นหา
-            const newSearchBox = $('<div class="egp-search-container"><div class="egp-search-wrapper"><input type="text" class="egp-search-input" placeholder="ค้นหาเอกสาร..."><span class="egp-search-icon dashicons dashicons-search"></span></div></div>');
+            const newSearchBox = $(`
+                <div class="egp-search-container">
+                    <div class="egp-search-wrapper">
+                        <input type="text" class="egp-search-input" placeholder="ค้นหาเอกสาร...">
+                        <span class="egp-search-icon dashicons dashicons-search"></span>
+                    </div>
+                </div>
+            `);
             container.find('.egp-file-header').after(newSearchBox);
         }
-    }
+    };
     
     // ฟังก์ชันแสดงข้อความแจ้งเตือน
-    function showNotification(container, type, message) {
+    const showNotification = (container, type, message) => {
         // ลบข้อความเดิม
         container.find('.egp-notification').remove();
         
         // สร้างข้อความใหม่
-        const notification = $('<div class="egp-notification egp-' + type + '"><span class="egp-notification-icon dashicons dashicons-' + (type === 'success' ? 'yes' : 'warning') + '"></span><span class="egp-notification-message">' + message + '</span></div>');
+        const icon = type === 'success' ? 'yes' : 'warning';
+        const notification = $(`
+            <div class="egp-notification egp-${type}">
+                <span class="egp-notification-icon dashicons dashicons-${icon}"></span>
+                <span class="egp-notification-message">${message}</span>
+            </div>
+        `);
         
         // แสดงข้อความ
         container.prepend(notification);
         
         // ซ่อนข้อความหลังจาก 3 วินาที
-        setTimeout(function() {
+        setTimeout(() => {
             notification.fadeOut(300, function() {
                 $(this).remove();
             });
         }, 3000);
-    }
+    };
 });

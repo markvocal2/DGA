@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(($) => {
     // Initialize Select2
     $('.menu-role-select').select2({
         placeholder: "Select roles",
@@ -7,11 +7,11 @@ jQuery(document).ready(function($) {
 
     // Handle role selection changes
     $('.menu-role-select').on('change', function() {
-        var $select = $(this);
-        var $spinner = $select.siblings('.spinner');
-        var $message = $select.siblings('.status-message');
-        var itemId = $select.data('item-id');
-        var selectedRoles = $select.val() || [];
+        const $select = $(this);
+        const $spinner = $select.siblings('.spinner');
+        const $message = $select.siblings('.status-message');
+        const itemId = $select.data('item-id');
+        let selectedRoles = $select.val() || [];
         
         // Handle "All Users" selection
         if (selectedRoles.includes('all')) {
@@ -23,10 +23,12 @@ jQuery(document).ready(function($) {
             $select.find('option[value="all"]').prop('selected', false);
         }
 
-        // Show spinner
+        // Show spinner and reset message
         $spinner.addClass('is-active');
-        $message.html('').removeClass('error-message success-message');
-
+        $message
+            .html('')
+            .removeClass('error-message success-message');
+        
         // Send AJAX request
         $.ajax({
             url: menuRolesAjax.ajaxurl,
@@ -37,7 +39,7 @@ jQuery(document).ready(function($) {
                 item_id: itemId,
                 roles: selectedRoles
             },
-            success: function(response) {
+            success: (response) => {
                 if (response.success) {
                     $message
                         .html(response.data.message)
@@ -50,19 +52,22 @@ jQuery(document).ready(function($) {
                         .css('color', 'red');
                 }
             },
-            error: function() {
+            error: () => {
                 $message
                     .html('Error updating roles')
                     .addClass('error-message')
                     .css('color', 'red');
             },
-            complete: function() {
+            complete: () => {
                 $spinner.removeClass('is-active');
                 
                 // Hide message after 3 seconds
-                setTimeout(function() {
-                    $message.fadeOut(function() {
-                        $(this).html('').show().removeClass('error-message success-message');
+                setTimeout(() => {
+                    $message.fadeOut(() => {
+                        $message
+                            .html('')
+                            .show()
+                            .removeClass('error-message success-message');
                     });
                 }, 3000);
             }

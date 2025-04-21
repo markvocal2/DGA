@@ -1,51 +1,45 @@
 /**
  * CKAN Data Preview Filter JavaScript
  * เพิ่มความสามารถในการกรองข้อมูลและการค้นหาสำหรับตารางไฟล์ในตัวอย่าง
+ * Version: 1.1.0 (Refactored rowMatchesFilters for complexity)
  */
 jQuery(document).ready(($) => {
     // ตัวแปรสำหรับการจัดการข้อมูล
     const tableData = {
-        allRows: [],           // เก็บข้อมูลทั้งหมด
-        filteredRows: [],      // เก็บข้อมูลหลังกรอง
-        columns: [],           // เก็บชื่อคอลัมน์
-        currentPage: 1,        // หน้าปัจจุบัน
-        rowsPerPage: 30,       // จำนวนแถวต่อหน้า
-        totalRows: 0,          // จำนวนแถวทั้งหมด
-        activeFilters: {}      // กรองที่ใช้งานอยู่
+        allRows: [],          // เก็บข้อมูลทั้งหมด
+        filteredRows: [],     // เก็บข้อมูลหลังกรอง
+        columns: [],          // เก็บชื่อคอลัมน์
+        currentPage: 1,       // หน้าปัจจุบัน
+        rowsPerPage: 30,      // จำนวนแถวต่อหน้า
+        totalRows: 0,         // จำนวนแถวทั้งหมด
+        activeFilters: {}     // กรองที่ใช้งานอยู่
     };
-    
+
     // ติดตั้ง event handlers หลังจากโหลด preview
     $(document).on('ckan_preview_loaded', () => {
         initializeDataTable();
         setupEventHandlers();
     });
-    
+
     // ฟังก์ชั่นเริ่มต้นสำหรับจัดการข้อมูลตาราง
     const initializeDataTable = () => {
-        // รับข้อมูลจากตาราง
         extractTableData();
-        
-        // ตั้งค่าการแสดงผลเริ่มต้น
         tableData.filteredRows = tableData.allRows.slice();
         tableData.totalRows = tableData.filteredRows.length;
         updatePaginationInfo();
-        
-        // เริ่มต้นแสดงหน้าแรก
         renderCurrentPage();
     };
-    
+
     // ดึงข้อมูลจากตารางที่แสดงอยู่
     const extractTableData = () => {
         const table = $('.ckan-preview-table, #excel-preview-table');
         tableData.allRows = [];
         tableData.columns = [];
-        
-        // ดึงข้อมูลหัวตาราง (columns)
+
         table.find('thead th').each(function() {
             tableData.columns.push($(this).text().trim());
         });
-        
-        // ดึงข้อมูลแถว (rows)
+
         table.find('tbody tr').each(function() {
             const rowData = [];
             $(this).find('td').each(function() {
@@ -53,356 +47,344 @@ jQuery(document).ready(($) => {
             });
             tableData.allRows.push(rowData);
         });
-        
-        // สำรองข้อมูลตารางต้นฉบับ
+
         if (!table.data('originalTable')) {
             table.data('originalTable', table.find('tbody').html());
         }
     };
-    
+
     // ตั้งค่า event handlers สำหรับปุ่มและการควบคุมต่างๆ
     const setupEventHandlers = () => {
-        // ปุ่มค้นหา
-        $('.ckan-preview-search button:not(.filters-btn)').on('click', () => {
-            searchTable();
+        // ปุ่มค้นหา (Event delegation might be better if controls are added dynamically)
+        $('.ckan-preview-search button:not(.filters-btn)').off('click').on('click', searchTable);
+        $('.ckan-preview-search input').off('keypress').on('keypress', (e) => {
+            if (e.which === 13) searchTable();
         });
-        
-        // ค้นหาเมื่อกด Enter
-        $('.ckan-preview-search input').on('keypress', (e) => {
-            if (e.which === 13) {
-                searchTable();
-            }
-        });
-        
-        // ปุ่ม Add Filter
-        $('.ckan-preview-filter-btn').on('click', () => {
-            showFilterDialog();
-        });
-        
-        // ปุ่ม Filters
-        $('.ckan-preview-search .filters-btn').on('click', () => {
-            showFilterDialog();
-        });
-        
+
+        // ปุ่ม Add Filter / Filters
+        $('.ckan-preview-filter-btn, .ckan-preview-search .filters-btn').off('click').on('click', showFilterDialog);
+
         // ปุ่มเปลี่ยนหน้า
-        $('.ckan-preview-pagination span:contains("«")').on('click', () => {
-            navigateToPage('first');
-        });
-        
-        $('.ckan-preview-pagination span:contains("»")').on('click', () => {
-            navigateToPage('last');
-        });
-        
-        // อัพเดทเมื่อใส่หมายเลขหน้าโดยตรง
-        $('.ckan-preview-pagination input').on('change', function() {
+        $('.ckan-preview-pagination span:contains("«")').off('click').on('click', () => navigateToPage('first'));
+        $('.ckan-preview-pagination span:contains("»")').off('click').on('click', () => navigateToPage('last'));
+        $('.ckan-preview-pagination input').off('change').on('change', function() {
             const inputPage = parseInt($(this).val());
-            if (!isNaN(inputPage)) {
-                navigateToPage(inputPage);
-            }
+            if (!isNaN(inputPage)) navigateToPage(inputPage);
         });
     };
-    
+
     // แสดงหน้าต่างสำหรับตั้งค่ากรอง
     const showFilterDialog = () => {
-        // ถ้ามีหน้าต่างอยู่แล้ว ให้ลบทิ้งก่อน
-        $('.ckan-filter-dialog').remove();
-        
-        // สร้างหน้าต่างสำหรับกรอง
-        let dialogHtml = '<div class="ckan-filter-dialog">';
-        dialogHtml += '<div class="ckan-filter-dialog-content">';
-        dialogHtml += '<span class="ckan-filter-dialog-close">&times;</span>';
-        dialogHtml += '<h3>Add Filter</h3>';
-        
-        // สร้าง filter options สำหรับแต่ละคอลัมน์
-        dialogHtml += '<div class="ckan-filter-options">';
+        $('.ckan-filter-dialog').remove(); // Ensure only one dialog exists
+
+        let dialogHtml = `
+            <div class="ckan-filter-dialog">
+                <div class="ckan-filter-dialog-content">
+                    <span class="ckan-filter-dialog-close">&times;</span>
+                    <h3>Add Filter</h3>
+                    <div class="ckan-filter-options">`;
+
         tableData.columns.forEach((column, index) => {
-            dialogHtml += `<div class="ckan-filter-option">
-                <div class="filter-column-name">${column}</div>
-                <select class="filter-operator" data-column="${index}">
-                    <option value="contains">Contains</option>
-                    <option value="equals">Equals</option>
-                    <option value="starts">Starts with</option>
-                    <option value="ends">Ends with</option>
-                    <option value="greater">Greater than</option>
-                    <option value="less">Less than</option>
-                </select>
-                <input type="text" class="filter-value" data-column="${index}" placeholder="Filter value">
-                <button class="apply-filter" data-column="${index}">Apply</button>
-            </div>`;
+            dialogHtml += `
+                <div class="ckan-filter-option">
+                    <div class="filter-column-name">${escapeHtml(column)}</div>
+                    <select class="filter-operator" data-column="${index}">
+                        <option value="contains">Contains</option>
+                        <option value="equals">Equals</option>
+                        <option value="starts">Starts with</option>
+                        <option value="ends">Ends with</option>
+                        <option value="greater">Greater than</option>
+                        <option value="less">Less than</option>
+                    </select>
+                    <input type="text" class="filter-value" data-column="${index}" placeholder="Filter value">
+                    <button class="apply-filter" data-column="${index}">Apply</button>
+                </div>`;
         });
-        dialogHtml += '</div>';
-        
-        // แสดงกรองที่ใช้งานอยู่
-        dialogHtml += '<div class="active-filters-container">';
-        dialogHtml += '<h4>Active Filters</h4>';
-        dialogHtml += '<div class="active-filters-list"></div>';
-        dialogHtml += `<button class="clear-all-filters" ${Object.keys(tableData.activeFilters).length === 0 ? 'disabled' : ''}>Clear All Filters</button>`;
-        dialogHtml += '</div>';
-        
-        dialogHtml += '</div>'; // End filter dialog content
-        dialogHtml += '</div>'; // End filter dialog
-        
-        // เพิ่มหน้าต่างไปยัง DOM
-        $('.ckan-preview-modal-body').append(dialogHtml);
-        
-        // แสดงกรองที่ใช้งานอยู่
+
+        dialogHtml += `
+                    </div>
+                    <div class="active-filters-container">
+                        <h4>Active Filters</h4>
+                        <div class="active-filters-list"></div>
+                        <button class="clear-all-filters" ${Object.keys(tableData.activeFilters).length === 0 ? 'disabled' : ''}>Clear All Filters</button>
+                    </div>
+                </div>
+            </div>`;
+
+        // Use a container that's likely to exist, e.g., body or a specific wrapper
+        $('body').append(dialogHtml); // Append to body to ensure it's top-level
+
         updateActiveFiltersList();
-        
-        // ตั้งค่า event handlers สำหรับหน้าต่างกรอง
         setupFilterDialogHandlers();
     };
-    
+
     // ตั้งค่า event handlers สำหรับหน้าต่างกรอง
     const setupFilterDialogHandlers = () => {
-        // ปิดหน้าต่างกรอง
-        $('.ckan-filter-dialog-close').on('click', () => {
+        // Use event delegation for dynamically added dialog elements
+        $(document).off('click.filterDialog').on('click.filterDialog', '.ckan-filter-dialog-close', () => {
             $('.ckan-filter-dialog').remove();
+            $(document).off('click.filterDialog'); // Clean up delegated event
         });
-        
-        // คลิกนอกหน้าต่างกรองเพื่อปิด
-        $(document).on('click', (e) => {
+
+        // Close on outside click
+        $(document).off('click.filterDialogOutside').on('click.filterDialogOutside', (e) => {
             if ($(e.target).is('.ckan-filter-dialog')) {
                 $('.ckan-filter-dialog').remove();
+                $(document).off('click.filterDialogOutside'); // Clean up delegated event
             }
         });
-        
-        // ปุ่ม Apply filter
-        $('.apply-filter').on('click', function() {
+
+        // Apply Filter Button
+        $('.ckan-filter-dialog').off('click.applyFilter').on('click.applyFilter', '.apply-filter', function() {
             const columnIndex = $(this).data('column');
             const operator = $(`.filter-operator[data-column="${columnIndex}"]`).val();
             const value = $(`.filter-value[data-column="${columnIndex}"]`).val().trim();
-            
+
             if (value !== '') {
-                // เพิ่มกรอง
-                tableData.activeFilters[columnIndex] = {
-                    operator,
-                    value
-                };
-                
-                // ใช้กรองและแสดงผล
-                applyFilters();
-                updateActiveFiltersList();
-                
-                // ปิดหน้าต่างกรอง
-                $('.ckan-filter-dialog').remove();
+                tableData.activeFilters[columnIndex] = { operator, value };
+                applyFilters(); // Apply filters immediately
+                $('.ckan-filter-dialog').remove(); // Close dialog
+                $(document).off('click.filterDialog'); // Clean up delegated events
+                $(document).off('click.filterDialogOutside');
             }
         });
-        
-        // ปุ่ม Clear All Filters
-        $('.clear-all-filters').on('click', () => {
+
+        // Clear All Filters Button
+        $('.ckan-filter-dialog').off('click.clearFilters').on('click.clearFilters', '.clear-all-filters', () => {
             tableData.activeFilters = {};
-            applyFilters();
-            updateActiveFiltersList();
-            
-            // ปิดหน้าต่างกรอง
-            $('.ckan-filter-dialog').remove();
+            applyFilters(); // Apply (which means reset) filters
+            $('.ckan-filter-dialog').remove(); // Close dialog
+            $(document).off('click.filterDialog'); // Clean up delegated events
+            $(document).off('click.filterDialogOutside');
         });
     };
-    
-    // อัพเดทรายการกรองที่ใช้งานอยู่
+
+    // อัพเดทรายการกรองที่ใช้งานอยู่ (ในหน้าต่างกรอง)
     const updateActiveFiltersList = () => {
         const filtersList = $('.active-filters-list');
+        if (!filtersList.length) return; // Exit if dialog isn't open
+
         filtersList.empty();
-        
-        // แสดงรายการกรองที่ใช้งานอยู่
-        $.each(tableData.activeFilters, (columnIndex, filter) => {
-            const columnName = tableData.columns[columnIndex];
-            const operatorText = getOperatorDisplayText(filter.operator);
-            
-            const filterHtml = `<div class="active-filter">
-                <span class="filter-desc">${columnName} ${operatorText} "${filter.value}"</span>
-                <button class="remove-filter" data-column="${columnIndex}">×</button>
-            </div>`;
-            
-            filtersList.append(filterHtml);
-        });
-        
-        // ถ้าไม่มีกรองที่ใช้งานอยู่ ให้แสดงข้อความ
-        if (Object.keys(tableData.activeFilters).length === 0) {
-            filtersList.html('<div class="no-filters">ไม่มีกรองที่ใช้งานอยู่</div>');
-            $('.clear-all-filters').prop('disabled', true);
+        const hasFilters = Object.keys(tableData.activeFilters).length > 0;
+
+        if (hasFilters) {
+            $.each(tableData.activeFilters, (columnIndex, filter) => {
+                const columnName = tableData.columns[columnIndex];
+                const operatorText = getOperatorDisplayText(filter.operator);
+                const filterHtml = `
+                    <div class="active-filter">
+                        <span class="filter-desc">${escapeHtml(columnName)} ${operatorText} "${escapeHtml(filter.value)}"</span>
+                        <button class="remove-filter" data-column="${columnIndex}">×</button>
+                    </div>`;
+                filtersList.append(filterHtml);
+            });
+            // Attach remove handler specifically here after adding elements
+            $('.remove-filter').off('click').on('click', handleRemoveFilterClick);
         } else {
-            $('.clear-all-filters').prop('disabled', false);
+            filtersList.html('<div class="no-filters">ไม่มีกรองที่ใช้งานอยู่</div>');
         }
-        
-        // ตั้งค่า event handler สำหรับปุ่มลบกรอง
-        $('.remove-filter').on('click', function() {
-            const columnIndex = $(this).data('column');
-            delete tableData.activeFilters[columnIndex];
-            applyFilters();
-            updateActiveFiltersList();
-        });
+
+        $('.clear-all-filters').prop('disabled', !hasFilters);
     };
-    
+
+    // Handler for removing a single filter from the list
+    const handleRemoveFilterClick = function() {
+        const columnIndex = $(this).data('column');
+        delete tableData.activeFilters[columnIndex];
+        applyFilters(); // Re-apply filters after removal
+        updateActiveFiltersList(); // Update the list in the dialog
+    };
+
+
     // ค้นหาข้อมูลในตาราง
     const searchTable = () => {
         const searchText = $('.ckan-preview-search input').val().trim().toLowerCase();
-        
-        if (searchText === '') {
-            // ถ้าไม่มีข้อความค้นหา ใช้เฉพาะกรอง
-            applyFilters();
+        applyFiltersAndSearch(searchText); // Consolidate filtering logic
+    };
+
+    // ใช้กรองกับข้อมูล
+    const applyFilters = () => {
+        applyFiltersAndSearch(''); // Apply filters with no search text
+    };
+
+    // Apply filters and optional search term
+    const applyFiltersAndSearch = (searchText) => {
+        const hasFilters = Object.keys(tableData.activeFilters).length > 0;
+        const hasSearch = searchText !== '';
+
+        if (!hasFilters && !hasSearch) {
+            tableData.filteredRows = tableData.allRows.slice(); // No filters, no search
         } else {
-            // กรองข้อมูลด้วยข้อความค้นหาและกรองที่ใช้งานอยู่
-            tableData.filteredRows = tableData.allRows.filter((rowData) => {
-                // ตรวจสอบว่าแถวนี้ตรงกับกรองหรือไม่
+            tableData.filteredRows = tableData.allRows.filter(rowData => {
+                // Must match all active filters
                 if (!rowMatchesFilters(rowData)) {
                     return false;
                 }
-                
-                // ตรวจสอบว่าแถวนี้มีข้อความที่ค้นหาหรือไม่
-                for (let i = 0; i < rowData.length; i++) {
-                    if (rowData[i].toLowerCase().includes(searchText)) {
-                        return true;
-                    }
+                // If searching, must also match search text somewhere
+                if (hasSearch) {
+                    return rowData.some(cellData => cellData.toLowerCase().includes(searchText));
                 }
-                return false;
+                // If only filtering, reaching here means it matches
+                return true;
             });
-            
-            tableData.totalRows = tableData.filteredRows.length;
-            tableData.currentPage = 1;
-            updatePaginationInfo();
-            renderCurrentPage();
         }
-    };
-    
-    // ใช้กรองกับข้อมูล
-    const applyFilters = () => {
-        if (Object.keys(tableData.activeFilters).length === 0) {
-            // ถ้าไม่มีกรอง ใช้ข้อมูลทั้งหมด
-            tableData.filteredRows = tableData.allRows.slice();
-        } else {
-            // กรองข้อมูล
-            tableData.filteredRows = tableData.allRows.filter(rowMatchesFilters);
-        }
-        
+
         tableData.totalRows = tableData.filteredRows.length;
-        tableData.currentPage = 1;
+        tableData.currentPage = 1; // Reset to first page after filtering/searching
         updatePaginationInfo();
         renderCurrentPage();
     };
-    
-    // ตรวจสอบว่าแถวตรงกับกรองหรือไม่
-    const rowMatchesFilters = (rowData) => {
-        for (const columnIndex in tableData.activeFilters) {
+
+
+    // --- Refactored Filter Comparison Logic ---
+
+    // Helper functions for specific comparisons
+    const checkContains = (cell, filterVal) => cell.toLowerCase().includes(filterVal.toLowerCase());
+    const checkEquals = (cell, filterVal) => cell.toLowerCase() === filterVal.toLowerCase();
+    const checkStartsWith = (cell, filterVal) => cell.toLowerCase().startsWith(filterVal.toLowerCase());
+    const checkEndsWith = (cell, filterVal) => cell.toLowerCase().endsWith(filterVal.toLowerCase());
+
+    const checkGreaterThan = (cell, filterVal) => {
+        const numCell = parseFloat(cell);
+        const numFilter = parseFloat(filterVal);
+        // Return false if either is not a number or if cell is not greater
+        return !isNaN(numCell) && !isNaN(numFilter) && numCell > numFilter;
+    };
+
+    const checkLessThan = (cell, filterVal) => {
+        const numCell = parseFloat(cell);
+        const numFilter = parseFloat(filterVal);
+        // Return false if either is not a number or if cell is not less
+        return !isNaN(numCell) && !isNaN(numFilter) && numCell < numFilter;
+    };
+
+    // Map operators to their corresponding check functions
+    const operatorCheckFunctions = {
+        'contains': checkContains,
+        'equals': checkEquals,
+        'starts': checkStartsWith,
+        'ends': checkEndsWith,
+        'greater': checkGreaterThan,
+        'less': checkLessThan
+    };
+
+    // ตรวจสอบว่าแถวตรงกับกรองทั้งหมดหรือไม่ (Refactored)
+    const rowMatchesFilters = (rowData) => { // Complexity significantly reduced
+        for (const columnIndex in tableData.activeFilters) { // +1 (loop)
             const filter = tableData.activeFilters[columnIndex];
-            const cellValue = rowData[columnIndex] || '';
-            const filterValue = filter.value;
-            
-            // ตรวจสอบตามประเภทของกรอง
-            switch (filter.operator) {
-                case 'contains':
-                    if (!cellValue.toLowerCase().includes(filterValue.toLowerCase())) {
-                        return false;
-                    }
-                    break;
-                case 'equals':
-                    if (cellValue.toLowerCase() !== filterValue.toLowerCase()) {
-                        return false;
-                    }
-                    break;
-                case 'starts':
-                    if (!cellValue.toLowerCase().startsWith(filterValue.toLowerCase())) {
-                        return false;
-                    }
-                    break;
-                case 'ends':
-                    if (!cellValue.toLowerCase().endsWith(filterValue.toLowerCase())) {
-                        return false;
-                    }
-                    break;
-                case 'greater':
-                    const numCellGreater = parseFloat(cellValue);
-                    const numFilterGreater = parseFloat(filterValue);
-                    if (isNaN(numCellGreater) || isNaN(numFilterGreater) || numCellGreater <= numFilterGreater) {
-                        return false;
-                    }
-                    break;
-                case 'less':
-                    const numCellLess = parseFloat(cellValue);
-                    const numFilterLess = parseFloat(filterValue);
-                    if (isNaN(numCellLess) || isNaN(numFilterLess) || numCellLess >= numFilterLess) {
-                        return false;
-                    }
-                    break;
+            const cellValue = rowData[columnIndex] || ''; // Handle potential undefined cells
+            const checkFunction = operatorCheckFunctions[filter.operator];
+
+            // If a valid check function exists and it returns false, the row doesn't match
+            if (checkFunction && !checkFunction(cellValue, filter.value)) { // +1 (if) +1 (logical not)
+                return false; // +1 (early return)
             }
         }
+        // If the loop completes without returning false, the row matches all filters
         return true;
     };
-    
+    // Estimated Complexity: 1 (function) + 1 (loop) + 1 (if) + 1 (logical not) + 1 (return) = 5
+
+    // --- End Refactored Filter Comparison Logic ---
+
+
     // แปลงรหัสตัวดำเนินการเป็นข้อความที่แสดง
     const getOperatorDisplayText = (operator) => {
-        switch (operator) {
-            case 'contains': return 'contains';
-            case 'equals': return 'equals';
-            case 'starts': return 'starts with';
-            case 'ends': return 'ends with';
-            case 'greater': return 'is greater than';
-            case 'less': return 'is less than';
-            default: return operator;
-        }
+        const displayTexts = {
+            'contains': 'contains',
+            'equals': 'equals',
+            'starts': 'starts with',
+            'ends': 'ends with',
+            'greater': 'is greater than',
+            'less': 'is less than'
+        };
+        return displayTexts[operator] || operator; // Fallback to operator code
     };
-    
+
     // นำไปยังหน้าที่ระบุ
     const navigateToPage = (page) => {
-        const totalPages = Math.ceil(tableData.totalRows / tableData.rowsPerPage);
-        
+        const totalPages = Math.max(1, Math.ceil(tableData.totalRows / tableData.rowsPerPage));
+        let targetPage = tableData.currentPage; // Default to current
+
         if (page === 'first') {
-            tableData.currentPage = 1;
+            targetPage = 1;
         } else if (page === 'last') {
-            tableData.currentPage = totalPages;
-        } else {
-            let currentPage = page;
-            if (currentPage < 1) currentPage = 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-            tableData.currentPage = currentPage;
+            targetPage = totalPages;
+        } else if (!isNaN(parseInt(page))) {
+            targetPage = parseInt(page);
         }
-        
+
+        // Clamp page number within valid range
+        tableData.currentPage = Math.max(1, Math.min(targetPage, totalPages));
+
         updatePaginationInfo();
         renderCurrentPage();
     };
-    
+
     // อัพเดทข้อมูลการแบ่งหน้า
     const updatePaginationInfo = () => {
         const totalPages = Math.max(1, Math.ceil(tableData.totalRows / tableData.rowsPerPage));
-        
+        const $paginationControls = $('.ckan-preview-pagination'); // Cache selector
+
         // อัพเดทข้อความจำนวนแถว
-        $('.ckan-preview-pagination span').first().text(`${tableData.totalRows} records`);
-        
+        $paginationControls.find('span').first().text(`${tableData.totalRows} records`);
+
         // อัพเดทช่องป้อนหมายเลขหน้า
-        $('.ckan-preview-pagination input').first().val(tableData.currentPage);
-        $('.ckan-preview-pagination input').last().val(totalPages);
+        $paginationControls.find('input').first().val(tableData.currentPage);
+        $paginationControls.find('span').eq(1).text(` of ${totalPages} `); // Update total pages text
+
+        // Enable/disable navigation buttons based on current page
+        $paginationControls.find('span:contains("«")').prop('disabled', tableData.currentPage === 1);
+        $paginationControls.find('span:contains("»")').prop('disabled', tableData.currentPage === totalPages);
     };
-    
+
     // แสดงข้อมูลสำหรับหน้าปัจจุบัน
     const renderCurrentPage = () => {
         const table = $('.ckan-preview-table, #excel-preview-table');
         const tbody = table.find('tbody');
-        
-        // คำนวณแถวที่จะแสดง
+        tbody.empty(); // Clear previous rows
+
         const startIndex = (tableData.currentPage - 1) * tableData.rowsPerPage;
         const endIndex = Math.min(startIndex + tableData.rowsPerPage, tableData.totalRows);
-        
-        // ล้างตาราง
-        tbody.empty();
-        
-        // ไม่มีข้อมูลให้แสดง
+
         if (tableData.filteredRows.length === 0) {
             const colSpan = tableData.columns.length || 1;
             tbody.append(`<tr><td colspan="${colSpan}" class="no-data">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`);
             return;
         }
-        
-        // เพิ่มแถวสำหรับหน้าปัจจุบัน
+
+        // Build rows HTML string for better performance
+        let rowsHtml = '';
         for (let i = startIndex; i < endIndex; i++) {
             const rowData = tableData.filteredRows[i];
-            let rowHtml = '<tr>';
-            
+            rowsHtml += '<tr>';
+            // Use simple loop for potentially large number of columns
             for (let j = 0; j < rowData.length; j++) {
-                rowHtml += `<td>${rowData[j]}</td>`;
+                // Escape cell data to prevent potential XSS if data is untrusted
+                rowsHtml += `<td>${escapeHtml(rowData[j])}</td>`;
             }
-            
-            rowHtml += '</tr>';
-            tbody.append(rowHtml);
+            rowsHtml += '</tr>';
         }
+        tbody.append(rowsHtml); // Append all rows at once
     };
+
+    // Helper function to escape HTML (basic implementation)
+    const escapeHtml = (unsafe) => {
+        if (typeof unsafe !== 'string') {
+            // Attempt to convert non-strings, return empty for null/undefined
+            if (unsafe === null || unsafe === undefined) return '';
+            try {
+                unsafe = String(unsafe);
+            } catch (e) {
+                return ''; // Return empty if conversion fails
+            }
+        }
+        return unsafe
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+     };
+
 });

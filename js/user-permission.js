@@ -1,6 +1,6 @@
 /**
  * JavaScript สำหรับการจัดการสิทธิ์ผู้ใช้ (User Permissions)
- * Version: 1.0.1 (Refactored - Removed void operator)
+ * Version: 1.0.2 (Refactored - Addressed SonarQube L579)
  */
 jQuery(document).ready(function($) {
 
@@ -549,9 +549,9 @@ jQuery(document).ready(function($) {
                  // Ideally, store the original reason/prompt when showing overlay,
                  // but using defaults for simplicity here.
                  const initialMessageHtml = `
-                     <h2>หน้านี้ถูกจำกัดการเข้าถึง</h2>
-                     <p>กรุณาลงชื่อเข้าใช้ด้วยบัญชีที่มีสิทธิ์</p>
-                     <button id="user-permission-login-btn" class="user-permission-login-btn">ลงชื่อเข้าใช้</button>
+                      <h2>หน้านี้ถูกจำกัดการเข้าถึง</h2>
+                      <p>กรุณาลงชื่อเข้าใช้ด้วยบัญชีที่มีสิทธิ์</p>
+                      <button id="user-permission-login-btn" class="user-permission-login-btn">ลงชื่อเข้าใช้</button>
                  `;
                  $overlay.find('.user-permission-message').html(initialMessageHtml);
             }
@@ -573,21 +573,23 @@ jQuery(document).ready(function($) {
                 </div>
             `).appendTo('body');
 
-            // --- Reflow Trigger (Replaced void operator) ---
-            // Accessing offsetWidth forces the browser to calculate layout, ensuring
-            // the element is rendered in its initial state before the 'show' class is added.
-            $toast[0].offsetWidth; // Force reflow
+            // --- Reflow Trigger ---
+            // Accessing offsetWidth forces the browser to calculate layout (reflow),
+            // ensuring the element is rendered in its initial state (display: block, opacity: 0, etc.)
+            // before the 'show' class (opacity: 1, transform) is added for the transition to work correctly.
+            // Assign to an unused variable to satisfy SonarQube/linters ("expression expected").
+            const _unused = $toast[0].offsetWidth; // Force reflow (Side effect is the goal)
 
-            // Add 'show' class to trigger the CSS transition
+            // Add 'show' class AFTER the reflow to trigger the CSS transition
             $toast.addClass('show');
 
             // Set timeout to remove the toast
             const displayDuration = 3000; // ms
-            const fadeDuration = 300;    // ms (should match CSS transition)
+            const fadeDuration = 300;    // ms (should match CSS transition-duration)
 
             setTimeout(() => {
                 $toast.removeClass('show');
-                // Remove from DOM after fade out transition
+                // Remove from DOM after fade out transition completes
                 setTimeout(() => {
                     $toast.remove();
                 }, fadeDuration);

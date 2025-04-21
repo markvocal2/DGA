@@ -1,3 +1,7 @@
+/**
+ * JavaScript สำหรับการจัดการสิทธิ์ผู้ใช้ (User Permissions)
+ * Version: 1.0.1 (Refactored - Removed void operator)
+ */
 jQuery(document).ready(function($) {
 
     /**
@@ -17,6 +21,15 @@ jQuery(document).ready(function($) {
         init: function() {
             // Store reference to 'this' (the controller object) for consistent access
             const controller = this;
+
+            // Configuration Check
+            if (typeof userPermissionAjax === 'undefined' || !userPermissionAjax.ajaxurl || !userPermissionAjax.nonce) {
+                console.error('User Permission: userPermissionAjax object is missing or incomplete. Functionality may be limited.');
+                // Optionally display a persistent error message on the page
+                // $('body').prepend('<div class="error-message admin-notice">User Permission Error: Configuration missing.</div>');
+                // return; // Stop initialization if config is critical
+            }
+
 
             controller.bindEvents();
             // Check permissions for the current page on load if the icon exists
@@ -38,10 +51,11 @@ jQuery(document).ready(function($) {
             const controller = this;
 
             // Use event delegation for dynamically added elements
-            // Use .off().on() to prevent multiple bindings if init is called multiple times (though unlikely here)
+            // Use .off().on() to prevent multiple bindings if init is called multiple times
             $(document).off('click.permissionIcon').on('click.permissionIcon', '.user-permission-icon', function(e) {
                 controller.toggleSettingsPanel(e, this); // Pass event and element
             });
+            // Use delegation from body for elements potentially added later (panel, overlay)
             $('body').off('click.permissionSave').on('click.permissionSave', '#user-permission-save', function() {
                 controller.savePermissions(this); // Pass button element
             });
@@ -51,6 +65,12 @@ jQuery(document).ready(function($) {
             });
             $('body').off('click.permissionClose').on('click.permissionClose', '.user-permission-close', $.proxy(controller.closePanel, controller));
             $('body').off('click.permissionCancelLogin').on('click.permissionCancelLogin', '.user-permission-login-form .cancel-btn', $.proxy(controller.cancelLogin, controller));
+             // Close panel on Escape key
+            $(document).off('keydown.permissionPanel').on('keydown.permissionPanel', function(e) {
+                if ((e.key === "Escape" || e.key === "Esc") && $('#user-permission-panel').hasClass('show')) {
+                     controller.closePanel();
+                }
+            });
         },
 
         /**
@@ -71,14 +91,21 @@ jQuery(document).ready(function($) {
                 return;
             }
 
-            // Store the page ID for later use (e.g., saving)
-            controller.currentPageId = pageId;
-
-            if ($panel.length === 0) {
-                controller.createSettingsPanel();
-            } else {
-                controller.closePanel();
+            // If the panel exists and is for the *same* pageId, close it.
+            // If it exists for a *different* pageId, close it first, then proceed to open for the new ID.
+            if ($panel.length) {
+                 const existingPageId = $panel.data('page-id');
+                 controller.closePanel(); // Close existing panel first
+                 // If the click was on the icon for the *already open* panel, stop here (effectively toggling off)
+                 if (existingPageId === pageId) {
+                    return;
+                 }
             }
+
+             // Store the new page ID
+            controller.currentPageId = pageId;
+            // Proceed to create and open the panel for the new page ID
+            controller.createSettingsPanel();
         },
 
         /**
@@ -87,7 +114,7 @@ jQuery(document).ready(function($) {
         closePanel: function() {
             const controller = this;
             const $panel = $('#user-permission-panel');
-            if ($panel.length) {
+            if ($panel.length && $panel.hasClass('show')) { // Check if it's currently shown
                 $panel.removeClass('show');
                 // Remove the panel after the transition completes
                 setTimeout(() => {
@@ -107,9 +134,9 @@ jQuery(document).ready(function($) {
 
             // Panel HTML structure (using template literal for readability)
             const panelHtml = `
-                <div id="user-permission-panel" class="user-permission-panel">
+                <div id="user-permission-panel" class="user-permission-panel" data-page-id="${controller.currentPageId || ''}">
                     <button class="user-permission-close" title="ปิด">×</button>
-                    <h3>ตั้งค่าการเข้าถึง</h3>
+                    <h3>ตั้งค่าการเข้าถึง (ID: ${controller.currentPageId || 'N/A'})</h3>
                     <div class="user-permission-roles">
                         <div class="role-list">
                             <h4>บทบาทที่อนุญาต:</h4>
@@ -118,25 +145,27 @@ jQuery(document).ready(function($) {
                             </div>
                         </div>
                     </div>
-                    <button id="user-permission-save" class="user-permission-save">บันทึก</button>
+                    <button id="user-permission-save" class="user-permission-save" disabled>บันทึก</button>
+                    <div class="panel-status-message" style="display: none; margin-top: 10px;"></div>
                 </div>
             `;
 
             const $panel = $(panelHtml).appendTo('body');
 
-            // Use requestAnimationFrame to ensure the element is in the DOM
-            // and the 'show' class is added in the next frame, triggering the transition.
+            // Use requestAnimationFrame for smoother transition initialization
             requestAnimationFrame(() => {
                 $panel.addClass('show');
             });
 
-            // Load roles and existing settings for the current page ID
+            // Load roles and existing settings
             if (controller.currentPageId) {
-                controller.loadAllRoles();
+                controller.loadAllRoles(); // This will chain to loadExistingSettings on success
             } else {
                 console.error("User Permission: Cannot load roles, currentPageId is not set.");
                 $('#role-checkboxes').html('<div class="error-message">เกิดข้อผิดพลาด: ไม่พบ Page ID</div>');
-                controller.showToast('เกิดข้อผิดพลาด: ไม่พบ Page ID', 'error');
+                // Show error in panel status instead of toast
+                $panel.find('.panel-status-message').text('เกิดข้อผิดพลาด: ไม่พบ Page ID').addClass('error').show();
+                // controller.showToast('เกิดข้อผิดพลาด: ไม่พบ Page ID', 'error');
             }
         },
 
@@ -145,43 +174,46 @@ jQuery(document).ready(function($) {
          */
         loadAllRoles: function() {
             const controller = this;
+            const $panel = $('#user-permission-panel'); // Get current panel context
+            const $checkboxContainer = $panel.find('#role-checkboxes');
+            const $saveBtn = $panel.find('#user-permission-save');
+            const $statusMsg = $panel.find('.panel-status-message');
 
-            if (controller.isLoading) return; // Prevent concurrent requests
+            if (controller.isLoading) return;
             controller.isLoading = true;
-            // Show loading indicator in the panel
-            $('#role-checkboxes').html('<div class="loading-spinner">กำลังโหลดบทบาท...</div>');
+            $saveBtn.prop('disabled', true); // Disable save while loading
+            $statusMsg.hide().removeClass('error success');
+            $checkboxContainer.html('<div class="loading-spinner">กำลังโหลดบทบาท...</div>');
 
             $.ajax({
                 url: userPermissionAjax.ajaxurl,
                 type: 'POST',
                 data: {
                     action: 'get_all_roles',
-                    nonce: userPermissionAjax.nonce // Ensure this variable is available globally
+                    nonce: userPermissionAjax.nonce
                 },
-                dataType: 'json', // Expect JSON response
+                dataType: 'json',
                 success: function(response) {
                     if (response.success && response.data && response.data.roles) {
                         controller.roles = response.data.roles;
-                        controller.renderRoleCheckboxes();
-                        // Now load the settings specific to this page
-                        controller.loadExistingSettings();
+                        controller.renderRoleCheckboxes(); // Render checkboxes first
+                        controller.loadExistingSettings(); // Then load current settings (will re-enable save on complete)
                     } else {
                         const errorMsg = response.data?.message || 'ไม่สามารถโหลดข้อมูลบทบาทได้';
-                        $('#role-checkboxes').html(`<div class="error-message">${errorMsg}</div>`);
-                        controller.showToast(errorMsg, 'error');
+                        $checkboxContainer.html(`<div class="error-message">${errorMsg}</div>`);
+                        $statusMsg.text(errorMsg).addClass('error').show();
                         console.error("User Permission: Failed to load roles.", response);
+                        controller.isLoading = false; // Reset loading as the chain broke
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    $('#role-checkboxes').html('<div class="error-message">เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อโหลดบทบาท</div>');
-                    controller.showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลบทบาท', 'error');
+                    const errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อโหลดบทบาท';
+                    $checkboxContainer.html(`<div class="error-message">${errorMsg}</div>`);
+                    $statusMsg.text(errorMsg).addClass('error').show();
                     console.error("User Permission: AJAX error loading roles.", textStatus, errorThrown);
-                },
-                complete: function() {
-                    // Note: isLoading is set to false in loadExistingSettings' complete callback
-                    // to ensure both requests finish before enabling the save button etc.
-                    // If loadExistingSettings fails immediately, we might need to reset it here too.
+                    controller.isLoading = false; // Reset loading on error
                 }
+                // No 'complete' here, handled in loadExistingSettings complete
             });
         },
 
@@ -190,7 +222,7 @@ jQuery(document).ready(function($) {
          */
         renderRoleCheckboxes: function() {
             const controller = this;
-            const $checkboxContainer = $('#role-checkboxes');
+            const $checkboxContainer = $('#role-checkboxes'); // Target container inside the panel
 
             if ($.isEmptyObject(controller.roles)) {
                 $checkboxContainer.html('<div class="error-message">ไม่พบข้อมูลบทบาท</div>');
@@ -206,8 +238,10 @@ jQuery(document).ready(function($) {
                 <div class="role-divider"></div>
             `;
 
-            // Add checkboxes for registered user roles
-            checkboxesHtml += Object.entries(controller.roles).map(([roleKey, roleData]) => `
+            // Add checkboxes for registered user roles, sorted alphabetically by name
+            checkboxesHtml += Object.entries(controller.roles)
+                .sort(([, roleA], [, roleB]) => (roleA.name || '').localeCompare(roleB.name || '')) // Sort by name
+                .map(([roleKey, roleData]) => `
                 <label class="role-checkbox">
                     <input type="checkbox" name="roles[]" value="${roleKey}">
                     <span class="role-name">${roleData.name || roleKey}</span>
@@ -222,11 +256,15 @@ jQuery(document).ready(function($) {
          */
         loadExistingSettings: function() {
             const controller = this;
+            const $panel = $('#user-permission-panel');
+            const $saveBtn = $panel.find('#user-permission-save');
+            const $statusMsg = $panel.find('.panel-status-message');
+
 
             if (!controller.currentPageId) {
                 console.error("User Permission: Cannot load settings, currentPageId is not set.");
-                controller.showToast('เกิดข้อผิดพลาด: ไม่พบ Page ID สำหรับโหลดการตั้งค่า', 'error');
-                controller.isLoading = false; // Reset loading state as this sequence failed
+                $statusMsg.text('เกิดข้อผิดพลาด: ไม่พบ Page ID สำหรับโหลดการตั้งค่า').addClass('error').show();
+                controller.isLoading = false; // Reset loading state
                 return;
             }
 
@@ -243,23 +281,24 @@ jQuery(document).ready(function($) {
                     if (response.success && response.data && Array.isArray(response.data.roles)) {
                         // Check the boxes corresponding to the saved roles
                         response.data.roles.forEach(role => {
-                            $(`#role-checkboxes input[name="roles[]"][value="${role}"]`).prop('checked', true);
+                            $panel.find(`#role-checkboxes input[name="roles[]"][value="${role}"]`).prop('checked', true);
                         });
                     } else if (!response.success) {
-                        // Handle case where fetching settings fails but roles loaded
                         const errorMsg = response.data?.message || 'ไม่สามารถโหลดการตั้งค่าปัจจุบันได้';
-                        controller.showToast(errorMsg, 'error');
+                        $statusMsg.text(errorMsg).addClass('error').show();
                         console.error("User Permission: Failed to load existing settings.", response);
                     }
                     // If response.data is empty or roles is not an array, it means no roles are set, which is valid.
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    controller.showToast('เกิดข้อผิดพลาดในการโหลดการตั้งค่าที่มีอยู่', 'error');
+                     const errorMsg = 'เกิดข้อผิดพลาดในการโหลดการตั้งค่าที่มีอยู่';
+                     $statusMsg.text(errorMsg).addClass('error').show();
                     console.error("User Permission: AJAX error loading existing settings.", textStatus, errorThrown);
                 },
                 complete: function() {
-                    // Both role loading and settings loading are complete
+                    // Both role loading and settings loading are complete (or failed)
                     controller.isLoading = false;
+                    $saveBtn.prop('disabled', false); // Enable save button now
                 }
             });
         },
@@ -271,6 +310,9 @@ jQuery(document).ready(function($) {
         savePermissions: function(buttonElement) {
             const controller = this;
             const $saveBtn = $(buttonElement);
+            const $panel = $saveBtn.closest('#user-permission-panel');
+            const $statusMsg = $panel.find('.panel-status-message');
+
 
             if (controller.isLoading || !controller.currentPageId) {
                 console.warn("User Permission: Save aborted. Busy or no page ID.", { isLoading: controller.isLoading, pageId: controller.currentPageId });
@@ -279,12 +321,13 @@ jQuery(document).ready(function($) {
 
             const originalText = $saveBtn.text();
             const selectedRoles = [];
-            $('#role-checkboxes input[name="roles[]"]:checked').each(function() {
+            $panel.find('#role-checkboxes input[name="roles[]"]:checked').each(function() {
                 selectedRoles.push($(this).val());
             });
 
             controller.isLoading = true;
             $saveBtn.prop('disabled', true).text('กำลังบันทึก...');
+            $statusMsg.hide().removeClass('error success'); // Clear previous status
 
             $.ajax({
                 url: userPermissionAjax.ajaxurl,
@@ -300,21 +343,26 @@ jQuery(document).ready(function($) {
                     if (response.success) {
                         controller.showToast('บันทึกการตั้งค่าเรียบร้อยแล้ว');
                         controller.closePanel();
-                        // Optionally, re-check permissions immediately if needed, though usually a page reload follows.
-                        // controller.checkPagePermissions();
+                        // Re-check permissions for the page to update content visibility immediately
+                        controller.checkPagePermissions();
                     } else {
                         const errorMsg = response.data?.message || 'เกิดข้อผิดพลาดในการบันทึก';
-                        controller.showToast(errorMsg, 'error');
+                        $statusMsg.text(errorMsg).addClass('error').show(); // Show error in panel
+                        controller.showToast(errorMsg, 'error'); // Also show toast
                         console.error("User Permission: Failed to save permissions.", response);
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    controller.showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อบันทึก', 'error');
+                     const errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อบันทึก';
+                     $statusMsg.text(errorMsg).addClass('error').show(); // Show error in panel
+                    controller.showToast(errorMsg, 'error');
                     console.error("User Permission: AJAX error saving permissions.", textStatus, errorThrown);
                 },
                 complete: function() {
-                    // Re-enable button and restore text regardless of success/error
-                    $saveBtn.prop('disabled', false).text(originalText);
+                    // Re-enable button and restore text only if save failed (panel stays open)
+                    if ($panel.is(':visible')) {
+                         $saveBtn.prop('disabled', false).text(originalText);
+                    }
                     controller.isLoading = false;
                 }
             });
@@ -326,17 +374,17 @@ jQuery(document).ready(function($) {
          */
         checkPagePermissions: function() {
             const controller = this;
+            const $protectedContent = $('.protected-content'); // Target the content area
 
             if (!controller.currentPageId) {
                 console.warn("User Permission: Cannot check permissions, no page ID set.");
-                // Decide if an overlay should be shown by default if page ID is missing
-                // controller.showBlurOverlay("ไม่สามารถตรวจสอบสิทธิ์ได้");
+                // controller.showBlurOverlay("ไม่สามารถตรวจสอบสิทธิ์ได้"); // Avoid showing overlay if ID is missing
                 return;
             }
 
-            // Assume content is hidden initially or hide it now
-            $('.protected-content').hide(); // Ensure it's hidden before check
-            $('.user-permission-overlay').remove(); // Remove any existing overlay
+            // Hide content initially and remove old overlay
+            $protectedContent.hide();
+            $('.user-permission-overlay').remove();
 
             $.ajax({
                 url: userPermissionAjax.ajaxurl,
@@ -349,22 +397,19 @@ jQuery(document).ready(function($) {
                 dataType: 'json',
                 success: function(response) {
                     if (response.success && response.data?.allowed) {
-                        // User has permission, show content
-                        $('.protected-content').fadeIn();
+                        $protectedContent.fadeIn(); // Show content
                         $('.user-permission-overlay').remove(); // Ensure overlay is gone
                     } else {
-                        // User does not have permission or error occurred
-                        const message = response.data?.message || "คุณไม่มีสิทธิ์เข้าถึงหน้านี้"; // Use message from server if available
-                        controller.showBlurOverlay(message);
+                        const message = response.data?.message || "คุณไม่มีสิทธิ์เข้าถึงหน้านี้";
+                        controller.showBlurOverlay(message); // Show restriction overlay
                         console.log("User Permission: Access denied.", response);
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    // Failed to check permissions, assume restricted
+                    // Failed to check permissions, show overlay with error
                     controller.showBlurOverlay("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์");
                     console.error("User Permission: AJAX error checking page permissions.", textStatus, errorThrown);
                 }
-                // No complete handler needed unless managing a loading state specific to this check
             });
         },
 
@@ -386,9 +431,9 @@ jQuery(document).ready(function($) {
                     </div>
                 </div>
             `;
-            $('body').append(overlayHtml);
-            // Optionally fade in the overlay
-            $('.user-permission-overlay').hide().fadeIn();
+            // Prepend to body to ensure it's visually on top
+            $('body').prepend(overlayHtml);
+            $('.user-permission-overlay').hide().fadeIn(200); // Fade in effect
         },
 
         /**
@@ -398,17 +443,19 @@ jQuery(document).ready(function($) {
             const controller = this;
             const $messageContainer = $('.user-permission-message');
 
-            if (!$messageContainer.length) return; // Target container doesn't exist
+            if (!$messageContainer.length) return;
 
             const loginFormHtml = `
                 <div class="user-permission-login-form">
                     <h3>เข้าสู่ระบบ</h3>
                     <form id="user-permission-login" novalidate>
                         <div class="form-group">
-                            <input type="text" name="username" placeholder="ชื่อผู้ใช้" required autocomplete="username">
+                            <label for="perm-username" class="sr-only">ชื่อผู้ใช้</label>
+                            <input id="perm-username" type="text" name="username" placeholder="ชื่อผู้ใช้" required autocomplete="username">
                         </div>
                         <div class="form-group">
-                            <input type="password" name="password" placeholder="รหัสผ่าน" required autocomplete="current-password">
+                             <label for="perm-password" class="sr-only">รหัสผ่าน</label>
+                            <input id="perm-password" type="password" name="password" placeholder="รหัสผ่าน" required autocomplete="current-password">
                         </div>
                         <div class="button-group">
                             <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
@@ -418,7 +465,9 @@ jQuery(document).ready(function($) {
                     </form>
                 </div>
             `;
+            // Replace content within the message container
             $messageContainer.html(loginFormHtml);
+            $messageContainer.find('input[name="username"]').focus(); // Focus username field
         },
 
         /**
@@ -427,26 +476,24 @@ jQuery(document).ready(function($) {
          * @param {HTMLFormElement} formElement - The submitted form element.
          */
         handleLogin: function(e, formElement) {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
             const controller = this;
             const $form = $(formElement);
             const $submitBtn = $form.find('button[type="submit"]');
             const $messageDiv = $form.find('.login-message');
-            const username = $form.find('input[name="username"]').val();
-            const password = $form.find('input[name="password"]').val();
+            const username = $form.find('input[name="username"]').val()?.trim(); // Optional chaining and trim
+            const password = $form.find('input[name="password"]').val(); // Don't trim password
 
-            // Basic validation
             if (!username || !password) {
                 $messageDiv.text('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน').show();
                 return;
             }
-
-            if (controller.isLoading) return; // Prevent concurrent requests
+            if (controller.isLoading) return;
 
             const originalBtnText = $submitBtn.text();
             controller.isLoading = true;
             $submitBtn.prop('disabled', true).text('กำลังเข้าสู่ระบบ...');
-            $messageDiv.hide(); // Hide previous messages
+            $messageDiv.hide();
 
             $.ajax({
                 url: userPermissionAjax.ajaxurl,
@@ -461,15 +508,15 @@ jQuery(document).ready(function($) {
                 success: function(response) {
                     if (response.success) {
                         controller.showToast('เข้าสู่ระบบสำเร็จ กำลังโหลดหน้าใหม่...');
-                        // Reload the page after a short delay to show the toast
+                        // Reload the page after a short delay
                         setTimeout(() => {
                             window.location.reload();
                         }, 1500);
-                        // No need to manually re-enable the button as the page reloads
+                        // Button state handled by page reload
                     } else {
                         const errorMsg = response.data?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-                        $messageDiv.text(errorMsg).show(); // Show error in the form
-                        controller.showToast(errorMsg, 'error'); // Also show as toast
+                        $messageDiv.text(errorMsg).show();
+                        controller.showToast(errorMsg, 'error');
                         $submitBtn.prop('disabled', false).text(originalBtnText); // Re-enable button
                         console.warn("User Permission: Login failed.", response);
                     }
@@ -478,12 +525,13 @@ jQuery(document).ready(function($) {
                     const errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อเข้าสู่ระบบ';
                     $messageDiv.text(errorMsg).show();
                     controller.showToast(errorMsg, 'error');
-                    $submitBtn.prop('disabled', false).text(originalBtnText); // Re-enable button
+                    $submitBtn.prop('disabled', false).text(originalBtnText);
                     console.error("User Permission: AJAX error during login.", textStatus, errorThrown);
                 },
-                complete: function() {
-                    // Only reset isLoading if the login didn't succeed (page isn't reloading)
-                    if (!$submitBtn.prop('disabled')) {
+                complete: function(jqXHR, textStatus) {
+                    // Reset isLoading only if the login failed (page isn't reloading)
+                    // Check based on button state or textStatus if needed
+                    if (textStatus !== 'success' || (jqXHR.responseJSON && !jqXHR.responseJSON.success)) {
                          controller.isLoading = false;
                     }
                 }
@@ -495,15 +543,15 @@ jQuery(document).ready(function($) {
          */
         cancelLogin: function() {
             const controller = this;
-            // Re-show the original overlay message. Fetch the original reason/prompt if stored,
-            // otherwise use defaults. For simplicity, using defaults here.
             const $overlay = $('.user-permission-overlay');
             if ($overlay.length) {
                  // Re-create the initial message content
+                 // Ideally, store the original reason/prompt when showing overlay,
+                 // but using defaults for simplicity here.
                  const initialMessageHtml = `
-                    <h2>หน้านี้ถูกจำกัดการเข้าถึง</h2>
-                    <p>กรุณาลงชื่อเข้าใช้ด้วยบัญชีที่มีสิทธิ์</p>
-                    <button id="user-permission-login-btn" class="user-permission-login-btn">ลงชื่อเข้าใช้</button>
+                     <h2>หน้านี้ถูกจำกัดการเข้าถึง</h2>
+                     <p>กรุณาลงชื่อเข้าใช้ด้วยบัญชีที่มีสิทธิ์</p>
+                     <button id="user-permission-login-btn" class="user-permission-login-btn">ลงชื่อเข้าใช้</button>
                  `;
                  $overlay.find('.user-permission-message').html(initialMessageHtml);
             }
@@ -525,21 +573,25 @@ jQuery(document).ready(function($) {
                 </div>
             `).appendTo('body');
 
-            // Force reflow before adding 'show' class to trigger transition
-            // This line is an expression used for its side-effect (forcing reflow)
-            // and might be flagged by some linters, but it's intentional.
-            void $toast[0].offsetWidth; // Use void to indicate intentional non-assignment
+            // --- Reflow Trigger (Replaced void operator) ---
+            // Accessing offsetWidth forces the browser to calculate layout, ensuring
+            // the element is rendered in its initial state before the 'show' class is added.
+            $toast[0].offsetWidth; // Force reflow
 
+            // Add 'show' class to trigger the CSS transition
             $toast.addClass('show');
 
             // Set timeout to remove the toast
+            const displayDuration = 3000; // ms
+            const fadeDuration = 300;    // ms (should match CSS transition)
+
             setTimeout(() => {
                 $toast.removeClass('show');
                 // Remove from DOM after fade out transition
                 setTimeout(() => {
                     $toast.remove();
-                }, 300); // Match CSS transition duration
-            }, 3000); // Duration the toast is visible
+                }, fadeDuration);
+            }, displayDuration);
         }
     };
 

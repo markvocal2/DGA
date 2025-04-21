@@ -33,9 +33,15 @@ jQuery(document).ready(function($) {
 
     // Form validation functions
     function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+    // ตรวจสอบความยาวสูงสุดก่อน (ป้องกัน input ที่ยาวเกินไป)
+    if (!email || email.length > 254) {
+        return false;
     }
+    
+    // ใช้ regex ที่ตรวจสอบโครงสร้างขั้นพื้นฐาน โดยมีการจำกัดความซับซ้อน
+    const emailPattern = /^[a-zA-Z0-9._%+-]{1,64}@[a-zA-Z0-9.-]{1,253}\.[a-zA-Z]{2,}$/;
+    return emailPattern.test(email);
+}
 
     function showError(inputElement, message) {
         const errorElement = $(`#${inputElement.attr('id')}-error`);

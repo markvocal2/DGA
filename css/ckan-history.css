@@ -1,23 +1,24 @@
 /**
  * CKAN Usage Report System Stylesheet
  * Modern, clean design with blue, orange and black color scheme
+ * Version: 1.0.1 (Refactored - Merged duplicate selectors)
  */
 
 /* ======================= Variables ======================= */
 :root {
     /* Main Colors */
-    --ckan-primary: #1976D2;     /* Blue */
+    --ckan-primary: #1976D2;      /* Blue */
     --ckan-primary-light: #64B5F6;
     --ckan-primary-dark: #0D47A1;
-    --ckan-secondary: #FF9800;    /* Orange */
+    --ckan-secondary: #FF9800;     /* Orange */
     --ckan-secondary-light: #FFB74D;
     --ckan-secondary-dark: #E65100;
-    --ckan-tertiary: #4CAF50;     /* Green */
-    --ckan-quaternary: #9C27B0;   /* Purple */
-    --ckan-danger: #F44336;       /* Red */
-    --ckan-warning: #FFC107;     /* Amber */
-    --ckan-success: #4CAF50;     /* Green */
-    --ckan-info: #2196F3;         /* Light Blue */
+    --ckan-tertiary: #4CAF50;      /* Green */
+    --ckan-quaternary: #9C27B0;     /* Purple */
+    --ckan-danger: #F44336;        /* Red */
+    --ckan-warning: #FFC107;       /* Amber */
+    --ckan-success: #4CAF50;       /* Green */
+    --ckan-info: #2196F3;          /* Light Blue */
 
     /* Text Colors */
     --ckan-text-primary: #212121; /* Near Black */
@@ -613,7 +614,6 @@
 }
 
 /* ======================= Responsive Design ======================= */
-/* Note: The duplicate selector ".ckan-report-container" reported around line 678 was not found here. */
 @media screen and (max-width: 1200px) {
     .ckan-chart-row {
         grid-template-columns: 1fr;
@@ -677,10 +677,12 @@
 
 /* ======================= Print Styles ======================= */
 @media print {
+    /* Merged .ckan-report-container print styles */
     .ckan-report-container {
         box-shadow: none;
         padding: 0;
         margin: 0;
+        font-size: 12px; /* Moved from L708 */
     }
 
     .ckan-report-filters,
@@ -711,9 +713,7 @@
         height: 180px;
     }
 
-    .ckan-report-container {
-        font-size: 12px;
-    }
+    /* Duplicate .ckan-report-container block removed (was L707-709) */
 
     .ckan-report-header h2 {
         font-size: 18px;

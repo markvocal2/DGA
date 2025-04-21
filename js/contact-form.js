@@ -31,32 +31,72 @@ jQuery(document).ready(function($) {
         }, duration);
     }
 
-    // Form validation functions
+    /**
+     * ตรวจสอบความถูกต้องของอีเมลแบบปลอดภัย
+     * ใช้การตรวจสอบแบบขั้นตอนและไม่พึ่งพา regex ที่ซับซ้อนเกินไป
+     * เพื่อป้องกันปัญหา ReDoS (Regular Expression Denial of Service)
+     * 
+     * @param {string} email - อีเมลที่ต้องการตรวจสอบ
+     * @returns {boolean} - ผลการตรวจสอบ (true คือถูกต้อง, false คือไม่ถูกต้อง)
+     */
     function validateEmail(email) {
-    if (!email || typeof email !== 'string') {
-        return false;
+        // ตรวจสอบค่าว่างหรือไม่ใช่สตริง
+        if (!email || typeof email !== 'string') {
+            return false;
+        }
+        
+        // ตรวจสอบความยาวสูงสุดตามมาตรฐาน RFC
+        if (email.length > 254) {
+            return false;
+        }
+        
+        // ตรวจสอบเบื้องต้น: มี @ หนึ่งตัว
+        const atIndex = email.indexOf('@');
+        const lastAtIndex = email.lastIndexOf('@');
+        
+        if (atIndex === -1 || atIndex !== lastAtIndex || atIndex === 0 || atIndex === email.length - 1) {
+            return false;
+        }
+        
+        // แยกส่วน local และ domain
+        const localPart = email.substring(0, atIndex);
+        const domainPart = email.substring(atIndex + 1);
+        
+        // ตรวจสอบความยาวของส่วน local และ domain
+        if (localPart.length > 64 || domainPart.length > 255) {
+            return false;
+        }
+        
+        // ตรวจสอบจุดในส่วน domain
+        const dotIndex = domainPart.indexOf('.');
+        if (dotIndex === -1 || dotIndex === 0 || dotIndex === domainPart.length - 1) {
+            return false;
+        }
+        
+        // ตรวจสอบว่ามีช่องว่างหรือไม่
+        if (email.includes(' ')) {
+            return false;
+        }
+        
+        // ตรวจสอบอักขระพิเศษที่ไม่อนุญาตในส่วน domain
+        const domainRegex = /^[a-z0-9.-]+$/i;
+        if (!domainRegex.test(domainPart)) {
+            return false;
+        }
+        
+        // ตรวจสอบส่วนลงท้ายของ domain (TLD) อย่างน้อย 2 ตัวอักษร
+        const tld = domainPart.substring(domainPart.lastIndexOf('.') + 1);
+        if (tld.length < 2) {
+            return false;
+        }
+        
+        // ตรวจสอบจุดติดกัน
+        if (email.includes('..')) {
+            return false;
+        }
+        
+        return true;
     }
-    
-    // ตรวจสอบเบื้องต้น: มี @ หนึ่งตัว และมีจุดหลัง @
-    const atIndex = email.indexOf('@');
-    if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
-        return false;
-    }
-    
-    const domain = email.substring(atIndex + 1);
-    const dotIndex = domain.indexOf('.');
-    if (dotIndex === -1 || dotIndex === 0 || dotIndex === domain.length - 1) {
-        return false;
-    }
-    
-    // ตรวจสอบความยาวสูงสุด
-    if (email.length > 254) {
-        return false;
-    }
-    
-    // ตรวจสอบขั้นสุดท้ายด้วย regex อย่างง่าย
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-}
 
     function showError(inputElement, message) {
         const errorElement = $(`#${inputElement.attr('id')}-error`);

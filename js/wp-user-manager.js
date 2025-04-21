@@ -1,7 +1,7 @@
 /**
  * wp-user-manager.js
  * สคริปต์จัดการข้อมูลผู้ใช้ WordPress ปรับปรุงใหม่
- * Version: 1.0.1 (Refactored for Nesting Depth and Complexity)
+ * Version: 1.0.2 (Refactored - Addressed SonarQube L650)
  */
 jQuery(document).ready(function($) {
     'use strict';
@@ -146,8 +146,8 @@ jQuery(document).ready(function($) {
         // Role Option Click in Modal (Delegated from modal body for reliability)
         $roleEditModal.on('click', '.role-option', function() { // Needs 'function' for $(this)
              // Ensure only one option is selected visually
-            $roleEditModal.find('.role-option').removeClass('selected');
-            $(this).addClass('selected');
+             $roleEditModal.find('.role-option').removeClass('selected');
+             $(this).addClass('selected');
         });
 
 
@@ -171,10 +171,10 @@ jQuery(document).ready(function($) {
             const username = $button.data('username') || 'ผู้ใช้นี้'; // Fallback username
 
              if (!userId) {
-                console.error('Delete User Error: Missing user ID.');
-                showNotification('เกิดข้อผิดพลาด: ไม่พบ ID ผู้ใช้', 'error');
-                return;
-            }
+                 console.error('Delete User Error: Missing user ID.');
+                 showNotification('เกิดข้อผิดพลาด: ไม่พบ ID ผู้ใช้', 'error');
+                 return;
+             }
 
             $deleteUserId.val(userId);
             // Use text() for safety, construct HTML carefully if needed
@@ -203,7 +203,7 @@ jQuery(document).ready(function($) {
         // Close Modal on Background Click
         $('.modal').on('click', function(event) { // Attach directly to modal elements
              if (event.target === this) { // Check if the click is directly on the modal background
-                 closeModal($(this));
+                  closeModal($(this));
              }
         });
     }
@@ -567,7 +567,7 @@ jQuery(document).ready(function($) {
                     closeModal($deleteConfirmModal);
                     // Adjust current page if the last user on the page was deleted
                     if ($userTableBody.find('tr').length === 1 && currentPage > 1) {
-                        currentPage--;
+                         currentPage--;
                     }
                     loadUsers(); // Reload users
                 } else {
@@ -606,10 +606,10 @@ jQuery(document).ready(function($) {
      * @param {jQuery} notification - The notification element.
      */
     function removeNotificationAfterFade(notification) {
-         // Remove from DOM after transition
-         setTimeout(() => {
-            notification.remove();
-         }, 300); // Match CSS transition duration
+           // Remove from DOM after transition
+           setTimeout(() => {
+                notification.remove();
+           }, 300); // Match CSS transition duration
     }
 
     /**
@@ -618,13 +618,13 @@ jQuery(document).ready(function($) {
      * @param {number} [duration=5000] - How long the notification stays visible (ms).
      */
     function scheduleNotificationRemoval(notification, duration = 5000) {
-         const autoHideTimer = setTimeout(() => {
-             notification.removeClass('show');
-             removeNotificationAfterFade(notification);
-         }, duration);
+           const autoHideTimer = setTimeout(() => {
+                notification.removeClass('show');
+                removeNotificationAfterFade(notification);
+           }, duration);
 
-         // Store timer data to allow cancellation on manual close
-         notification.data('autoHideTimer', autoHideTimer);
+           // Store timer data to allow cancellation on manual close
+           notification.data('autoHideTimer', autoHideTimer);
     }
 
     /**
@@ -646,8 +646,11 @@ jQuery(document).ready(function($) {
 
         // Use requestAnimationFrame for smoother animation start
         requestAnimationFrame(() => {
-             // Force reflow before adding class
-             notification[0].offsetHeight;
+             // Force reflow before adding class by reading offsetHeight.
+             // Assign to an unused variable to satisfy SonarQube/linters ("expression expected").
+             const _unused = notification[0].offsetHeight; // Force reflow (Side effect is the goal)
+
+             // Now add the class to trigger the transition
              notification.addClass('show');
         });
 

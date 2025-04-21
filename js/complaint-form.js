@@ -1,6 +1,6 @@
 /**
  * Complaint Form Handler
- * Version: 1.1.0
+ * Version: 1.1.1 (Security fixes)
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -9,6 +9,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const getElements = selector => document.querySelectorAll(selector);
     const showElement = el => el && (el.style.display = 'block');
     const hideElement = el => el && (el.style.display = 'none');
+    
+    // Escape HTML เพื่อป้องกัน XSS
+    const escapeHTML = str => {
+        if (typeof str !== 'string') return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    };
 
     // Debug ข้อมูล AJAX
     if (window.complaintFormAjax) {
@@ -20,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form Configuration
     const CONFIG = {
         MIN_DETAILS_LENGTH: 20,
+        MAX_DETAILS_LENGTH: 2000,
+        MAX_EMAIL_LENGTH: 254, // ตามมาตรฐาน RFC 5321
         SUBMIT_ENDPOINT: window.complaintFormAjax?.ajaxurl || '/wp-admin/admin-ajax.php',
         REQUIRED_FIELDS: ['type', 'department', 'details'],
         PERSONAL_INFO_FIELDS: ['name', 'address', 'phone', 'email'],
@@ -144,8 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const count = this.value.length;
                 detailsCount.textContent = count;
                 formState.details = this.value;
-                if (count > 2000) {
-                    this.value = this.value.substring(0, 2000);
+                if (count > CONFIG.MAX_DETAILS_LENGTH) {
+                    this.value = this.value.substring(0, CONFIG.MAX_DETAILS_LENGTH);
                     formState.details = this.value;
                 }
                 validateField('details');
@@ -293,10 +306,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Validate email field
+    /**
+     * ตรวจสอบความถูกต้องของอีเมลโดยไม่ใช้ regex ที่ซับซ้อน
+     * เพื่อป้องกันปัญหา ReDoS (Regular Expression Denial of Service)
+     * @param {Object} errors - อ็อบเจ็กต์เก็บข้อความแจ้งเตือน
+     */
     function validateEmailField(errors) {
-        if (formState.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+        const email = formState.email;
+        
+        // ถ้าไม่มีข้อมูลอีเมล ไม่ต้องตรวจสอบ
+        if (!email) return;
+        
+        // ตรวจสอบความยาวอีเมล
+        if (email.length > CONFIG.MAX_EMAIL_LENGTH) {
+            errors.email = 'อีเมลยาวเกินไป';
+            return;
+        }
+        
+        // ตรวจสอบโครงสร้างพื้นฐานของอีเมล
+        const atIndex = email.indexOf('@');
+        if (atIndex <= 0 || atIndex === email.length - 1) {
             errors.email = 'กรุณาระบุอีเมลให้ถูกต้อง';
+            return;
+        }
+        
+        // แยกส่วน local และ domain
+        const localPart = email.substring(0, atIndex);
+        const domainPart = email.substring(atIndex + 1);
+        
+        // ตรวจสอบว่ามีจุดในส่วน domain
+        const dotIndex = domainPart.indexOf('.');
+        if (dotIndex <= 0 || dotIndex === domainPart.length - 1) {
+            errors.email = 'กรุณาระบุอีเมลให้ถูกต้อง';
+            return;
+        }
+        
+        // ตรวจสอบความยาวส่วน local และ domain
+        if (localPart.length > 64 || domainPart.length > 255) {
+            errors.email = 'กรุณาระบุอีเมลให้ถูกต้อง';
+            return;
+        }
+        
+        // ตรวจสอบการมีอยู่ของช่องว่าง
+        if (email.includes(' ')) {
+            errors.email = 'กรุณาระบุอีเมลให้ถูกต้อง';
+            return;
         }
     }
     
@@ -585,11 +639,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (result.success) {
             // แสดงข้อความเมื่อส่งสำเร็จ
             messageDiv.className = 'message success';
+            
+            // ป้องกัน XSS ใน HTML ที่ถูกแสดง
+            const message = escapeHTML(result.data?.message || 'เราได้รับเรื่องร้องเรียนของท่านเรียบร้อยแล้ว');
+            const refNumber = result.data?.ref_number ? escapeHTML(result.data.ref_number) : '';
+            
             messageDiv.innerHTML = `
                 <h3>ขอบคุณสำหรับการแจ้งเรื่องร้องเรียน</h3>
-                <p>${result.data?.message || 'เราได้รับเรื่องร้องเรียนของท่านเรียบร้อยแล้ว'}</p>
-                ${result.data?.ref_number ? `<p>เลขที่เรื่องร้องเรียนของท่าน: <strong>${result.data.ref_number}</strong></p>` : ''}
+                <p>${message}</p>
+                ${refNumber ? `<p>เลขที่เรื่องร้องเรียนของท่าน: <strong>${refNumber}</strong></p>` : ''}
             `;
+            
             // รีเซ็ตฟอร์ม
             resetForm();
             // เลื่อนไปยังข้อความแจ้งเตือน

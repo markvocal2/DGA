@@ -38,6 +38,22 @@ jQuery(document).ready(function($) {
         'minor': 'เล็กน้อย'
     };
 
+    // ปรับปรุงการตรวจสอบ JavaScript: links
+if (severity === 'high' && href && typeof href === 'string') {
+    // ตรวจสอบอย่างปลอดภัยโดยใช้ toLowerCase และ indexOf แทน startsWith
+    // และแยกการตรวจสอบสตริงออกมาเป็นตัวแปรก่อน เพื่อหลีกเลี่ยงการทำงานกับ input โดยตรง
+    const hrefLower = href.toLowerCase();
+    const hasJavascriptProtocol = hrefLower.indexOf('javascript:') === 0;
+    
+    if (hasJavascriptProtocol) {
+        violations.push({
+            message: 'ใช้ javascript: ใน href (ควรใช้ button แทนสำหรับการเรียกใช้ JavaScript)',
+            element: this.outerHTML,
+            impact: 'minor' // อาจจะ moderate เป็น minor
+        });
+    }
+}
+
     // --- Helper Functions ---
 
     // ดึงชื่อหมวดหมู่การตรวจสอบเป็นภาษาไทย

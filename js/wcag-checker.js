@@ -3,7 +3,7 @@ jQuery(document).ready(function($) {
     /**
      * WCAG Checker Script
      * Handles running checks, calculating scores, and displaying results.
-     * Version: 1.0.1 (Refactored for complexity)
+     * Version: 1.0.2 (Security improvements for JavaScript URLs)
      */
 
     // --- Cache DOM Elements ---
@@ -129,6 +129,7 @@ jQuery(document).ready(function($) {
         const filteredViolations = filterViolationsBySeverity(violations, severity);
         return { passed: filteredViolations.length === 0, violations: filteredViolations, total: total || 1 }; // Ensure total is at least 1 for calculation
     }
+    
     function checkImages() {
         const violations = [];
         const severity = getSavedSeverity();
@@ -136,20 +137,75 @@ jQuery(document).ready(function($) {
         const filteredViolations = filterViolationsBySeverity(violations, severity);
         return { passed: filteredViolations.length === 0, violations: filteredViolations, total: total || 1 };
     }
-     function checkLinks() {
+    
+    /**
+     * ตรวจสอบลิงก์ที่อาจมีปัญหาความปลอดภัย เช่น javascript: URLs
+     * ปรับปรุงให้ปลอดภัยจาก XSS และมีการตรวจสอบที่ครอบคลุม
+     */
+    function checkLinks() {
         const violations = [];
-        // Example: Add the javascript: check from the user's snippet
+        
+        // ตรวจสอบลิงก์ทั้งหมดที่มี href
         $('a[href]').each(function() {
-             const href = $(this).attr('href');
-             // Safe check for javascript: protocol
-             if (href && typeof href === 'string' && href.trim().toLowerCase().startsWith('javascript:')) {
-                 violations.push({
-                     message: 'ใช้ javascript: ใน href (ควรใช้ button แทน)',
-                     element: this.outerHTML,
-                     impact: 'minor' // Or 'moderate' depending on context
-                 });
-             }
-             // Add other link checks here...
+            const $link = $(this);
+            const href = $link.attr('href');
+            
+            // ตรวจสอบกรณีค่า null หรือ undefined
+            if (!href) {
+                return;
+            }
+            
+            // ตรวจสอบว่าเป็นสตริงและไม่เกินความยาวที่เหมาะสม
+            if (typeof href !== 'string' || href.length > 2048) {
+                violations.push({
+                    message: 'ลิงก์มีความยาวเกินไปหรือผิดรูปแบบ',
+                    element: this.outerHTML,
+                    impact: 'minor'
+                });
+                return;
+            }
+            
+            // ล้างค่าช่องว่างและแปลงเป็น lowercase สำหรับการตรวจสอบ
+            const normalizedHref = href.trim().toLowerCase();
+            
+            // ตรวจสอบ javascript: protocol อย่างปลอดภัย
+            if (normalizedHref.startsWith('javascript:')) {
+                violations.push({
+                    message: 'ใช้ javascript: ใน href (ควรใช้ button แทน)',
+                    element: this.outerHTML,
+                    impact: 'moderate' // เพิ่มระดับผลกระทบเป็น moderate เนื่องจากเป็นปัญหาความปลอดภัย
+                });
+            }
+            
+            // ตรวจสอบ href ว่างเปล่า
+            if (normalizedHref === '' || normalizedHref === '#') {
+                const hasOnClick = $link.attr('onclick') !== undefined;
+                const hasTitle = $link.attr('title') !== undefined && $link.attr('title').trim() !== '';
+                const hasAriaLabel = $link.attr('aria-label') !== undefined && $link.attr('aria-label').trim() !== '';
+                
+                if (!hasOnClick && !hasTitle && !hasAriaLabel) {
+                    violations.push({
+                        message: 'ลิงก์ว่างเปล่าไม่มีคำอธิบายหรือ handler',
+                        element: this.outerHTML,
+                        impact: 'minor'
+                    });
+                }
+            }
+            
+            // ตรวจสอบว่ามีข้อความหรือ accessible name
+            if ($link.text().trim() === '' && !$link.find('img[alt]').length) {
+                const hasTitle = $link.attr('title') !== undefined && $link.attr('title').trim() !== '';
+                const hasAriaLabel = $link.attr('aria-label') !== undefined && $link.attr('aria-label').trim() !== '';
+                const hasAriaLabelledBy = $link.attr('aria-labelledby') !== undefined;
+                
+                if (!hasTitle && !hasAriaLabel && !hasAriaLabelledBy) {
+                    violations.push({
+                        message: 'ลิงก์ไม่มีข้อความหรือชื่อที่เข้าถึงได้',
+                        element: this.outerHTML,
+                        impact: 'serious'
+                    });
+                }
+            }
         });
 
         const severity = getSavedSeverity();
@@ -157,6 +213,7 @@ jQuery(document).ready(function($) {
         const filteredViolations = filterViolationsBySeverity(violations, severity);
         return { passed: filteredViolations.length === 0, violations: filteredViolations, total: total || 1 };
     }
+    
     function checkContrast() {
         const violations = []; // Contrast checks are complex, usually done with axe
         const severity = getSavedSeverity();
@@ -164,20 +221,23 @@ jQuery(document).ready(function($) {
         // Total is hard to define for contrast, often treated as one overall check result
         return { passed: filteredViolations.length === 0, violations: filteredViolations, total: 1 };
     }
-     function checkForms() {
+    
+    function checkForms() {
         const violations = [];
         const severity = getSavedSeverity();
         const total = $('input, select, textarea, button').not('[type="hidden"]').length || 0;
         const filteredViolations = filterViolationsBySeverity(violations, severity);
         return { passed: filteredViolations.length === 0, violations: filteredViolations, total: total || 1 };
     }
-     function checkARIA() {
+    
+    function checkARIA() {
         const violations = [];
         const severity = getSavedSeverity();
         const total = $('[role], [aria-label], [aria-labelledby], [aria-describedby]').length || 0; // Example count
         const filteredViolations = filterViolationsBySeverity(violations, severity);
         return { passed: filteredViolations.length === 0, violations: filteredViolations, total: total || 1 };
     }
+    
     function checkKeyboardNavigation() {
         const violations = []; // Keyboard checks often involve manual testing or complex analysis
         const severity = getSavedSeverity();
@@ -327,6 +387,10 @@ jQuery(document).ready(function($) {
         return summaryHtml;
     }
 
+    /**
+     * จัดกลุ่มปัญหาที่พบให้เป็นหมวดหมู่
+     * เพิ่มการป้องกัน XSS โดยการเรียกใช้ escapeHtml 
+     */
     function groupViolations(violations) {
         if (!Array.isArray(violations)) return {};
         return violations.reduce((acc, violation) => {
@@ -349,6 +413,10 @@ jQuery(document).ready(function($) {
         }, {});
     }
 
+    /**
+     * สร้าง HTML สำหรับแสดงปัญหาที่พบ
+     * พร้อมมีการป้องกัน XSS
+     */
     function generateViolationsHtml(results) {
         let violationsHtml = '';
         let hasAnyViolations = false;

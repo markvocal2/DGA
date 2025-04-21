@@ -73,32 +73,44 @@
             },
             minLength: 2,
             select: function(event, ui) {
-                event.preventDefault(); // Prevent default selection behavior
+                // 1. Prevent the default action (like setting the value AND closing the menu)
+                event.preventDefault();
 
+                // 2. Guard clause: Handle cases where the selected item is invalid
                 if (!ui.item) {
+                    console.warn('Autocomplete select: ui.item is missing.');
+                    // Returning false here is acceptable for an early exit/failure condition.
                     return false;
                 }
 
-                $(this).val(ui.item.value); // Set input value
+                // 3. Manually set the input field's value
+                $(this).val(ui.item.value);
 
-                // Determine search term based on selected item type
+                // 4. Determine the actual search term based on item type
                 if (ui.item.type === 'custom_field' && ui.item.id) {
                     state.selectedPostId = ui.item.id;
-                    state.search = ui.item.id.toString(); // Search by post ID
+                    // Use the specific ID for searching when a custom field item is selected
+                    state.search = ui.item.id.toString();
                 } else {
                     state.selectedPostId = null;
-                    state.search = ui.item.value; // Search by title/label
+                    // Use the displayed value for searching otherwise
+                    state.search = ui.item.value;
                 }
 
-                // Clear badge filter
+                // 5. Clear any active badge filter when a search term is selected
                 state.filterField = '';
                 container.find('.filter-badge').removeClass('active');
 
-                // Reset pagination and load posts
+                // 6. Reset pagination to the first page
                 state.paged = 1;
-                loadPostsCallback(); // Use the passed callback
 
-                return false; // Prevent default selection behavior
+                // 7. Trigger the loading of posts with the new search term/state
+                loadPostsCallback();
+
+                // 8. No 'return false;' here. The function implicitly returns undefined.
+                //    preventDefault() was called at the beginning. stopPropagation()
+                //    is usually not strictly necessary here and was the only remaining
+                //    effect of the original 'return false;'.
             },
             position: { // Adjust dropdown position
                 my: "left top+5",

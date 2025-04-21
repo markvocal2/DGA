@@ -5,6 +5,7 @@
  * Refactored using CSS variables for better maintainability and theming.
  * Addresses missing generic font family warning.
  * File path: /css/ckan-delete-dataset.css
+ * Version: 1.0.2 (Refactored - Removed commented code L343)
  */
 
 :root {
@@ -340,7 +341,6 @@ body.cpd-modal-open {
   left: calc(50% - 10px); /* Adjusted for new size */
   position: absolute;
   top: calc(50% - 10px); /* Adjusted for new size */
-  /* transform: translateY(-50%); */ /* Removed as top/left handle centering */
   width: 20px; /* Reduced size */
 }
 

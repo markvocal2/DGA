@@ -1,14 +1,57 @@
 (function($) {
     'use strict';
-    
-    // ประกาศฟังก์ชันต่างๆ นอก document.ready เพื่อลดระดับการซ้อนฟังก์ชัน
-    
+
+    // --- Utility Functions ---
+
+    function showLoading() {
+        if ($('.loading-overlay').length === 0) {
+            $('<div class="loading-overlay"><div class="loading-spinner"></div></div>').appendTo('body');
+        }
+        $('.loading-overlay').addClass('show');
+    }
+
+    function hideLoading() {
+        $('.loading-overlay').removeClass('show');
+    }
+
+    function showToast(message) {
+        $('.document-table-toast').remove(); // Remove old toast if exists
+        const toast = $('<div>')
+            .addClass('document-table-toast')
+            .text(message)
+            .appendTo('body');
+
+        setTimeout(function() {
+            toast.addClass('show');
+        }, 100); // Short delay for transition
+
+        setTimeout(function() {
+            toast.removeClass('show');
+            setTimeout(function() {
+                toast.remove();
+            }, 300); // Remove after fade out
+        }, 3000); // Display duration
+    }
+
+    // --- Core Functions ---
+
     /**
-     * ฟังก์ชันตั้งค่า Autocomplete
+     * Sets up jQuery UI Autocomplete for the search input.
      */
-    function setupAutocomplete(container, state, loadPosts) {
+    function setupAutocomplete(container, state, loadPostsCallback) {
         const searchInput = container.find('.autocomplete-search');
-        
+        if (!searchInput.length || typeof $.ui === 'undefined' || typeof $.ui.autocomplete === 'undefined') {
+            console.warn('Autocomplete input not found or jQuery UI Autocomplete not loaded.');
+            return;
+        }
+
+        // Ensure dynamic_post_cards_params is available
+        if (typeof dynamic_post_cards_params === 'undefined' || !dynamic_post_cards_params.ajax_url || !dynamic_post_cards_params.nonce) {
+            console.error('dynamic_post_cards_params is not defined or incomplete.');
+            return;
+        }
+
+
         searchInput.autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -21,305 +64,339 @@
                         post_type: state.postType
                     },
                     success: function(data) {
-                        response(data);
+                        response(data || []); // Ensure response is always an array
+                    },
+                    error: function() {
+                        response([]); // Return empty array on error
                     }
                 });
             },
             minLength: 2,
             select: function(event, ui) {
-                // เมื่อเลือกรายการจาก autocomplete
-                event.preventDefault();
-                
-                // ตั้งค่าค่าใน input
-                $(this).val(ui.item.value);
-                
-                // เก็บ ID ของโพสต์ที่เลือกเพื่อใช้ในการค้นหา
-                if (ui.item.type === 'custom_field') {
-                    // ถ้าเลือกจาก custom field ใช้ ID ของโพสต์
-                    state.selectedPostId = ui.item.id;
-                    state.search = ui.item.id.toString();
-                } else {
-                    // ถ้าเลือกจากชื่อเรื่อง ใช้ชื่อเรื่องในการค้นหา
-                    state.selectedPostId = null;
-                    state.search = ui.item.value;
+                event.preventDefault(); // Prevent default selection behavior
+
+                if (!ui.item) {
+                    return false;
                 }
-                
-                // ยกเลิกการกรองตาม custom field
+
+                $(this).val(ui.item.value); // Set input value
+
+                // Determine search term based on selected item type
+                if (ui.item.type === 'custom_field' && ui.item.id) {
+                    state.selectedPostId = ui.item.id;
+                    state.search = ui.item.id.toString(); // Search by post ID
+                } else {
+                    state.selectedPostId = null;
+                    state.search = ui.item.value; // Search by title/label
+                }
+
+                // Clear badge filter
                 state.filterField = '';
                 container.find('.filter-badge').removeClass('active');
-                
-                // รีเซ็ตหน้าแล้วโหลดข้อมูลใหม่
+
+                // Reset pagination and load posts
                 state.paged = 1;
-                loadPosts();
-                
-                return false;
+                loadPostsCallback(); // Use the passed callback
+
+                return false; // Prevent default selection behavior
             },
-            // แก้ไขปัญหาการแสดงผล dropdown ด้วยการกำหนด position และ z-index
-            position: {
+            position: { // Adjust dropdown position
                 my: "left top+5",
                 at: "left bottom",
                 collision: "flip"
             },
-            // จำกัดการแสดงผลให้อยู่ภายใน container ของเรา
-            appendTo: container
+            appendTo: container // Append dropdown to the container
         }).autocomplete("instance")._renderItem = function(ul, item) {
-            // แสดงผล item ใน dropdown
+            // Custom rendering for autocomplete items
             let itemClass = "ui-menu-item-wrapper";
-            let itemContent = item.label;
-            
-            // เพิ่ม badge ถ้าเป็น custom field
+            let itemContent = item.label || item.value; // Fallback to value if label is missing
+
+            // Add badge styling if it's a custom field result
             if (item.type === 'custom_field') {
-                const badgeClass = item.meta_key === 'at_docnum_1' ? 'orange-badge-mini' : 'gold-badge-mini';
-                itemClass += " has-badge " + badgeClass;
+                const badgeClass = item.meta_key === 'at_docnum_1' ? 'orange-badge-mini' : (item.meta_key === 'at_docnum_2' ? 'gold-badge-mini' : '');
+                if (badgeClass) {
+                    itemClass += " has-badge " + badgeClass;
+                    // Optionally add data-badge attribute if CSS uses it
+                    // return $("<li>").append(`<div class='${itemClass}' data-badge='${item.meta_key === 'at_docnum_1' ? 'มสพร.' : 'มรด.'}'>${itemContent}</div>`).appendTo(ul);
+                }
             }
-            
+
             return $("<li>")
                 .append("<div class='" + itemClass + "'>" + itemContent + "</div>")
                 .appendTo(ul);
         };
-        
-        // เพิ่มคลาสให้กับ autocomplete dropdown
-        $(document).on('autocompleteopen', function() {
-            $('.ui-autocomplete').addClass('dynamic-post-cards-autocomplete');
+
+         // Add custom class to the dropdown when it opens
+        searchInput.on('autocompleteopen', function() {
+             // Use instance().menu.element to target the specific dropdown
+             $(this).autocomplete("instance").menu.element.addClass('dynamic-post-cards-autocomplete');
         });
     }
-    
+
     /**
-     * ฟังก์ชันตั้งค่า Mobile Filter Toggle
+     * Sets up the toggle button for mobile filters.
      */
     function setupMobileFilterToggle(container) {
-        // เพิ่มปุ่มเฟืองสำหรับมือถือ
+        const controls = container.find('.dynamic-post-cards-controls');
+        const filterControls = container.find('.filter-controls');
+        if (!controls.length || !filterControls.length) return;
+
         const toggleButtonId = container.attr('id') + '-mobile-toggle';
+        // Check if button already exists
+        if ($('#' + toggleButtonId).length > 0) {
+            return;
+        }
+
         const toggleButton = $('<button id="' + toggleButtonId + '" class="mobile-filter-toggle"><span class="dashicons dashicons-admin-generic"></span></button>');
-        
-        // เพิ่มปุ่มเข้าไปด้านบนของ controls
-        container.find('.dynamic-post-cards-controls').prepend(toggleButton);
-        
-        // จัดการการคลิกปุ่ม
+        controls.prepend(toggleButton); // Add button to the controls area
+
         toggleButton.on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            container.find('.filter-controls').toggleClass('active');
+            filterControls.toggleClass('active'); // Toggle visibility class
         });
-        
-        // ปิดเมนูเมื่อคลิกที่อื่น
+
+        // Close menu when clicking outside
         $(document).on('click', function(event) {
-            if (!$(event.target).closest('.filter-controls', container).length && 
-                !$(event.target).closest('.mobile-filter-toggle', container).length) {
-                container.find('.filter-controls').removeClass('active');
+            const $target = $(event.target);
+            // Check if the click is outside the filter controls AND outside the toggle button
+            if (!$target.closest(filterControls).length && !$target.is(toggleButton) && !$target.closest(toggleButton).length) {
+                 if (filterControls.hasClass('active')) {
+                     filterControls.removeClass('active');
+                 }
             }
         });
     }
-    
+
     /**
-     * ฟังก์ชันตั้งค่า Event Listeners
+     * Sets up various event listeners for controls.
      */
-    function setupEventListeners(container, state, contentContainer, noResultsMessage, loadMoreBtn, loadPosts, renderPosts) {
-        // สลับมุมมองระหว่าง Card View และ List View
+    function setupEventListeners(container, state, contentContainer, noResultsMessage, loadMoreBtn, loadPostsCallback, renderPostsCallback) {
+        // View mode toggle
         container.find('.view-mode-btn').on('click', function() {
-            const viewMode = $(this).hasClass('card-view-btn') ? 'card' : 'list';
-            
-            // เปลี่ยนปุ่มที่ active
+            const $this = $(this);
+            if ($this.hasClass('active')) return; // Do nothing if already active
+
+            const viewMode = $this.hasClass('card-view-btn') ? 'card' : 'list';
             container.find('.view-mode-btn').removeClass('active');
-            $(this).addClass('active');
-            
-            // เปลี่ยน class ของ content container
+            $this.addClass('active');
             contentContainer.removeClass('card-view list-view').addClass(viewMode + '-view');
-            
-            // อัปเดตสถานะ
             state.view = viewMode;
-            
-            // อัปเดต layout
-            renderPosts(state.currentPosts || []);
+            // Re-render existing posts with the new view (if posts exist)
+            renderPostsCallback(state.currentPosts || [], false); // false = not appending
         });
-        
-        // การเรียงลำดับ
+
+        // Sorting select
         container.find('.sorting-select').on('change', function() {
             const sortValue = $(this).val();
             const [sortBy, sortOrder] = sortValue.split('-');
-            
-            // อัปเดตสถานะ
-            state.orderby = sortBy;
-            state.order = sortOrder.toUpperCase();
-            state.paged = 1;
-            
-            // โหลดโพสต์ใหม่
-            loadPosts();
+            if (state.orderby !== sortBy || state.order !== sortOrder.toUpperCase()) {
+                state.orderby = sortBy;
+                state.order = sortOrder.toUpperCase();
+                state.paged = 1;
+                loadPostsCallback();
+            }
         });
-        
-        // การคลิกที่ Badge กรอง
+
+        // Filter badges
         container.find('.filter-badge').on('click', function() {
-            const field = $(this).data('field');
-            
-            // ถ้าคลิกที่ Badge ที่กำลังใช้อยู่ ให้ยกเลิกการกรอง
-            if (state.filterField === field) {
+            const $this = $(this);
+            const field = $this.data('field');
+
+            if ($this.hasClass('active')) { // Clicked active badge - deactivate
                 state.filterField = '';
-                $(this).removeClass('active');
-            } else {
+                $this.removeClass('active');
+            } else { // Clicked inactive badge - activate
                 state.filterField = field;
-                container.find('.filter-badge').removeClass('active');
-                $(this).addClass('active');
+                container.find('.filter-badge').removeClass('active'); // Deactivate others
+                $this.addClass('active');
+                // Clear search if activating a filter
+                if (state.search !== '') {
+                    state.search = '';
+                    state.selectedPostId = null;
+                    container.find('.search-input').val('');
+                }
             }
-            
-            // ล้างการค้นหา
-            if (state.search !== '') {
-                state.search = '';
-                container.find('.search-input').val('');
-            }
-            
-            // รีเซ็ตหน้าและค้นหาใหม่
             state.paged = 1;
-            loadPosts();
+            loadPostsCallback();
         });
-        
-        // การค้นหา (กำหนด debounce เพื่อไม่ให้ส่ง request มากเกินไป)
+
+        // Search input with debounce
+        let searchTimer = null;
         container.find('.search-input').on('input', function() {
-            // ล้างค่า selectedPostId เมื่อมีการพิมพ์ค้นหาใหม่
-            state.selectedPostId = null;
-            
             const searchTerm = $(this).val().trim();
-            
-            // ล้างการกรอง Badge ถ้ามีการพิมพ์ค้นหา
+
+            // Clear selectedPostId on manual input
+            if (state.selectedPostId !== null) {
+                 state.selectedPostId = null;
+            }
+
+            // Clear badge filter if searching
             if (searchTerm !== '' && state.filterField !== '') {
                 state.filterField = '';
                 container.find('.filter-badge').removeClass('active');
             }
-            
-            // ยกเลิก timer เดิม
-            if (state.searchTimer) {
-                clearTimeout(state.searchTimer);
-            }
-            
-            // สร้าง timer ใหม่สำหรับ debounce (รอ 500ms)
-            state.searchTimer = setTimeout(function() {
-                if (state.search !== searchTerm) {
+
+            clearTimeout(searchTimer); // Clear previous timer
+            searchTimer = setTimeout(() => {
+                if (state.search !== searchTerm) { // Only search if term changed
                     state.search = searchTerm;
                     state.paged = 1;
-                    loadPosts();
+                    loadPostsCallback();
                 }
-            }, 500);
+            }, 500); // 500ms debounce
         });
-        
-        // กรองตามปี
+
+         // Prevent form submission on Enter key in search input
+         container.find('.search-input').on('keypress', function(e) {
+            if (e.which === 13) { // 13 is the Enter key code
+                e.preventDefault();
+                // Optionally trigger search immediately on Enter
+                // clearTimeout(searchTimer);
+                // if (state.search !== $(this).val().trim()) {
+                //     state.search = $(this).val().trim();
+                //     state.paged = 1;
+                //     loadPostsCallback();
+                // }
+            }
+        });
+
+
+        // Year filter select
         container.find('.year-filter-select').on('change', function() {
             const yearValue = $(this).val();
-            
-            // อัปเดตสถานะ
-            state.year = yearValue;
-            state.paged = 1;
-            
-            // โหลดโพสต์ใหม่
-            loadPosts();
+            if (state.year !== yearValue) {
+                state.year = yearValue;
+                state.paged = 1;
+                loadPostsCallback();
+            }
         });
-        
-        // โหลดเพิ่มเติม
+
+        // Load more button
         loadMoreBtn.on('click', function() {
             if (state.paged < state.maxPages && !state.isLoading) {
                 state.paged++;
-                loadPosts(true); // true = append mode
+                loadPostsCallback(true); // true = append mode
             }
         });
     }
-    
+
     /**
-     * ฟังก์ชันแสดงโพสต์
+     * Renders posts into the content container.
      */
     function renderPosts(posts, contentContainer, noResultsMessage, state, append = false) {
         if (!append) {
-            contentContainer.empty();
+            contentContainer.empty(); // Clear container if not appending
         }
-        
-        // ตรวจสอบว่า posts เป็น array และมีข้อมูล
+
         if (!Array.isArray(posts) || posts.length === 0) {
-            if (!append) {
+            if (!append) { // Only show "no results" if it's the initial load or filter change
                 noResultsMessage.show();
             }
+            // If appending and no more posts, the load more button should already be hidden
             return;
         }
-        
-        // ซ่อนข้อความไม่พบผลลัพธ์ เพราะมีโพสต์แล้ว
-        noResultsMessage.hide();
-        
-        // สร้าง HTML สำหรับแต่ละโพสต์
-        posts.forEach(function(post) {
+
+        noResultsMessage.hide(); // Hide "no results" because we have posts
+
+        const fragment = document.createDocumentFragment(); // Use fragment for better performance
+
+        posts.forEach(post => {
+            // Basic sanitization/validation
+            const title = post.title || 'Untitled';
+            const permalink = post.permalink || '#';
+            const featuredImage = post.featured_image || dynamic_post_cards_params.placeholder_image || 'https://placehold.co/300x200/e0e0e0/757575?text=No+Image';
+            const date = post.date || '';
+            const visitorCount = post.visitor_count || '';
+            const excerpt = post.excerpt || '';
+            const docNum1 = post.at_docnum_1 || '';
+            const docNum2 = post.at_docnum_2 || '';
+
             let postHtml = '';
-            let imgAttributes = `src="${post.featured_image}" alt="${post.title}" loading="lazy" decoding="async"`;
-            
-            // สร้าง HTML สำหรับ badge ตามเงื่อนไข
+            // Use placeholder for missing images or on error
+            const imgAttributes = `src="${featuredImage}" alt="${title}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='${dynamic_post_cards_params.placeholder_image || 'https://placehold.co/300x200/e0e0e0/757575?text=Error'}';"`;
+
+            // Determine badge HTML
             let badgeHtml = '';
-            if (post.at_docnum_2) {
-                badgeHtml = `<div class="doc-badge gold-badge">เลขที่ มรด. ${post.at_docnum_2}</div>`;
-            } else if (post.at_docnum_1) {
-                badgeHtml = `<div class="doc-badge orange-badge">เลขที่ มสพร. ${post.at_docnum_1}</div>`;
+            if (docNum2) {
+                badgeHtml = `<div class="doc-badge gold-badge" title="เลขที่ มรด. ${docNum2}">เลขที่ มรด. ${docNum2}</div>`;
+            } else if (docNum1) {
+                badgeHtml = `<div class="doc-badge orange-badge" title="เลขที่ มสพร. ${docNum1}">เลขที่ มสพร. ${docNum1}</div>`;
             }
-            
+
+            // Generate HTML based on view mode
             if (state.view === 'card') {
                 postHtml = `
                     <div class="card-item">
-                        <a href="${post.permalink}" class="card-image-link">
+                        <a href="${permalink}" class="card-image-link" title="${title}">
                             <img ${imgAttributes} class="card-image">
                             ${badgeHtml}
                         </a>
-                        <!-- โค้ดที่เหลือเหมือนเดิม -->
-                    </div>
-                `;
-            } else {
+                        <div class="card-content">
+                             <div class="card-meta">
+                                <span class="post-date">${date}</span>
+                                ${visitorCount ? `<span class="visitor-count">${visitorCount}</span>` : ''}
+                            </div>
+                            <h3 class="card-title" title="${title}">
+                                <a href="${permalink}">${title}</a>
+                            </h3>
+                            <div class="card-excerpt">${excerpt}</div>
+                            <div class="card-footer">
+                                <a href="${permalink}" class="read-more-btn">อ่านต่อ</a>
+                            </div>
+                        </div>
+                    </div>`;
+            } else { // List view
                 postHtml = `
                     <div class="list-item">
-                        <a href="${post.permalink}" class="list-image-link">
+                        <a href="${permalink}" class="list-image-link" title="${title}">
                             <img ${imgAttributes} class="list-image">
                             ${badgeHtml}
                         </a>
                         <div class="list-content">
-                            <h3 class="list-title" title="${post.title}">
-                                <a href="${post.permalink}">${post.title}</a>
+                            <h3 class="list-title" title="${title}">
+                                <a href="${permalink}">${title}</a>
                             </h3>
                             <div class="list-meta">
-                                <span class="post-date">${post.date}</span>
-                                <span class="visitor-count">${post.visitor_count}</span>
+                                <span class="post-date">${date}</span>
+                                 ${visitorCount ? `<span class="visitor-count">${visitorCount}</span>` : ''}
                             </div>
-                            <div class="list-excerpt">${post.excerpt}</div>
+                            <div class="list-excerpt">${excerpt}</div>
                             <div class="list-footer">
-                                <a href="${post.permalink}" class="read-more-btn">อ่านต่อ</a>
+                                <a href="${permalink}" class="read-more-btn">อ่านต่อ</a>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
-            
-            contentContainer.append(postHtml);
+            // Use jQuery to parse the HTML string and append to the fragment
+             $(fragment).append(postHtml);
         });
-        
-        // เลื่อนไปที่โพสต์ใหม่ที่โหลดมาถ้าเป็นโหมด append
-        if (append && posts.length > 0) {
-            const firstNewPost = contentContainer.children().eq(contentContainer.children().length - posts.length);
-            $('html, body').animate({
-                scrollTop: firstNewPost.offset().top - 30
-            }, 500);
-        }
+
+        contentContainer.append(fragment); // Append the fragment to the DOM
+
+        // Optional: Scroll to new posts if appending
+        // if (append && posts.length > 0) {
+        //     const firstNewPost = contentContainer.children().last().prevAll().slice(posts.length - 1).first();
+        //     if (firstNewPost.length) {
+        //         $('html, body').animate({
+        //             scrollTop: firstNewPost.offset().top - 30 // Adjust offset as needed
+        //         }, 500);
+        //     }
+        // }
     }
-    
+
+
     /**
-     * ฟังก์ชันโหลดโพสต์
+     * Performs the AJAX request to fetch posts. Returns a Promise.
      */
-    function createLoadPostsFunction(state, contentContainer, loadingContainer, noResultsMessage, loadMoreBtn, renderPostsCallback) {
-        return function(append = false) {
-            if (state.isLoading) return;
-            
-            state.isLoading = true;
-            
-            // ซ่อนข้อความไม่พบผลลัพธ์
-            noResultsMessage.hide();
-            
-            // แสดง loading skeleton ถ้าไม่ใช่โหมด append
-            if (!append) {
-                contentContainer.empty();
-                loadingContainer.show();
-            } else {
-                loadMoreBtn.text('กำลังโหลด...').prop('disabled', true);
-            }
-            
-            // ส่ง AJAX request
+     function fetchPosts(state) {
+         // Ensure dynamic_post_cards_params is available
+        if (typeof dynamic_post_cards_params === 'undefined' || !dynamic_post_cards_params.ajax_url || !dynamic_post_cards_params.nonce) {
+            console.error('dynamic_post_cards_params is not defined or incomplete for fetchPosts.');
+            return Promise.reject('AJAX configuration missing.'); // Return a rejected promise
+        }
+
+        return new Promise((resolve, reject) => {
             $.ajax({
                 url: dynamic_post_cards_params.ajax_url,
                 type: 'POST',
@@ -334,247 +411,196 @@
                     order: state.order,
                     search: state.search,
                     year: state.year,
-                    filter_field: state.filterField
+                    filter_field: state.filterField,
+                    // Include selectedPostId if you want server to prioritize it
+                    // selected_post_id: state.selectedPostId
                 },
+                dataType: 'json', // Expect JSON response
                 success: function(response) {
-                    if (response.success) {
-                        // ตรวจสอบให้แน่ใจว่ามีโพสต์กลับมา
-                        if (response.posts && Array.isArray(response.posts)) {
-                            // เก็บข้อมูลสำหรับการใช้งานต่อไป
-                            state.currentPosts = append 
-                                ? (state.currentPosts || []).concat(response.posts) 
-                                : response.posts;
-                            state.maxPages = response.max_pages;
-                            
-                            // แสดงโพสต์
-                            renderPostsCallback(response.posts, append);
-                            
-                            // จัดการแสดงข้อความไม่พบผลลัพธ์
-                            if (response.posts.length === 0 && !append) {
-                                noResultsMessage.show();
-                            } else {
-                                noResultsMessage.hide();
-                            }
-                            
-                            // จัดการปุ่มโหลดเพิ่มเติม
-                            if (state.paged < state.maxPages) {
-                                loadMoreBtn.text('โหลดเพิ่มเติม').show().prop('disabled', false);
-                            } else {
-                                loadMoreBtn.hide();
-                            }
-                        } else {
-                            console.error('Invalid posts data in response', response);
-                            if (!append) {
-                                contentContainer.empty();
-                                noResultsMessage.show();
-                            }
-                        }
+                    if (response && response.success) {
+                        // Ensure posts is an array, default to empty array if missing
+                        response.posts = Array.isArray(response.posts) ? response.posts : [];
+                        resolve(response);
                     } else {
-                        console.error('Error loading posts', response);
-                        if (!append) {
-                            contentContainer.empty();
-                            noResultsMessage.show();
-                        }
+                        // Reject with a specific error message if available
+                        reject(response ? response.data || 'Server indicated failure.' : 'Empty or invalid success response.');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AJAX error:', error);
-                    if (!append) {
-                        contentContainer.empty();
-                        noResultsMessage.show();
-                    }
-                },
-                complete: function() {
-                    state.isLoading = false;
-                    loadingContainer.hide();
+                    console.error('AJAX error details:', status, error, xhr);
+                    reject(`AJAX Error: ${status} - ${error || 'Request failed'}`); // Reject with error details
                 }
             });
+        });
+    }
+
+    /**
+     * Handles the successful response from fetchPosts.
+     */
+     function handleLoadPostsSuccess(response, state, append, contentContainer, noResultsMessage, loadMoreBtn, renderPostsCallback) {
+        state.currentPosts = append
+            ? (state.currentPosts || []).concat(response.posts)
+            : response.posts;
+        state.maxPages = response.max_pages || 1; // Default to 1 if missing
+
+        renderPostsCallback(response.posts, append); // Render the newly fetched posts
+
+        // Update UI based on results
+        if (state.currentPosts.length === 0 && !append) {
+            noResultsMessage.show();
+        } else {
+            noResultsMessage.hide();
+        }
+
+        // Update Load More button state
+        if (state.paged < state.maxPages) {
+            loadMoreBtn.text('โหลดเพิ่มเติม').show().prop('disabled', false);
+        } else {
+            loadMoreBtn.hide();
+        }
+    }
+
+    /**
+     * Handles errors from fetchPosts (AJAX error or success:false).
+     */
+    function handleLoadPostsError(error, state, append, contentContainer, noResultsMessage, loadMoreBtn) {
+        console.error('Error loading posts:', error);
+        // Show "no results" only if it's not an append operation and the container is empty
+        if (!append && (!state.currentPosts || state.currentPosts.length === 0)) {
+             contentContainer.empty(); // Clear potentially existing skeletons
+             noResultsMessage.text('เกิดข้อผิดพลาดในการโหลดข้อมูล').show(); // Show specific error message
+        }
+        loadMoreBtn.hide(); // Hide load more on error
+    }
+
+
+    /**
+     * Creates the loadPosts function with closure over its dependencies.
+     * This is the function that will be called to trigger loading/reloading.
+     */
+    function createLoadPostsFunction(state, contentContainer, loadingContainer, noResultsMessage, loadMoreBtn, renderPostsCallback) {
+        // This is the actual function that gets called by event handlers etc.
+        return function(append = false) {
+            if (state.isLoading) return; // Prevent concurrent requests
+
+            state.isLoading = true;
+            noResultsMessage.hide(); // Hide message initially
+
+            // Update UI to show loading state
+            if (!append) {
+                contentContainer.empty(); // Clear previous results
+                loadingContainer.show(); // Show skeleton loader
+                loadMoreBtn.hide(); // Hide load more during initial load/filter
+            } else {
+                loadMoreBtn.text('กำลังโหลด...').prop('disabled', true); // Update load more button text/state
+            }
+
+            // Perform the fetch operation using the extracted function
+            fetchPosts(state)
+                .then(response => {
+                    // Call the success handler
+                    handleLoadPostsSuccess(response, state, append, contentContainer, noResultsMessage, loadMoreBtn, renderPostsCallback);
+                })
+                .catch(error => {
+                    // Call the error handler
+                    handleLoadPostsError(error, state, append, contentContainer, noResultsMessage, loadMoreBtn);
+                })
+                .finally(() => {
+                    // Always executes after promise settles (success or error)
+                    state.isLoading = false;
+                    loadingContainer.hide(); // Hide skeleton loader
+                    // Ensure Load More button text is reset if it's still visible
+                    if (state.paged < state.maxPages) {
+                         loadMoreBtn.text('โหลดเพิ่มเติม').prop('disabled', false);
+                    } else {
+                         loadMoreBtn.hide(); // Ensure it's hidden if on last page
+                    }
+                });
         };
     }
-    
+
+
     /**
-     * ฟังก์ชันโหลดข้อมูล Repeater เดิมจาก customfield
+     * Initializes the dynamic post cards functionality for a given container.
      */
-    function loadExistingRepeaterData(container, currentPostId, state, addRepeaterRow) {
+    function initPostCards(container) {
+        const contentContainer = container.find('.dynamic-post-cards-content');
+        const loadingContainer = container.find('.dynamic-post-cards-loading'); // Assume skeleton/loading indicator container
+        const loadMoreBtn = container.find('.load-more-btn');
         const noResultsMessage = container.find('.no-results-message');
-        showLoading();
-        
-        $.ajax({
-            url: dynamic_post_cards_params.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'get_existing_repeater_data',
-                nonce: dynamic_post_cards_params.nonce,
-                post_id: currentPostId
-            },
-            success: function(response) {
-                if (response.success) {
-                    // เคลียร์ข้อมูลเดิมก่อน
-                    $('.document-repeater-list').empty();
-                    
-                    if (response.data.length > 0) {
-                        // สร้าง Row สำหรับแต่ละเอกสารที่มีอยู่
-                        $.each(response.data, function(index, item) {
-                            addRepeaterRowWithData(container, item, state);
-                        });
-                    } else {
-                        // ถ้าไม่มีข้อมูลเดิม ให้เพิ่ม Row เปล่า 1 อัน
-                        addRepeaterRow(container);
-                    }
-                    
-                    hideLoading();
-                } else {
-                    showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลเอกสาร');
-                    addRepeaterRow(container); // เพิ่ม Row เปล่า 1 อัน
-                    hideLoading();
-                }
-            },
-            error: function() {
-                console.error('Error loading existing repeater data');
-                showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลเอกสาร');
-                addRepeaterRow(container); // เพิ่ม Row เปล่า 1 อัน
-                hideLoading();
-            }
-        });
-    }
-    
-    /**
-     * ฟังก์ชันเพิ่ม Row พร้อมข้อมูล
-     */
-    function addRepeaterRowWithData(container, data, state) {
-        const template = document.getElementById('repeater-item-template').innerHTML;
-        const newItem = $(template);
-        
-        // อัพเดตลำดับของ row ใหม่
-        const itemCount = $('.repeater-item').length + 1;
-        newItem.find('.item-number').text(itemCount);
-        
-        // ใส่ข้อมูลเข้าไปในฟอร์ม
-        newItem.find('.file-name').val(data.name);
-        newItem.find('.file-date').val(data.date);
-        newItem.find('.file-link').val(data.link);
-        
-        $('.document-repeater-list').append(newItem);
-    }
-    
-    /**
-     * โค้ด utility functions
-     */
-    function showLoading() {
-        if ($('.loading-overlay').length === 0) {
-            $('<div class="loading-overlay"><div class="loading-spinner"></div></div>').appendTo('body');
+
+        // Basic validation for essential elements
+        if (!contentContainer.length || !loadMoreBtn.length || !noResultsMessage.length) {
+             console.error('Initialization failed: Essential elements missing in container:', container.attr('id'));
+             return;
         }
-        $('.loading-overlay').addClass('show');
+
+
+        // Initial state based on data attributes and defaults
+        const state = {
+            postType: container.data('post-type') || 'post',
+            postsPerPage: container.data('posts-per-page') || 10,
+            category: container.data('category') || '',
+            orderby: 'date',
+            order: 'DESC',
+            paged: 1,
+            maxPages: 1,
+            view: container.data('view') || 'card', // Default view
+            isLoading: false,
+            search: '',
+            year: container.find('.year-filter-select').val() || '', // Initial year from select
+            searchTimer: null, // For debounce
+            selectedPostId: null, // Store ID from autocomplete selection
+            filterField: '', // Store active badge filter field
+            currentPosts: [] // Store currently displayed posts
+        };
+
+        // Set initial view class
+        contentContainer.addClass(state.view + '-view');
+        container.find(`.${state.view}-view-btn`).addClass('active');
+
+
+        // Create the renderPosts callback specific to this container
+        const renderPostsCallback = function(posts, append = false) {
+            renderPosts(posts, contentContainer, noResultsMessage, state, append);
+        };
+
+        // Create the loadPosts function specific to this container
+        const loadPosts = createLoadPostsFunction(
+            state,
+            contentContainer,
+            loadingContainer,
+            noResultsMessage,
+            loadMoreBtn,
+            renderPostsCallback // Pass the specific render function
+        );
+
+        // Setup UI components and event listeners
+        setupAutocomplete(container, state, loadPosts); // Pass the loadPosts function
+        setupMobileFilterToggle(container);
+        setupEventListeners(
+            container,
+            state,
+            contentContainer,
+            noResultsMessage,
+            loadMoreBtn,
+            loadPosts, // Pass the loadPosts function
+            renderPostsCallback // Pass the specific render function
+        );
+
+        // Initial load of posts
+        loadPosts();
     }
-    
-    function hideLoading() {
-        $('.loading-overlay').removeClass('show');
-    }
-    
-    function showToast(message) {
-        // ลบ toast เก่าถ้ามี
-        $('.document-table-toast').remove();
-        
-        const toast = $('<div>')
-            .addClass('document-table-toast')
-            .text(message)
-            .appendTo('body');
-        
-        setTimeout(function() {
-            toast.addClass('show');
-        }, 100);
-        
-        setTimeout(function() {
-            toast.removeClass('show');
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
-        }, 3000);
-    }
-    
-    function showSkeletonLoader() {
-        const tbody = $('#document-table-body');
-        if (tbody.children().length === 0) {
-            tbody.html(
-                '<tr class="skeleton-row">' +
-                '<td><div class="skeleton-loader"></div></td>'.repeat(4) +
-                '</tr>'.repeat(3)
-            );
-        }
-    }
-    
-    function hideSkeletonLoader() {
-        $('.skeleton-row').remove();
-    }
-    
-    // เมื่อ document พร้อม
-    $(document).ready(function() {
-        // เริ่มต้นโหลดโพสต์สำหรับทุก container
-        $('.dynamic-post-cards-container').each(function() {
-            const container = $(this);
-            initPostCards(container);
-        });
-        
-        // ฟังก์ชันเริ่มต้นสำหรับแต่ละ container
-        function initPostCards(container) {
-            const contentContainer = container.find('.dynamic-post-cards-content');
-            const loadingContainer = container.find('.dynamic-post-cards-loading');
-            const loadMoreBtn = container.find('.load-more-btn');
-            const noResultsMessage = container.find('.no-results-message');
-            
-            // ตัวแปรสำหรับเก็บข้อมูลสถานะ
-            const state = {
-                postType: container.data('post-type'),
-                postsPerPage: container.data('posts-per-page'),
-                category: container.data('category'),
-                orderby: 'date',
-                order: 'DESC',
-                paged: 1,
-                maxPages: 1,
-                view: container.data('view'),
-                isLoading: false,
-                search: '',
-                year: '',
-                searchTimer: null,
-                selectedPostId: null,
-                filterField: ''
-            };
-            
-            // ฟังก์ชันแสดงโพสต์ที่ส่งเข้าไปใน loadPosts
-            const renderPostsCallback = function(posts, append = false) {
-                renderPosts(posts, contentContainer, noResultsMessage, state, append);
-            };
-            
-            // สร้างฟังก์ชัน loadPosts ที่ใช้ในทุกที่
-            const loadPosts = createLoadPostsFunction(
-                state, 
-                contentContainer, 
-                loadingContainer, 
-                noResultsMessage, 
-                loadMoreBtn, 
-                renderPostsCallback
-            );
-            
-            // ตั้งค่า Autocomplete
-            setupAutocomplete(container, state, loadPosts);
-            
-            // เพิ่มปุ่มเฟืองสำหรับมือถือ
-            setupMobileFilterToggle(container);
-            
-            // ตั้งค่า event listeners
-            setupEventListeners(
-                container, 
-                state, 
-                contentContainer, 
-                noResultsMessage, 
-                loadMoreBtn, 
-                loadPosts, 
-                renderPostsCallback
-            );
-            
-            // โหลดโพสต์ครั้งแรก
-            loadPosts();
+
+    // --- Document Ready ---
+    // Initialize for each container found on the page
+    $('.dynamic-post-cards-container').each(function() {
+        const container = $(this);
+        // Ensure initialization happens only once per container if needed
+        if (!container.data('dpc-initialized')) {
+             initPostCards(container);
+             container.data('dpc-initialized', true);
         }
     });
-    
+
 })(jQuery);

@@ -1,7 +1,7 @@
 /**
  * CKAN Metadata Fields Admin JavaScript
  * สำหรับผู้ดูแลระบบเพื่อแก้ไขข้อมูล
- * Version: 1.0.3 (Refactored formatValue for Complexity)
+ * Version: 1.0.4 (Security Fixes for Email Validation)
  */
 jQuery(document).ready(function($) {
     'use strict';
@@ -64,16 +64,49 @@ jQuery(document).ready(function($) {
         return isTrue ? `<span class="boolean-true">${trueText}</span>` : `<span class="boolean-false">${falseText}</span>`;
     }
 
-    /** Formats email values as mailto links */
+    /** 
+     * Safely validates and formats email values as mailto links
+     * Use simple validation to prevent ReDoS attacks
+     * @param {*} value The email value to format
+     * @returns {string} HTML string with formatted email
+     */
     function formatEmailValue(value) {
         const trimmedValue = String(value || '').trim();
         if (!trimmedValue) return formatEmptyValue();
+        
         const escapedEmail = escapeHtml(trimmedValue);
-        // Basic email validation (optional, adjust regex as needed)
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedValue)) {
-             // Return as text if not a valid email format
-             return escapedEmail;
+        
+        // 1. จำกัดความยาวอีเมลก่อนตรวจสอบ (ตามมาตรฐาน RFC)
+        if (trimmedValue.length > 254) {
+            return escapedEmail;
         }
+        
+        // 2. ตรวจสอบรูปแบบอีเมลพื้นฐานโดยไม่ใช้ regex ที่ซับซ้อน
+        const atIndex = trimmedValue.indexOf('@');
+        if (atIndex <= 0 || atIndex === trimmedValue.length - 1) {
+            return escapedEmail;
+        }
+        
+        const dotIndex = trimmedValue.lastIndexOf('.');
+        if (dotIndex <= atIndex + 1 || dotIndex === trimmedValue.length - 1) {
+            return escapedEmail;
+        }
+        
+        // 3. ตรวจสอบว่ามีอักขระไม่พึงประสงค์หรือไม่
+        const localPart = trimmedValue.substring(0, atIndex);
+        const domainPart = trimmedValue.substring(atIndex + 1);
+        
+        // ตรวจสอบอักขระพิเศษที่ไม่ควรมีในส่วน domain
+        if (/[\s<>()[\]\\.,;:@"']/.test(domainPart)) {
+            return escapedEmail;
+        }
+        
+        // ตรวจสอบว่า domain มีส่วนย่อยอย่างน้อย 2 ส่วน
+        const domainParts = domainPart.split('.');
+        if (domainParts.length < 2 || domainParts.some(part => part === '')) {
+            return escapedEmail;
+        }
+        
         return `<a href="mailto:${escapedEmail}">${escapedEmail}</a>`;
     }
 

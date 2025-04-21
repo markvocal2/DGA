@@ -1,7 +1,7 @@
 /**
  * Department Role Manager - CSS Styles
  * สไตล์สำหรับระบบจัดการบทบาทแผนก
- * เวอร์ชัน: 1.0.1 (Refactored)
+ * เวอร์ชัน: 1.1.0 (Refactored for prefers-reduced-motion)
  */
 
 /* ===== ตัวแปรสี และค่าพื้นฐาน ===== */
@@ -367,7 +367,7 @@
 .cancel-btn,
 .view-users-btn, /* Added */
 .edit-user-btn,  /* Added */
-.close-btn {     /* Added */
+.close-btn {      /* Added */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -597,7 +597,7 @@
 .cancel-btn:disabled,
 .view-users-btn:disabled, /* Added */
 .edit-user-btn:disabled,  /* Added */
-.close-btn:disabled {     /* Added */
+.close-btn:disabled {      /* Added */
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none; /* Ensure no interaction */
@@ -893,8 +893,11 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
-        transform: none !important; /* Added to prevent transforms */
-        transition: none !important; /* Added to prevent transitions */
-        animation: none !important; /* Added to prevent animations */
+    }
+
+    /* Explicitly disable transitions and animations */
+    * {
+        transition: none !important;
+        animation: none !important;
     }
 }

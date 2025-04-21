@@ -1,33 +1,36 @@
 /**
  * CKAN Metadata Fields Admin JavaScript
  * สำหรับผู้ดูแลระบบเพื่อแก้ไขข้อมูล
- * Version: 1.0.1 (Refactored for reduced nesting)
+ * Version: 1.0.2 (Refactored for Complexity in startEditing)
  */
 jQuery(document).ready(function($) {
     'use strict';
 
-    // ตรวจสอบว่าเป็น admin หรือไม่
-    if (!ckanMetafieldAdmin || !ckanMetafieldAdmin.isAdmin) {
-        console.warn('CKAN Admin JS: Not an admin or admin data missing.');
+    // --- Configuration Check ---
+    if (!ckanMetafieldAdmin || !ckanMetafieldAdmin.isAdmin || !ckanMetafieldAdmin.ajaxurl || !ckanMetafieldAdmin.nonce) {
+        console.warn('CKAN Admin JS: Admin data (ckanMetafieldAdmin) is missing or incomplete.');
+        // Optionally disable edit icons if config is missing
+        // $('.ckan-edit-icon').hide();
         return;
     }
 
-    // ตัวแปรสำหรับเก็บข้อมูลโพสต์
+    // --- Cache Post ID ---
     const postId = $('.ckan-metadata-container').data('post-id');
     if (!postId) {
-        console.error('CKAN Admin JS: Post ID not found.');
+        console.error('CKAN Admin JS: Post ID not found in .ckan-metadata-container');
         return; // Stop if post ID is missing
     }
 
     // --- Helper Functions ---
 
     /**
-     * ฟังก์ชันช่วย - escape HTML entities
-     * @param {string|null|undefined} str ข้อความที่ต้องการ escape
-     * @returns {string} ข้อความที่ escape แล้ว
+     * Escapes HTML entities in a string.
+     * @param {string|null|undefined} str The string to escape.
+     * @returns {string} The escaped string.
      */
     function escapeHtml(str) {
         if (str === null || str === undefined) return '';
+        // Basic escaping, consider a more robust library if complex HTML is expected.
         return String(str)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -37,10 +40,10 @@ jQuery(document).ready(function($) {
     }
 
     /**
-     * จัดรูปแบบข้อมูลสำหรับการแสดงผล (simplified version)
-     * @param {*} value ค่าที่ต้องการจัดรูปแบบ
-     * @param {string} type ประเภทข้อมูล (boolean, email, url, etc.)
-     * @returns {string} HTML string สำหรับแสดงผล
+     * Formats a value for display based on its type.
+     * @param {*} value The value to format.
+     * @param {string} type The field type ('boolean', 'email', 'url', 'date', 'datetime', etc.).
+     * @returns {string} HTML string for display.
      */
     function formatValue(value, type) {
         if (value === null || value === undefined || value === '') {
@@ -49,7 +52,6 @@ jQuery(document).ready(function($) {
 
         switch (type) {
             case 'boolean':
-                // More robust boolean check
                 const isTrue = [true, 1, '1', 'true', 'yes'].includes(
                     typeof value === 'string' ? value.toLowerCase() : value
                 );
@@ -62,222 +64,326 @@ jQuery(document).ready(function($) {
             case 'url':
                 const escapedUrl = escapeHtml(value);
                 let displayUrl = escapedUrl;
+                // Basic URL validation and protocol addition
+                let hrefUrl = escapedUrl;
+                if (!/^(?:f|ht)tps?:\/\//i.test(hrefUrl)) {
+                    hrefUrl = `http://${hrefUrl}`;
+                }
+                 // Truncate long URLs for display
                 if (displayUrl.length > 50) {
                     displayUrl = displayUrl.substring(0, 47) + '...';
                 }
-                // Ensure URL has a protocol for the link
-                const hrefUrl = /^(http|https):\/\//.test(escapedUrl) ? escapedUrl : `http://${escapedUrl}`;
                 return `<a href="${hrefUrl}" target="_blank" rel="noopener noreferrer" title="${escapedUrl}">${displayUrl}</a>`;
 
-            // Add cases for date/datetime formatting if needed here
-            // case 'date':
-            // case 'datetime':
+            case 'date':
+                 // Attempt to format potential timestamp or existing date string
+                 try {
+                    let date = null;
+                    if (value && /^\d{10,}$/.test(value)) { // Looks like Unix timestamp (seconds)
+                        date = new Date(parseInt(value, 10) * 1000);
+                    } else if (value) { // Try parsing as is
+                         date = new Date(value);
+                    }
+                    if (date && !isNaN(date)) {
+                         // Format to a locale-friendly date string (e.g., DD/MM/YYYY or YYYY-MM-DD)
+                         // Adjust locale and options as needed
+                         return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+                         // Or use ISO format: return date.toISOString().split('T')[0];
+                    }
+                 } catch (e) { /* Ignore parsing errors, fall through */ }
+                 return escapeHtml(value); // Fallback to escaped original value
+
+            case 'datetime':
+                 // Attempt to format potential timestamp or existing datetime string
+                 try {
+                    let datetime = null;
+                    if (value && /^\d{10,}$/.test(value)) { // Looks like Unix timestamp (seconds)
+                        datetime = new Date(parseInt(value, 10) * 1000);
+                    } else if (value) { // Try parsing as is
+                         datetime = new Date(value);
+                    }
+                    if (datetime && !isNaN(datetime)) {
+                         // Format to a locale-friendly date and time string
+                         return datetime.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+                         // Or use ISO-like format: return datetime.toISOString().slice(0, 16).replace('T', ' ');
+                    }
+                 } catch (e) { /* Ignore parsing errors, fall through */ }
+                 return escapeHtml(value); // Fallback
 
             default:
+                // Escape potentially harmful HTML in default text display
                 return escapeHtml(value);
         }
     }
 
     /**
-     * แสดงข้อความสถานะชั่วคราว (เช่น สำเร็จ หรือ ผิดพลาด)
-     * @param {jQuery} parentElement Element ที่จะใส่ข้อความสถานะ
-     * @param {string} message ข้อความที่จะแสดง
-     * @param {string} cssClass Class CSS สำหรับข้อความ (เช่น 'ckan-status-success', 'ckan-status-error')
-     * @param {number} displayDuration ระยะเวลาที่จะแสดงข้อความ (ms)
+     * Displays a temporary status message within a parent element.
+     * @param {jQuery} parentElement The element to append the message to.
+     * @param {string} message The message text.
+     * @param {string} cssClass The CSS class for styling ('ckan-status-success', 'ckan-status-error', 'ckan-status-saving').
+     * @param {number|null} [displayDuration=2000] Duration in ms to show the message. Null keeps it visible.
      */
     function displayTemporaryMessage(parentElement, message, cssClass, displayDuration = 2000) {
-        const messageElement = $(`<div class="ckan-status-message ${cssClass}"></div>`).html(message);
+        // Remove existing message within the specific parent first
+        parentElement.find('.ckan-status-message').remove();
+
+        const messageElement = $(`<div class="ckan-status-message ${cssClass}"></div>`).html(message); // Use html() if message can contain HTML
         parentElement.append(messageElement);
-        scheduleMessageRemoval(messageElement, displayDuration);
+
+        if (displayDuration !== null) {
+             scheduleMessageRemoval(messageElement, displayDuration);
+        }
     }
 
     /**
-     * ตั้งเวลาเพื่อซ่อนและลบข้อความสถานะ
-     * @param {jQuery} messageElement Element ของข้อความสถานะ
-     * @param {number} displayDuration ระยะเวลาที่จะแสดงข้อความ (ms)
+     * Schedules the removal of a message element.
+     * @param {jQuery} messageElement The message element.
+     * @param {number} displayDuration Duration in ms before starting fade out.
      */
     function scheduleMessageRemoval(messageElement, displayDuration) {
         const fadeDuration = 300;
-        setTimeout(() => {
+        // Clear existing timer if any
+        clearTimeout(messageElement.data('removalTimer'));
+
+        const timer = setTimeout(() => {
             messageElement.fadeOut(fadeDuration, function() {
                 $(this).remove();
             });
         }, displayDuration);
+        messageElement.data('removalTimer', timer); // Store timer ID
     }
 
-    // --- Editing Functions ---
+
+    // --- Input Generation Helper Functions ---
+
+    function generateBooleanInputHtml(currentValue) {
+        const isChecked = currentValue === true; // Assumes value is already normalized boolean
+        return `<label class="ckan-input-boolean"><input type="checkbox" ${isChecked ? 'checked' : ''} /> ใช่</label>`;
+    }
+
+    function generateTextInputHtml(currentValue) {
+        return `<input type="text" value="${escapeHtml(currentValue)}" class="ckan-input-text" />`;
+    }
+
+    function generateEmailInputHtml(currentValue) {
+        return `<input type="email" value="${escapeHtml(currentValue)}" class="ckan-input-email" />`;
+    }
+
+    function generateUrlInputHtml(currentValue) {
+        return `<input type="url" value="${escapeHtml(currentValue)}" class="ckan-input-url" placeholder="https://example.com" />`;
+    }
+
+    function generateDateInputHtml(currentValue) {
+        let dateValue = currentValue;
+        // Convert timestamp (seconds) or existing valid date string to YYYY-MM-DD
+        if (dateValue) {
+             try {
+                let date = null;
+                if (/^\d{10,}$/.test(dateValue)) { // Unix timestamp (seconds)
+                    date = new Date(parseInt(dateValue, 10) * 1000);
+                } else { // Try parsing as date string
+                     date = new Date(dateValue);
+                }
+                if (date && !isNaN(date)) {
+                     dateValue = date.toISOString().split('T')[0];
+                } else {
+                     dateValue = ''; // Reset if invalid
+                }
+             } catch(e) { dateValue = ''; }
+        } else {
+            dateValue = '';
+        }
+        return `<input type="date" value="${escapeHtml(dateValue)}" class="ckan-input-date" />`;
+    }
+
+    function generateDateTimeInputHtml(currentValue) {
+        let datetimeValue = currentValue;
+        // Convert timestamp (seconds) or existing valid datetime string to YYYY-MM-DDTHH:mm
+        if (datetimeValue) {
+             try {
+                let datetime = null;
+                if (/^\d{10,}$/.test(datetimeValue)) { // Unix timestamp (seconds)
+                    datetime = new Date(parseInt(datetimeValue, 10) * 1000);
+                } else { // Try parsing as datetime string
+                     datetime = new Date(datetimeValue);
+                }
+                if (datetime && !isNaN(datetime)) {
+                    // Format for datetime-local input: YYYY-MM-DDTHH:mm
+                    const year = datetime.getFullYear();
+                    const month = (datetime.getMonth() + 1).toString().padStart(2, '0');
+                    const day = datetime.getDate().toString().padStart(2, '0');
+                    const hours = datetime.getHours().toString().padStart(2, '0');
+                    const minutes = datetime.getMinutes().toString().padStart(2, '0');
+                    datetimeValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+                } else {
+                     datetimeValue = ''; // Reset if invalid
+                }
+             } catch(e) { datetimeValue = ''; }
+        } else {
+            datetimeValue = '';
+        }
+        return `<input type="datetime-local" value="${escapeHtml(datetimeValue)}" class="ckan-input-datetime" />`;
+    }
+
+    function generateTextareaHtml(currentValue) {
+        return `<textarea rows="3" class="ckan-input-textarea">${escapeHtml(currentValue)}</textarea>`;
+    }
+
+    // Map field types to their generator functions
+    const inputGenerators = {
+        'boolean': generateBooleanInputHtml,
+        'text': generateTextInputHtml,
+        'email': generateEmailInputHtml,
+        'url': generateUrlInputHtml,
+        'date': generateDateInputHtml,
+        'datetime': generateDateTimeInputHtml,
+        'textarea': generateTextareaHtml // Explicitly map textarea if used as a type
+        // Add other types as needed
+    };
+
+
+    // --- Editing Functions (Refactored startEditing) ---
 
     /**
-     * เริ่มการแก้ไขในแถวที่กำหนด
-     * @param {jQuery} row แถว (element .ckan-metadata-row) ที่จะแก้ไข
+     * Starts the editing process for a specific metadata row.
+     * @param {jQuery} row The metadata row element (.ckan-metadata-row).
      */
     function startEditing(row) {
-        // หยุดหากกำลังแก้ไขแถวอื่นอยู่
-        if ($('.ckan-metadata-row.editing').length > 0 && !row.hasClass('editing')) {
-            alert('กรุณาบันทึกหรือยกเลิกการแก้ไขที่กำลังดำเนินการก่อน');
+        // Prevent editing multiple rows simultaneously
+        const $currentlyEditing = $('.ckan-metadata-row.editing');
+        if ($currentlyEditing.length > 0 && !$currentlyEditing.is(row)) {
+            alert(ckanMetafieldAdmin.messages?.already_editing || 'กรุณาบันทึกหรือยกเลิกการแก้ไขที่กำลังดำเนินการก่อน');
+            return;
+        }
+         // Prevent re-entering edit mode if already editing this row
+        if (row.hasClass('editing')) {
             return;
         }
 
+
         const fieldName = row.data('field');
-        const fieldType = row.data('type');
+        const fieldType = row.data('type') || 'text'; // Default to text if type is missing
         const valueCell = row.find('.ckan-metadata-value');
-        // Ensure original value is stored correctly, especially for boolean
-        let originalValue = valueCell.data('original-value');
+        let originalValue = valueCell.data('original-value'); // Keep original format for cancel
+
+        // Normalize boolean value for input generation
         if (fieldType === 'boolean') {
              originalValue = [true, 1, '1', 'true', 'yes'].includes(
                  typeof originalValue === 'string' ? originalValue.toLowerCase() : originalValue
              );
         }
-
+        // Use nullish coalescing for a default empty string
+        const currentValueForInput = originalValue ?? '';
 
         row.addClass('editing');
 
-        let editorHtml = '<div class="ckan-field-editor">';
-        let inputValue = originalValue ?? ''; // Use nullish coalescing for default
+        // Get the appropriate input generator function, default to textarea
+        const generatorFunction = inputGenerators[fieldType] || inputGenerators['textarea'];
+        const inputHtml = generatorFunction(currentValueForInput);
 
-        switch (fieldType) {
-            case 'boolean':
-                const isChecked = originalValue === true; // Simplified check after normalization
-                editorHtml += `<label><input type="checkbox" ${isChecked ? 'checked' : ''} /> ใช่</label>`;
-                break;
-            case 'text':
-                editorHtml += `<input type="text" value="${escapeHtml(inputValue)}" />`;
-                break;
-            case 'email':
-                editorHtml += `<input type="email" value="${escapeHtml(inputValue)}" />`;
-                break;
-            case 'url':
-                editorHtml += `<input type="url" value="${escapeHtml(inputValue)}" />`;
-                break;
-            case 'date':
-                let dateValue = inputValue;
-                 // Check if it looks like a Unix timestamp (seconds)
-                if (dateValue && /^\d{10,}$/.test(dateValue)) {
-                    try {
-                       const date = new Date(parseInt(dateValue, 10) * 1000);
-                       if (!isNaN(date)) { // Check if date is valid
-                           dateValue = date.toISOString().split('T')[0];
-                       } else {
-                            dateValue = ''; // Reset if timestamp was invalid
-                       }
-                    } catch(e) { dateValue = ''; } // Handle potential errors during parsing
-                } else if (dateValue && typeof dateValue === 'string' && dateValue.includes('T')) {
-                    // Handle if it's already an ISO string or similar from previous edits
-                    dateValue = dateValue.split('T')[0];
-                }
-                editorHtml += `<input type="date" value="${escapeHtml(dateValue)}" />`;
-                break;
-            case 'datetime':
-                let datetimeValue = inputValue;
-                // Check if it looks like a Unix timestamp (seconds)
-                if (datetimeValue && /^\d{10,}$/.test(datetimeValue)) {
-                     try {
-                        const datetime = new Date(parseInt(datetimeValue, 10) * 1000);
-                        if (!isNaN(datetime)) { // Check if date is valid
-                            // Format to YYYY-MM-DDTHH:mm (suitable for datetime-local)
-                            const year = datetime.getFullYear();
-                            const month = (datetime.getMonth() + 1).toString().padStart(2, '0');
-                            const day = datetime.getDate().toString().padStart(2, '0');
-                            const hours = datetime.getHours().toString().padStart(2, '0');
-                            const minutes = datetime.getMinutes().toString().padStart(2, '0');
-                            datetimeValue = `${year}-${month}-${day}T${hours}:${minutes}`;
-                        } else {
-                             datetimeValue = ''; // Reset if timestamp was invalid
-                        }
-                     } catch(e) { datetimeValue = ''; } // Handle potential errors
-                }
-                editorHtml += `<input type="datetime-local" value="${escapeHtml(datetimeValue)}" />`;
-                break;
-            default: // Use textarea for unknown or complex types
-                editorHtml += `<textarea rows="3">${escapeHtml(inputValue)}</textarea>`;
-        }
-
-        // Add buttons and status message container
-        editorHtml += `
-            <div class="ckan-edit-actions">
-                <button class="ckan-edit-btn ckan-save-btn">${ckanMetafieldAdmin.saveText || 'บันทึก'}</button>
-                <button class="ckan-edit-btn ckan-cancel-btn">${ckanMetafieldAdmin.cancelText || 'ยกเลิก'}</button>
-            </div>
-            <div class="ckan-status-message" style="display:none;"></div>
-        </div>`;
+        // Build the editor HTML
+        const editorHtml = `
+            <div class="ckan-field-editor">
+                ${inputHtml}
+                <div class="ckan-edit-actions">
+                    <button class="ckan-edit-btn ckan-save-btn">${ckanMetafieldAdmin.saveText || 'บันทึก'}</button>
+                    <button class="ckan-edit-btn ckan-cancel-btn">${ckanMetafieldAdmin.cancelText || 'ยกเลิก'}</button>
+                </div>
+                <div class="ckan-status-message" style="display:none;"></div>
+            </div>`;
 
         valueCell.html(editorHtml);
-        valueCell.find('input, textarea').first().focus(); // Focus the first input/textarea
+        valueCell.find('input, textarea').first().focus().select(); // Focus and select content
 
-        // Add event listeners for the new buttons
-        valueCell.find('.ckan-save-btn').on('click', function() {
-            saveField(row, fieldName, fieldType);
-        });
-        valueCell.find('.ckan-cancel-btn').on('click', function() {
-            cancelEditing(row);
-        });
+        // Add event listeners for the new buttons within this specific editor instance
+        const editorElement = valueCell.find('.ckan-field-editor');
+        editorElement.find('.ckan-save-btn').on('click.ckanEdit', () => saveField(row, fieldName, fieldType));
+        editorElement.find('.ckan-cancel-btn').on('click.ckanEdit', () => cancelEditing(row));
+         // Add keydown listener for Enter/Escape within the editor
+         editorElement.find('input, textarea').on('keydown.ckanEdit', (e) => {
+            if (e.key === 'Enter' && fieldType !== 'textarea') { // Save on Enter (except for textarea)
+                 e.preventDefault();
+                 saveField(row, fieldName, fieldType);
+            } else if (e.key === 'Escape' || e.key === 'Esc') { // Cancel on Escape
+                 cancelEditing(row);
+            }
+         });
     }
 
     /**
-     * ยกเลิกการแก้ไข
-     * @param {jQuery} row แถวที่กำลังแก้ไข
+     * Cancels editing for a specific row.
+     * @param {jQuery} row The metadata row element.
      */
     function cancelEditing(row) {
         const valueCell = row.find('.ckan-metadata-value');
-        const originalValue = valueCell.data('original-value'); // Get original value again
+        const originalValue = valueCell.data('original-value'); // Get original stored value
         const fieldType = row.data('type');
 
-        // แสดงค่าเดิมที่จัดรูปแบบแล้ว
+        // Restore original formatted value and remove editing class
         valueCell.html(formatValue(originalValue, fieldType));
         row.removeClass('editing');
+        // Remove specific event listeners for this editor instance
+        valueCell.find('.ckan-field-editor').off('.ckanEdit');
     }
 
     // --- AJAX Handlers ---
 
     /**
-     * Handles the success response after saving a field.
+     * Handles the successful response after saving a field.
      * @param {jQuery} row The table row element being edited.
      * @param {jQuery} valueCell The cell containing the value.
      * @param {object} responseData Data returned from the successful AJAX call.
      */
     function handleSaveSuccess(row, valueCell, responseData) {
-        // อัปเดตค่าใน data attribute (ใช้ raw_value ที่ server ส่งกลับมา)
+        // Update the stored original value with the newly saved raw value
         valueCell.data('original-value', responseData.raw_value);
 
-        // แสดงค่าที่ถูกจัดรูปแบบใหม่
+        // Display the newly formatted value returned from the server
         valueCell.html(responseData.formatted_value);
 
-        // แสดงข้อความสำเร็จชั่วคราว
+        // Show temporary success message within the value cell
         displayTemporaryMessage(valueCell, ckanMetafieldAdmin.successText || 'บันทึกสำเร็จ', 'ckan-status-success');
 
-        // ลบ class editing
+        // Clean up editing state
         row.removeClass('editing');
+        // Remove specific event listeners for this editor instance
+        valueCell.find('.ckan-field-editor').off('.ckanEdit'); // Should be gone anyway after .html()
     }
 
     /**
      * Handles the error response after attempting to save a field.
      * @param {jQuery} statusMessageElement The element to display the status message in.
-     * @param {object|string|null} responseData Data returned from the failed AJAX call, or null.
+     * @param {object|string|null} responseData Data returned from the failed AJAX call, or null/string.
      */
     function handleSaveError(statusMessageElement, responseData) {
-        const errorMessage = (responseData && typeof responseData === 'string' ? responseData : ckanMetafieldAdmin.errorText) || 'เกิดข้อผิดพลาด';
-        statusMessageElement.html(errorMessage)
+        // Try to get specific error from response, fallback to generic message
+        const errorMessage = (responseData && typeof responseData === 'string')
+                           ? responseData
+                           : (ckanMetafieldAdmin.errorText || 'เกิดข้อผิดพลาด');
+        statusMessageElement.html(errorMessage) // Use html() if error can contain HTML
             .removeClass('ckan-status-saving')
             .addClass('ckan-status-error')
-            .show(); // Ensure it's visible
+            .show(); // Make sure the error is visible
+        // Keep buttons enabled so user can retry or cancel
+        statusMessageElement.closest('.ckan-field-editor').find('.ckan-edit-btn').prop('disabled', false);
     }
 
     /**
-     * บันทึกข้อมูลที่แก้ไขผ่าน AJAX
-     * @param {jQuery} row แถวที่กำลังแก้ไข
-     * @param {string} fieldName ชื่อฟิลด์
-     * @param {string} fieldType ประเภทฟิลด์
+     * Saves the edited field value via AJAX.
+     * @param {jQuery} row The metadata row element.
+     * @param {string} fieldName The name of the field being saved.
+     * @param {string} fieldType The type of the field.
      */
     function saveField(row, fieldName, fieldType) {
         const valueCell = row.find('.ckan-metadata-value');
-        const editor = valueCell.find('.ckan-field-editor'); // Get the editor container
-        const statusMessage = editor.find('.ckan-status-message'); // Find status within editor
+        const editor = valueCell.find('.ckan-field-editor');
+        const statusMessage = editor.find('.ckan-status-message');
         let fieldValue;
 
-        // ดึงค่าจาก input ตามประเภท
+        // Get value from the correct input type
         switch (fieldType) {
             case 'boolean':
-                fieldValue = editor.find('input[type="checkbox"]').is(':checked'); // Simplified
+                fieldValue = editor.find('input[type="checkbox"]').is(':checked');
                 break;
             case 'text':
             case 'email':
@@ -286,42 +392,48 @@ jQuery(document).ready(function($) {
             case 'datetime':
                 fieldValue = editor.find('input').val();
                 break;
-            default:
+            default: // Includes 'textarea' or unknown types
                 fieldValue = editor.find('textarea').val();
         }
 
-        // แสดงสถานะกำลังบันทึก
+        // Show saving status and disable buttons
         statusMessage.html(ckanMetafieldAdmin.editingText || 'กำลังบันทึก...')
             .removeClass('ckan-status-success ckan-status-error')
             .addClass('ckan-status-saving')
             .show();
-        editor.find('.ckan-edit-btn').prop('disabled', true); // Disable buttons during save
+        editor.find('.ckan-edit-btn').prop('disabled', true);
 
-        // ส่งข้อมูลไปยัง server ด้วย AJAX
+        // Send AJAX request
         $.ajax({
             url: ckanMetafieldAdmin.ajaxurl,
             type: 'POST',
+            dataType: 'json', // Expect JSON response
             data: {
                 action: 'ckan_update_field',
                 nonce: ckanMetafieldAdmin.nonce,
                 post_id: postId,
                 field_name: fieldName,
                 field_value: fieldValue,
-                field_type: fieldType // Send type for potential server-side validation/conversion
+                field_type: fieldType
             },
             success: function(response) {
-                if (response.success) {
+                if (response && response.success) {
                     handleSaveSuccess(row, valueCell, response.data);
                 } else {
-                    handleSaveError(statusMessage, response.data); // Pass response data for specific error message
+                    // Pass potential error message from response.data
+                    handleSaveError(statusMessage, response ? response.data : null);
                 }
             },
-            error: function() {
-                handleSaveError(statusMessage, null); // Pass null for generic error
+            error: function(jqXHR, textStatus, errorThrown) {
+                 console.error("Save Field AJAX Error:", textStatus, errorThrown);
+                 // Pass null to indicate a generic connection/server error
+                handleSaveError(statusMessage, null);
             },
             complete: function() {
-                // Re-enable buttons if they still exist (might have been replaced on success)
-                 editor.find('.ckan-edit-btn').prop('disabled', false);
+                // Re-enable buttons ONLY if an error occurred (handleSaveSuccess removes the editor)
+                if (statusMessage.hasClass('ckan-status-error')) {
+                     editor.find('.ckan-edit-btn').prop('disabled', false);
+                }
             }
         });
     }
@@ -329,17 +441,17 @@ jQuery(document).ready(function($) {
     // --- Initialization ---
 
     /**
-     * เริ่มต้นการทำงาน Editor - เพิ่ม event listener สำหรับไอคอนแก้ไข
+     * Initializes the editor by attaching the main edit icon click listener.
      */
     function initEditor() {
+        // Use event delegation on the container for the edit icons
         $('.ckan-metadata-container').on('click', '.ckan-edit-icon', function() {
             const row = $(this).closest('.ckan-metadata-row');
             startEditing(row);
         });
-        // Add delegation for dynamically added cancel/save buttons if needed,
-        // but binding inside startEditing() is generally fine here.
     }
 
-    // เริ่มต้นการทำงาน
+    // Start the editor functionality
     initEditor();
-});
+
+}); // End document ready

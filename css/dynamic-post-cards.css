@@ -1,9 +1,10 @@
 /**
- * Dynamic Post Cards - Styles V2 (Refactored)
+ * Dynamic Post Cards - Styles V2 (Refactored & Fixed)
  *
  * Provides styling for displaying posts in card or list view,
  * including controls, filtering, skeleton loading, badges, and autocomplete.
  * Refactored using CSS variables for better maintainability and theming.
+ * Added generic font family fallbacks to prevent warnings.
  */
 
 /* ========== CSS Reset (Scoped) ========== */
@@ -58,6 +59,7 @@
   --dpc-autocomplete-active-text: var(--dpc-text-light);
 
   /* Typography */
+  /* Added sans-serif as the generic fallback */
   --dpc-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   --dpc-font-size-base: 16px;
   --dpc-font-size-sm: 14px; /* 0.875rem */
@@ -127,7 +129,7 @@
   max-width: var(--dpc-max-width);
   margin: 0 auto;
   padding: var(--dpc-spacing-xxxl) var(--dpc-spacing-lg); /* 20px 10px */
-  font-family: var(--dpc-font-family);
+  font-family: var(--dpc-font-family); /* Inherits generic fallback */
   color: var(--dpc-text-dark);
   position: relative; /* For absolute positioning context */
   z-index: var(--dpc-z-index-base);
@@ -194,6 +196,7 @@
   line-height: 1;
   height: var(--dpc-font-size-icon); /* Match font size */
   width: var(--dpc-font-size-icon);
+  /* Dashicons font is typically handled globally in WordPress */
 }
 
 /* Search Control */
@@ -222,11 +225,13 @@
   line-height: var(--dpc-line-height-base); /* Use base line height */
   height: auto; /* Allow height to adjust */
   color: var(--dpc-text-dark); /* Ensure text color */
+  font-family: var(--dpc-font-family); /* Inherit font family */
 }
 
 .dynamic-post-cards-container .search-input-wrapper::before { /* Search Icon */
   content: '\f179'; /* Dashicon search */
-  font-family: dashicons; /* Ensure Dashicons font is loaded */
+  /* Added generic fallback 'ui-sans-serif' which is common for icons, though less critical here */
+  font-family: dashicons, ui-sans-serif; /* Ensure Dashicons font is loaded */
   position: absolute;
   left: var(--dpc-spacing-lg); /* 10px */
   top: 50%;
@@ -235,6 +240,14 @@
   font-size: var(--dpc-font-size-icon);
   z-index: calc(var(--dpc-z-index-search) + 1); /* Above input */
   pointer-events: none; /* Don't block input clicks */
+  /* Ensure icon doesn't inherit text styles */
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Filter Badges */
@@ -264,6 +277,7 @@
   min-width: 60px !important;
   height: auto !important;
   line-height: 1.4; /* Adjust line height */
+  font-family: var(--dpc-font-family); /* Ensure font family is applied */
 }
 
 .dynamic-post-cards-container .filter-badge:hover {
@@ -327,6 +341,7 @@
   cursor: pointer;
   color: var(--dpc-text-dark); /* Ensure text color */
   line-height: normal; /* Reset line height */
+  font-family: var(--dpc-font-family); /* Inherit font family */
 }
 
 /* Add New Post Button */
@@ -348,6 +363,7 @@
   border: none;
   cursor: pointer;
   font-size: var(--dpc-font-size-sm); /* Consistent font size */
+  font-family: var(--dpc-font-family); /* Inherit font family */
 }
 
 .dynamic-post-cards-container .add-new-post-btn:hover {
@@ -390,7 +406,7 @@
 
 /* ========== Post Content Area ========== */
 .dynamic-post-cards-container .dynamic-post-cards-content {
-   margin-bottom: var(--dpc-spacing-xxxxl); /* 25px */
+  margin-bottom: var(--dpc-spacing-xxxxl); /* 25px */
 }
 
 /* Card View */
@@ -440,10 +456,10 @@
 }
 
 .dynamic-post-cards-container .card-content { /* Wrapper for text content */
-   padding: var(--dpc-spacing-xxl) var(--dpc-spacing-xxl) var(--dpc-spacing-lg); /* 15px padding, less at bottom */
-   flex-grow: 1; /* Allow content to grow */
-   display: flex;
-   flex-direction: column;
+  padding: var(--dpc-spacing-xxl) var(--dpc-spacing-xxl) var(--dpc-spacing-lg); /* 15px padding, less at bottom */
+  flex-grow: 1; /* Allow content to grow */
+  display: flex;
+  flex-direction: column;
 }
 
 .dynamic-post-cards-container .card-meta {
@@ -523,6 +539,7 @@
   text-decoration: none;
   transition: background-color var(--dpc-transition-duration-fast) var(--dpc-transition-timing);
   font-size: var(--dpc-font-size-sm); /* Consistent button font size */
+  font-family: var(--dpc-font-family); /* Inherit font family */
 }
 
 .dynamic-post-cards-container .read-more-btn:hover {
@@ -645,6 +662,7 @@
   cursor: pointer;
   transition: background-color var(--dpc-transition-duration-fast) var(--dpc-transition-timing);
   font-size: var(--dpc-font-size-base); /* Consistent font size */
+  font-family: var(--dpc-font-family); /* Inherit font family */
 }
 
 .dynamic-post-cards-container .load-more-btn:hover:not(:disabled) {
@@ -679,7 +697,7 @@
   border-radius: var(--dpc-border-radius-sm);
 }
 .dynamic-post-cards-container .skeleton-text:last-child {
-   margin-bottom: 0; /* Remove margin from last text line */
+  margin-bottom: 0; /* Remove margin from last text line */
 }
 
 .dynamic-post-cards-container .skeleton-short {
@@ -725,17 +743,17 @@
 /* Apply skeleton styles to card/list items */
 .dynamic-post-cards-container .card-item.skeleton,
 .dynamic-post-cards-container .list-item.skeleton {
-   background-color: var(--dpc-bg-white); /* Keep base background */
-   box-shadow: var(--dpc-shadow-md); /* Keep shadow */
+  background-color: var(--dpc-bg-white); /* Keep base background */
+  box-shadow: var(--dpc-shadow-md); /* Keep shadow */
 }
 
 .dynamic-post-cards-container .card-item.skeleton .card-image-link,
 .dynamic-post-cards-container .list-item.skeleton .list-image-link {
-   background-color: var(--dpc-bg-skeleton);
+  background-color: var(--dpc-bg-skeleton);
 }
 .dynamic-post-cards-container .card-item.skeleton .card-image,
 .dynamic-post-cards-container .list-item.skeleton .list-image {
-   visibility: hidden; /* Hide actual image if it loads */
+  visibility: hidden; /* Hide actual image if it loads */
 }
 
 
@@ -755,6 +773,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3; /* Adjust line height */
+  font-family: var(--dpc-font-family); /* Inherit font family */
 }
 
 .dynamic-post-cards-container .orange-badge {
@@ -781,6 +800,7 @@
   box-shadow: 0 4px 10px var(--dpc-autocomplete-shadow);
   z-index: var(--dpc-z-index-autocomplete) !important;
   position: absolute; /* Ensure absolute positioning */
+  /* Added generic fallback */
   font-family: var(--dpc-font-family) !important;
   font-size: var(--dpc-font-size-sm) !important;
   width: auto !important; /* Let width adjust */
@@ -801,6 +821,8 @@
   color: var(--dpc-text-dark); /* Default text color */
   display: block; /* Ensure it takes full width */
   line-height: var(--dpc-line-height-base);
+  /* Ensure font family is inherited/set */
+  font-family: var(--dpc-font-family) !important;
 }
 
 .ui-autocomplete.dynamic-post-cards-autocomplete .ui-menu-item-wrapper.ui-state-active { /* Hover/Focus state */
@@ -828,6 +850,8 @@
   white-space: nowrap;
   font-weight: var(--dpc-font-weight-medium);
   line-height: 1.2; /* Adjust line height */
+  /* Ensure font family is inherited/set */
+  font-family: var(--dpc-font-family) !important;
 }
 
 .ui-autocomplete.dynamic-post-cards-autocomplete .orange-badge-mini::before {
@@ -889,7 +913,7 @@
 /* Tablets */
 @media (max-width: 768px) {
   .dynamic-post-cards-container {
-     padding-top: 60px; /* More space above for mobile filter button */
+    padding-top: 60px; /* More space above for mobile filter button */
   }
 
   .dynamic-post-cards-container .filter-controls {
@@ -956,7 +980,7 @@
   }
 
   .dynamic-post-cards-container .add-button-wrapper {
-     text-align: center; /* Center add button */
+    text-align: center; /* Center add button */
   }
 }
 
@@ -1023,24 +1047,26 @@
 }
 /* Specific focus for autocomplete items */
 .ui-autocomplete.dynamic-post-cards-autocomplete .ui-menu-item-wrapper:focus {
-   outline: none; /* Use background color change instead */
+  outline: none; /* Use background color change instead */
 }
 
 
 /* High Contrast Mode */
 @media (forced-colors: active) {
   :root {
-      /* Reset colors to system defaults */
-      --dpc-primary-blue: LinkText;
-      --dpc-primary-orange: ButtonText;
-      --dpc-text-dark: CanvasText;
-      --dpc-text-medium: CanvasText;
-      --dpc-text-light: Canvas;
-      --dpc-bg-light: Canvas;
-      --dpc-bg-white: Canvas;
-      --dpc-border-color: CanvasText;
-      --dpc-shadow-color: transparent;
-      --dpc-green: ButtonText;
+    /* Reset colors to system defaults */
+    --dpc-primary-blue: LinkText;
+    --dpc-primary-orange: ButtonText;
+    --dpc-text-dark: CanvasText;
+    --dpc-text-medium: CanvasText;
+    --dpc-text-light: Canvas;
+    --dpc-bg-light: Canvas;
+    --dpc-bg-white: Canvas;
+    --dpc-border-color: CanvasText;
+    --dpc-shadow-color: transparent;
+    --dpc-green: ButtonText;
+    /* Reset font family to system default */
+    --dpc-font-family: sans-serif;
   }
 
   .dynamic-post-cards-container .card-item,
@@ -1052,6 +1078,7 @@
     border: 1px solid CanvasText;
     background-color: Canvas;
     color: CanvasText;
+    font-family: inherit; /* Ensure high contrast font is used */
   }
 
   .dynamic-post-cards-container .read-more-btn,
@@ -1063,29 +1090,49 @@
     background-color: ButtonFace;
     color: ButtonText;
     forced-color-adjust: none;
+    font-family: inherit;
   }
 
   .dynamic-post-cards-container .view-mode-btn {
-     border: 1px solid ButtonText;
-     color: ButtonText;
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    font-family: inherit;
   }
   .dynamic-post-cards-container .view-mode-btn.active {
-     background-color: Highlight;
-     color: HighlightText;
-     border-color: HighlightText;
-     forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+    border-color: HighlightText;
+    forced-color-adjust: none;
   }
 
   .dynamic-post-cards-container .skeleton,
   .dynamic-post-cards-container .skeleton::after {
-     background: transparent !important; /* Hide skeleton/shimmer */
-     border: 1px dashed GrayText;
-     animation: none !important;
+    background: transparent !important; /* Hide skeleton/shimmer */
+    border: 1px dashed GrayText;
+    animation: none !important;
   }
 
   .dynamic-post-cards-container .doc-badge {
-     border: 1px solid CanvasText;
-     background-color: Canvas;
-     color: CanvasText;
+    border: 1px solid CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+    font-family: inherit;
   }
+
+  .dynamic-post-cards-container .search-input-wrapper::before {
+    font-family: initial !important; /* Use system default for icon in high contrast */
+    content: '🔍'; /* Use a standard emoji as fallback */
+    color: CanvasText;
+  }
+
+   .ui-autocomplete.dynamic-post-cards-autocomplete {
+     font-family: inherit !important;
+   }
+   .ui-autocomplete.dynamic-post-cards-autocomplete .ui-menu-item-wrapper {
+     font-family: inherit !important;
+   }
+   .ui-autocomplete.dynamic-post-cards-autocomplete .orange-badge-mini::before,
+   .ui-autocomplete.dynamic-post-cards-autocomplete .gold-badge-mini::before {
+     font-family: inherit !important;
+   }
 }

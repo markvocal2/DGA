@@ -740,24 +740,19 @@ jQuery(document).ready(function($) {
      * @returns {string} The formatted number string.
      */
     function formatNumber(num) {
-        // Check if num is a valid number before formatting
-        if (typeof num !== 'number' || isNaN(num)) {
-            // Handle non-numeric or NaN input gracefully
-            // Return '0', an empty string, or 'N/A' depending on desired behavior
-            return '0';
-        }
-        try {
-            // Use toLocaleString for robust, locale-aware formatting.
-            // 'undefined' uses the browser's default locale.
-            // Specify a locale like 'en-US' or 'th-TH' for consistency if needed.
-            // maximumFractionDigits: 0 ensures no decimal places for counts.
-            return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
-        } catch (e) {
-            // Fallback in case toLocaleString fails (very unlikely for numbers)
-            console.error("toLocaleString formatting failed:", e);
-            return num.toString(); // Return unformatted number as fallback
-        }
+    // ตรวจสอบความถูกต้องของตัวเลขก่อนจัดรูปแบบ
+    if (typeof num !== 'number' || isNaN(num)) {
+        return '0';
     }
+    try {
+        // ใช้ toLocaleString สำหรับการจัดรูปแบบตัวเลขที่ปลอดภัย
+        return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    } catch (e) {
+        // มี fallback กรณีที่ toLocaleString ล้มเหลว
+        console.error("toLocaleString formatting failed:", e);
+        return num.toString();
+    }
+}
 
 
     /**

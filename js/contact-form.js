@@ -33,14 +33,29 @@ jQuery(document).ready(function($) {
 
     // Form validation functions
     function validateEmail(email) {
-    // ตรวจสอบความยาวสูงสุดก่อน (ป้องกัน input ที่ยาวเกินไป)
-    if (!email || email.length > 254) {
+    if (!email || typeof email !== 'string') {
         return false;
     }
     
-    // ใช้ regex ที่ตรวจสอบโครงสร้างขั้นพื้นฐาน โดยมีการจำกัดความซับซ้อน
-    const emailPattern = /^[a-zA-Z0-9._%+-]{1,64}@[a-zA-Z0-9.-]{1,253}\.[a-zA-Z]{2,}$/;
-    return emailPattern.test(email);
+    // ตรวจสอบเบื้องต้น: มี @ หนึ่งตัว และมีจุดหลัง @
+    const atIndex = email.indexOf('@');
+    if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
+        return false;
+    }
+    
+    const domain = email.substring(atIndex + 1);
+    const dotIndex = domain.indexOf('.');
+    if (dotIndex === -1 || dotIndex === 0 || dotIndex === domain.length - 1) {
+        return false;
+    }
+    
+    // ตรวจสอบความยาวสูงสุด
+    if (email.length > 254) {
+        return false;
+    }
+    
+    // ตรวจสอบขั้นสุดท้ายด้วย regex อย่างง่าย
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
     function showError(inputElement, message) {

@@ -217,6 +217,13 @@ jQuery(document).ready(function($) {
         updateStatusStats(stats.by_status);
         
         // สร้างกราฟ
+        createCharts(stats);
+    }
+
+    /**
+     * Create all charts
+     */
+    function createCharts(stats) {
         createStatusChart(stats.by_status);
         createTypeChart(stats.by_type);
         createDepartmentChart(stats.by_department);
@@ -252,69 +259,54 @@ jQuery(document).ready(function($) {
     }
 
     /**
-     * Create status chart
+     * Check if Highcharts library is available
      */
-    function createStatusChart(statusData) {
+    function checkHighchartsAvailability() {
         if (!Highcharts) {
             console.error('Highcharts is not loaded');
-            return;
+            return false;
         }
+        return true;
+    }
 
+    /**
+     * Prepare pie chart data
+     */
+    function preparePieChartData(data, useStatusColors = false) {
         const chartData = [];
         
-        Object.entries(statusData).forEach(([status, count]) => {
+        Object.entries(data).forEach(([key, count], index) => {
             if (count > 0) {
                 chartData.push({
-                    name: CONFIG.statusLabels[status] || status,
+                    name: useStatusColors ? (CONFIG.statusLabels[key] || key) : key,
                     y: count,
-                    color: CONFIG.statusColors[status]
+                    color: useStatusColors ? CONFIG.statusColors[key] : CONFIG.chartColors[index % CONFIG.chartColors.length]
                 });
             }
         });
+        
+        return chartData;
+    }
 
-        Highcharts.chart('complaints-by-status', {
-            chart: {
-                type: 'pie',
-                height: 260
-            },
-            title: {
-                text: ''
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
-            },
-            accessibility: {
-                point: {
-                    valueSuffix: '%'
+    /**
+     * Create status chart
+     */
+    function createStatusChart(statusData) {
+        if (!checkHighchartsAvailability()) return;
+
+        const chartData = preparePieChartData(statusData, true);
+
+        createPieChart('complaints-by-status', chartData, {
+            height: 260,
+            innerSize: '60%',
+            dataLabels: {
+                distance: -30,
+                style: {
+                    fontWeight: 'normal',
+                    color: 'white',
+                    textOutline: 'none'
                 }
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                        distance: -30,
-                        style: {
-                            fontWeight: 'normal',
-                            color: 'white',
-                            textOutline: 'none'
-                        }
-                    },
-                    showInLegend: false,
-                    size: '100%'
-                }
-            },
-            credits: {
-                enabled: false
-            },
-            series: [{
-                name: 'จำนวน',
-                colorByPoint: true,
-                innerSize: '60%',
-                data: chartData
-            }]
+            }
         });
     }
 
@@ -322,25 +314,33 @@ jQuery(document).ready(function($) {
      * Create type chart
      */
     function createTypeChart(typeData) {
-        if (!Highcharts) {
-            console.error('Highcharts is not loaded');
-            return;
-        }
+        if (!checkHighchartsAvailability()) return;
 
-        const chartData = [];
+        const chartData = preparePieChartData(typeData);
         
-        Object.entries(typeData).forEach(([type, count]) => {
-            if (count > 0) {
-                chartData.push({
-                    name: type,
-                    y: count
-                });
-            }
-        });
+        createPieChart('complaints-by-type', chartData);
+    }
 
-        Highcharts.chart('complaints-by-type', {
+    /**
+     * Create generic pie chart
+     */
+    function createPieChart(containerId, data, options = {}) {
+        const defaultOptions = {
+            height: null,
+            innerSize: null,
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            },
+            showInLegend: false
+        };
+        
+        const chartOptions = {...defaultOptions, ...options};
+
+        Highcharts.chart(containerId, {
             chart: {
-                type: 'pie'
+                type: 'pie',
+                height: chartOptions.height
             },
             title: {
                 text: ''
@@ -357,11 +357,10 @@ jQuery(document).ready(function($) {
                 pie: {
                     allowPointSelect: true,
                     cursor: 'pointer',
-                    colors: CONFIG.chartColors,
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-                    }
+                    dataLabels: chartOptions.dataLabels,
+                    showInLegend: chartOptions.showInLegend,
+                    size: '100%',
+                    innerSize: chartOptions.innerSize
                 }
             },
             credits: {
@@ -370,7 +369,7 @@ jQuery(document).ready(function($) {
             series: [{
                 name: 'จำนวน',
                 colorByPoint: true,
-                data: chartData
+                data: data
             }]
         });
     }
@@ -379,10 +378,7 @@ jQuery(document).ready(function($) {
      * Create department chart
      */
     function createDepartmentChart(departmentData) {
-        if (!Highcharts) {
-            console.error('Highcharts is not loaded');
-            return;
-        }
+        if (!checkHighchartsAvailability()) return;
 
         const sortedData = Object.entries(departmentData)
             .sort((a, b) => b[1] - a[1])
@@ -443,10 +439,7 @@ jQuery(document).ready(function($) {
      * Create trend chart
      */
     function createTrendChart(trendData) {
-        if (!Highcharts) {
-            console.error('Highcharts is not loaded');
-            return;
-        }
+        if (!checkHighchartsAvailability()) return;
 
         const selectedStatus = elements.trendStatusFilter.val();
         let series = [];
@@ -528,6 +521,25 @@ jQuery(document).ready(function($) {
     }
 
     /**
+     * Handle AJAX requests with standard options
+     */
+    function makeAjaxRequest(action, data, successCallback, errorCallback) {
+        $.ajax({
+            url: complaintStatsData.ajaxurl,
+            type: 'POST',
+            data: {
+                action: action,
+                nonce: complaintStatsData.nonce,
+                ...data
+            },
+            success: successCallback,
+            error: errorCallback || function() {
+                showAlert(complaintStatsData.messages.error, 'danger');
+            }
+        });
+    }
+
+    /**
      * Export data to Excel
      */
     function exportToExcel() {
@@ -535,16 +547,13 @@ jQuery(document).ready(function($) {
         elements.exportExcelBtn.prop('disabled', true);
         elements.exportExcelBtn.html('<i class="fas fa-spinner fa-spin me-1"></i> กำลังส่งออก...');
 
-        $.ajax({
-            url: complaintStatsData.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'export_complaint_data',
-                nonce: complaintStatsData.nonce,
+        makeAjaxRequest(
+            'export_complaint_data',
+            {
                 start_date: state.filters.startDate,
                 end_date: state.filters.endDate
             },
-            success: function(response) {
+            function(response) {
                 if (response.success) {
                     // สร้างไฟล์ Excel จากข้อมูล
                     generateExcelFile(response.data);
@@ -553,14 +562,13 @@ jQuery(document).ready(function($) {
                     showAlert(response.data?.message || complaintStatsData.messages.error, 'danger');
                 }
             },
-            error: function() {
+            function() {
                 showAlert(complaintStatsData.messages.error, 'danger');
-            },
-            complete: function() {
-                hideLoading();
-                elements.exportExcelBtn.prop('disabled', false);
-                elements.exportExcelBtn.html('<i class="fas fa-file-excel me-1"></i> ส่งออกข้อมูล Excel');
             }
+        ).always(function() {
+            hideLoading();
+            elements.exportExcelBtn.prop('disabled', false);
+            elements.exportExcelBtn.html('<i class="fas fa-file-excel me-1"></i> ส่งออกข้อมูล Excel');
         });
     }
 

@@ -83,29 +83,25 @@ jQuery(document).ready(function($) {
 
 
     function filterViolationsBySeverity(violations, severity) {
-         // Ensure violations is an array
-        if (!Array.isArray(violations)) {
-            return [];
-        }
-
-        switch (severity) {
-            case 'very-low': // Only critical
-                return violations.filter(v => v?.impact === 'critical');
-            case 'low': // Critical and serious
-                return violations.filter(v => v?.impact === 'critical' || v?.impact === 'serious');
-            case 'medium': // Critical, serious, and moderate (maybe filter moderate further if needed)
-                return violations.filter(v => v?.impact === 'critical' || v?.impact === 'serious' || v?.impact === 'moderate');
-                // Example: Filter moderate based on message (original logic)
-                // return violations.filter(v => v?.impact === 'critical' || v?.impact === 'serious' ||
-                //    (v?.impact === 'moderate' && v?.message?.includes('สำคัญ')));
-            case 'high': // All except minor (or maybe all including minor, depending on definition)
-                 return violations.filter(v => v?.impact !== 'minor');
-                 // Example: Filter minor based on message (original logic)
-                 // return violations.filter(v => v?.impact !== 'minor' || (v?.message?.includes('สำคัญ')));
-            default:
-                return violations; // Return all if severity is unknown
-        }
+    // Ensure violations is an array
+    if (!Array.isArray(violations)) {
+        return [];
     }
+
+    // Define filter predicates for each severity level
+    const severityFilters = {
+        'very-low': v => v?.impact === 'critical',
+        'low': v => v?.impact === 'critical' || v?.impact === 'serious',
+        'medium': v => v?.impact === 'critical' || v?.impact === 'serious' || v?.impact === 'moderate',
+        'high': v => v?.impact !== 'minor'
+    };
+
+    // Get the appropriate filter for the current severity or default to return all
+    const filter = severityFilters[severity] || (() => true);
+    
+    // Apply the filter
+    return violations.filter(filter);
+}
 
     // --- Check Functions (Stubs - Replace with actual axe-core or other checks) ---
     // These should return an object: { passed: boolean, violations: Array, total: number }

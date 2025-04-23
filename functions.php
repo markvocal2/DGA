@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Theme functions and definitions.
@@ -74,7 +73,7 @@ function my_register_recaptcha_scripts() {
         'custom-recaptcha',
         get_stylesheet_directory_uri() . '/js/recaptcha.js',
         array('jquery', 'google-recaptcha'),
-        '1.0.0',
+        
         true
     );
     
@@ -632,7 +631,7 @@ class Post_Count_Widget {
             'widget-post-count-js', 
             get_stylesheet_directory_uri() . '/js/widget-post-count.js', 
             array('jquery'), 
-            '1.0.0', 
+             
             true
         );
         
@@ -3180,7 +3179,7 @@ function modern_auth_buttons_assets() {
     
     // Enqueue custom styles and scripts from Child Theme
     wp_enqueue_style('modern-auth-buttons', $child_theme_url . '/css/modern-auth-buttons.css', array(), '1.0.0');
-    wp_enqueue_script('modern-auth-buttons', $child_theme_url . '/js/modern-auth-buttons.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('modern-auth-buttons', $child_theme_url . '/js/modern-auth-buttons.js', array('jquery'),  true);
 }
 
 // Main shortcode function
@@ -3297,7 +3296,7 @@ function edit_wpcontent_register_scripts() {
         'edit-wpcontent-script', 
         get_stylesheet_directory_uri() . '/js/edit-wpcontent.js', 
         array('jquery'), 
-        '1.0.0', 
+         
         true
     );
     
@@ -3683,7 +3682,7 @@ function simulate_css_validation($url) {
 // Enqueue necessary scripts and styles
 function wpml_language_switcher_assets() {
     wp_enqueue_style('wpml-language-switcher', get_stylesheet_directory_uri() . '/css/wpml-language-switcher.css', array(), '1.0.0');
-    wp_enqueue_script('wpml-language-switcher', get_stylesheet_directory_uri() . '/js/wpml-language-switcher.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('wpml-language-switcher', get_stylesheet_directory_uri() . '/js/wpml-language-switcher.js', array('jquery'),  true);
     
     // Pass AJAX URL and current language to JavaScript
     wp_localize_script('wpml-language-switcher', 'wpmlVars', array(
@@ -4759,7 +4758,7 @@ function reset_password_shortcode() {
     ob_start();
     // Enqueue CSS and JS files from ChildTheme
     wp_enqueue_style('reset-password-styles', get_stylesheet_directory_uri() . '/css/reset-password.css');
-    wp_enqueue_script('reset-password-script', get_stylesheet_directory_uri() . '/js/reset-password.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('reset-password-script', get_stylesheet_directory_uri() . '/js/reset-password.js', array('jquery'),  true);
   ?>
     <div class="reset-password-container" id="reset-password-form">
       <div class="card">
@@ -9149,7 +9148,7 @@ function enqueue_special_permissions_assets() {
         'special-permissions-js',
         $child_theme_url . '/js/special-permissions.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
     
@@ -9350,7 +9349,7 @@ function assign_admin_capabilities_to_role($role_name) {
 // Enqueue necessary scripts and styles
 function custom_ajax_search_enqueue_scripts() {
     wp_enqueue_style('custom-ajax-search', get_stylesheet_directory_uri() . '/css/custom-ajax-search.css', array(), '1.0.0');
-    wp_enqueue_script('custom-ajax-search', get_stylesheet_directory_uri() . '/js/custom-ajax-search.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('custom-ajax-search', get_stylesheet_directory_uri() . '/js/custom-ajax-search.js', array('jquery'),  true);
     wp_localize_script('custom-ajax-search', 'customAjaxSearch', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('custom_search_nonce')
@@ -9490,7 +9489,7 @@ function pplist_enqueue_assets() {
     
     // Enqueue JavaScript
     wp_enqueue_script('jquery-ui-autocomplete');
-    wp_enqueue_script('pplist-script', $theme_path . '/js/pplist.js', array('jquery', 'jquery-ui-autocomplete'), '1.0.0', true);
+    wp_enqueue_script('pplist-script', $theme_path . '/js/pplist.js', array('jquery', 'jquery-ui-autocomplete'),  true);
     
     // Localize script
     wp_localize_script('pplist-script', 'pplist_ajax', array(
@@ -9824,7 +9823,7 @@ function ppgroup_editor_enqueue_scripts() {
         'ppgroup-editor-script',
         $child_theme_url . '/js/ppgroup-editor.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
     
@@ -10221,7 +10220,7 @@ function thai_date_views_enqueue_scripts() {
     wp_enqueue_script('thai-date-views-script', 
         get_stylesheet_directory_uri() . '/js/thai-date-views.js', 
         array('jquery'), 
-        '1.0.0', 
+         
         true
     );
 }
@@ -10379,7 +10378,7 @@ function enqueue_standard_documents_assets() {
         'standard-documents-script',
         get_stylesheet_directory_uri() . '/js/standard-documents.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
 }
@@ -10466,7 +10465,7 @@ function display_standard_documents() {
 // Enqueue scripts and styles
 function tdep_cards_enqueue_assets() {
     wp_enqueue_style('tdep-cards-style', get_stylesheet_directory_uri() . '/css/tdep-cards.css', array(), '1.0.0');
-    wp_enqueue_script('tdep-cards-script', get_stylesheet_directory_uri() . '/js/tdep-cards.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('tdep-cards-script', get_stylesheet_directory_uri() . '/js/tdep-cards.js', array('jquery'),  true);
 }
 add_action('wp_enqueue_scripts', 'tdep_cards_enqueue_assets');
 
@@ -10948,7 +10947,7 @@ add_action('after_setup_theme', 'tdep_list_after_setup_theme');
 function register_category_editor_assets() {
     wp_enqueue_media(); // เพิ่ม WordPress Media Uploader
     wp_enqueue_style('category-editor-style', get_stylesheet_directory_uri() . '/css/category-editor.css', array(), '1.0.0');
-    wp_enqueue_script('category-editor-script', get_stylesheet_directory_uri() . '/js/category-editor.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('category-editor-script', get_stylesheet_directory_uri() . '/js/category-editor.js', array('jquery'),  true);
     wp_localize_script('category-editor-script', 'categoryEditorAjax', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('category_editor_nonce')
@@ -11814,7 +11813,7 @@ function tgall_add_shortcode() {
     wp_enqueue_script('jquery-ui-sortable');
     wp_enqueue_script('jquery-ui-datepicker');
     wp_enqueue_media();
-    wp_enqueue_script('tgall-add', get_stylesheet_directory_uri() . '/js/tgall-add.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('tgall-add', get_stylesheet_directory_uri() . '/js/tgall-add.js', array('jquery'),  true);
     wp_enqueue_style('tgall-add', get_stylesheet_directory_uri() . '/css/tgall-add.css');
     
     // Localize script
@@ -12082,7 +12081,7 @@ class UserPermissionController {
             'user-permission-script', 
             $this->child_theme_directory . '/js/user-permission.js',
             array('jquery'),
-            '1.0.0',
+            
             true
         );
 
@@ -13431,7 +13430,7 @@ function google_translate_button_shortcode() {
     wp_enqueue_script('google-translate', 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit', array(), null, true);
     
     // Enqueue custom script
-    wp_enqueue_script('custom-translate', get_stylesheet_directory_uri() . '/js/custom-translate.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('custom-translate', get_stylesheet_directory_uri() . '/js/custom-translate.js', array('jquery'),  true);
     
     // Enqueue custom styles
     wp_enqueue_style('custom-translate', get_stylesheet_directory_uri() . '/css/custom-translate.css', array(), '1.0.0');
@@ -15508,7 +15507,7 @@ function egp_statistics_enqueue_scripts() {
     wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array('jquery'), '3.9.1', true);
     
     // ลงทะเบียน Custom JavaScript
-    wp_enqueue_script('egp-statistics-script', get_stylesheet_directory_uri() . '/js/egp-statistics.js', array('jquery', 'chart-js'), '1.0.0', true);
+    wp_enqueue_script('egp-statistics-script', get_stylesheet_directory_uri() . '/js/egp-statistics.js', array('jquery', 'chart-js'),  true);
     
     // ส่งค่า AJAX URL และ nonce ไปยัง JavaScript
     wp_localize_script('egp-statistics-script', 'egp_ajax', array(
@@ -18209,7 +18208,7 @@ add_action('init', 'register_oitform_shortcode');
 // Enqueue scripts และ styles
 function enqueue_oitform_scripts() {
     wp_register_style('oitform-styles', get_stylesheet_directory_uri() . '/css/oitform.css', array(), '1.0.0');
-    wp_register_script('oitform-script', get_stylesheet_directory_uri() . '/js/oitform.js', array('jquery'), '1.0.0', true);
+    wp_register_script('oitform-script', get_stylesheet_directory_uri() . '/js/oitform.js', array('jquery'),  true);
     
     // ส่งค่า AJAX URL ไปยัง JavaScript
     wp_localize_script('oitform-script', 'oitform_params', array(
@@ -19359,7 +19358,7 @@ function corg_enqueue_assets() {
         $css_path = plugins_url('/css/corg-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('corg-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('corg-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('corg-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -19504,7 +19503,7 @@ function cgroup_enqueue_assets() {
         $css_path = plugins_url('/css/cgroup-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('cgroup-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('cgroup-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('cgroup-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -19649,7 +19648,7 @@ function cdata_enqueue_assets() {
         $css_path = plugins_url('/css/cdata-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('cdata-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('cdata-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('cdata-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -19794,7 +19793,7 @@ function cgov_enqueue_assets() {
         $css_path = plugins_url('/css/cgov-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('cgov-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('cgov-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('cgov-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -19939,7 +19938,7 @@ function caccess_enqueue_assets() {
         $css_path = plugins_url('/css/caccess-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('caccess-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('caccess-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('caccess-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -20085,7 +20084,7 @@ function cformat_enqueue_assets() {
         $css_path = plugins_url('/css/cformat-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('cformat-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('cformat-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('cformat-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -20231,7 +20230,7 @@ function clicense_enqueue_assets() {
         $css_path = plugins_url('/css/clicense-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('clicense-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('clicense-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('clicense-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -20377,7 +20376,7 @@ function ctag_enqueue_assets() {
         $css_path = plugins_url('/css/ctag-add-taxo.css', __FILE__);
     }
     
-    wp_enqueue_script('ctag-add-taxo', $js_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('ctag-add-taxo', $js_path, array('jquery'),  true);
     wp_enqueue_style('ctag-add-taxo', $css_path, array(), '1.0.0');
     
     // Add the WordPress AJAX URL to our script
@@ -20920,7 +20919,7 @@ function ckan_list_init() {
     
     // Register scripts and styles
     wp_register_style('ckan-list-css', get_stylesheet_directory_uri() . '/css/ckan-list.css', array(), '1.0.0');
-    wp_register_script('ckan-list-js', get_stylesheet_directory_uri() . '/js/ckan-list.js', array('jquery'), '1.0.0', true);
+    wp_register_script('ckan-list-js', get_stylesheet_directory_uri() . '/js/ckan-list.js', array('jquery'),  true);
     
     // Localize script with AJAX URL and nonce
     wp_localize_script('ckan-list-js', 'ckan_list_ajax', array(
@@ -21375,7 +21374,7 @@ function ckan_taxo_list_init() {
     
     // Register scripts and styles
     wp_register_style('ckan-taxo-list-css', get_stylesheet_directory_uri() . '/css/ckan-taxo-list.css', array(), '1.0.0');
-    wp_register_script('ckan-taxo-list-js', get_stylesheet_directory_uri() . '/js/ckan-taxo-list.js', array('jquery'), '1.0.0', true);
+    wp_register_script('ckan-taxo-list-js', get_stylesheet_directory_uri() . '/js/ckan-taxo-list.js', array('jquery'),  true);
     
     // Localize script with AJAX URL and nonce
     wp_localize_script('ckan-taxo-list-js', 'ckan_taxo_list_ajax', array(
@@ -22599,7 +22598,7 @@ function ckan_metafield_enqueue_scripts() {
     
     // เพิ่ม admin-specific JS และ localize script
     if (current_user_can('administrator')) {
-        wp_register_script('ckan-metafield-admin-js', get_stylesheet_directory_uri() . '/js/ckan-metafield-admin.js', array('jquery', 'ckan-metafield-js'), '1.0.0', true);
+        wp_register_script('ckan-metafield-admin-js', get_stylesheet_directory_uri() . '/js/ckan-metafield-admin.js', array('jquery', 'ckan-metafield-js'),  true);
         
         // ส่ง data ไปยัง JavaScript
         wp_localize_script('ckan-metafield-admin-js', 'ckanMetafieldAdmin', array(
@@ -23541,7 +23540,7 @@ function ckan_upsert_data($request) {
 // ฟังก์ชันเพิ่มการโหลด CSS และ JS สำหรับ API
 function ckan_api_enqueue_scripts() {
     wp_enqueue_style('ckan-api-css', get_stylesheet_directory_uri() . '/css/ckan-api.css');
-    wp_enqueue_script('ckan-api-js', get_stylesheet_directory_uri() . '/js/ckan-api.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('ckan-api-js', get_stylesheet_directory_uri() . '/js/ckan-api.js', array('jquery'),  true);
 }
 add_action('wp_enqueue_scripts', 'ckan_api_enqueue_scripts');
 
@@ -23549,7 +23548,7 @@ add_action('wp_enqueue_scripts', 'ckan_api_enqueue_scripts');
 function ckan_rp_list_add_api_scripts($atts) {
     // ต้องเพิ่มโค้ดเข้าไปในฟังก์ชัน ckan_rp_list ที่มีอยู่แล้ว
     wp_enqueue_style('ckan-api-css', get_stylesheet_directory_uri() . '/css/ckan-api.css');
-    wp_enqueue_script('ckan-api-js', get_stylesheet_directory_uri() . '/js/ckan-api.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('ckan-api-js', get_stylesheet_directory_uri() . '/js/ckan-api.js', array('jquery'),  true);
     
     // ไม่ต้องแก้ไขอะไรเพิ่ม เพราะฟังก์ชันนี้จะถูกเรียกใช้ก่อนฟังก์ชัน ckan_rp_list
 }
@@ -24146,7 +24145,7 @@ function at_status_toggle_enqueue_scripts() {
         'at-status-toggle-script',
         get_stylesheet_directory_uri() . '/js/at-status-toggle.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
     
@@ -24279,7 +24278,7 @@ function at_inactive_news_list_enqueue_scripts() {
         'at-inactive-news-list-script',
         get_stylesheet_directory_uri() . '/js/at-inactive-news-list.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
     
@@ -25329,7 +25328,7 @@ function ckan_save_revision_history($post_id, $new_data, $old_data = null) {
 function ckan_secret_shortcode($atts) {
     // Enqueue required scripts and styles จาก ChildTheme
     wp_enqueue_style('ckan-secret-css', get_stylesheet_directory_uri() . '/css/ckan-secret.css', array(), '1.0.0');
-    wp_enqueue_script('ckan-secret-js', get_stylesheet_directory_uri() . '/js/ckan-secret.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('ckan-secret-js', get_stylesheet_directory_uri() . '/js/ckan-secret.js', array('jquery'),  true);
     
     // Localize script สำหรับ AJAX URL และ nonce
     wp_localize_script('ckan-secret-js', 'ckanSecretData', array(
@@ -26887,7 +26886,7 @@ function ckan_taxo_orglist_enqueue_scripts() {
         'ckan-taxo-orglist-script',
         $child_theme_dir . '/js/ckan-taxo-orglist.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
 }
@@ -28794,7 +28793,7 @@ function cpd_delete_post_button_shortcode() {
         'cpd-delete-dataset-js', 
         get_stylesheet_directory_uri() . '/js/ckan-delete-dataset.js', 
         array('jquery'), 
-        '1.0.0', 
+         
         true
     );
     
@@ -29193,7 +29192,7 @@ function post_featured_images_enqueue_scripts() {
         'post-featured-images-js',
         $theme_uri . '/js/post-featured-images.js',
         array('jquery'),
-        '1.0.0',
+        
         true
     );
     
@@ -29790,7 +29789,7 @@ function news_statistics_enqueue_assets() {
         wp_enqueue_style('daterangepicker', 'https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css', array(), null);
         
         // Enqueue custom scripts and styles
-        wp_enqueue_script('news-statistics-js', get_stylesheet_directory_uri() . '/js/news-statistics.js', array('jquery', 'chartjs', 'daterangepicker'), '1.0.0', true);
+        wp_enqueue_script('news-statistics-js', get_stylesheet_directory_uri() . '/js/news-statistics.js', array('jquery', 'chartjs', 'daterangepicker'),  true);
         wp_enqueue_style('news-statistics-css', get_stylesheet_directory_uri() . '/css/news-statistics.css', array(), '1.0.0');
         
         // Pass Ajax URL and nonce to JavaScript
@@ -30838,7 +30837,7 @@ function std_looppost_enqueue_scripts() {
             'std-looppost-script',
             get_stylesheet_directory_uri() . '/js/std-looppost.js',
             array('jquery'),
-            '1.0.0',
+            
             true
         );
         
@@ -31688,7 +31687,7 @@ function dga_user_token_shortcode() {
     
     // Enqueue required styles and scripts
     wp_enqueue_style('dga-user-token-css', get_stylesheet_directory_uri() . '/css/dga-user-token.css', array(), '1.0.0');
-    wp_enqueue_script('dga-user-token-js', get_stylesheet_directory_uri() . '/js/dga-user-token.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('dga-user-token-js', get_stylesheet_directory_uri() . '/js/dga-user-token.js', array('jquery'),  true);
     
     // Add AJAX URL to the script
     wp_localize_script('dga-user-token-js', 'dgaUserToken', array(
@@ -31917,7 +31916,7 @@ function dga_endpoint_test_shortcode() {
     
     // Enqueue required styles and scripts
     wp_enqueue_style('dga-endpoint-test-css', get_stylesheet_directory_uri() . '/css/dga-endpoint-test.css', array(), '1.0.0');
-    wp_enqueue_script('dga-endpoint-test-js', get_stylesheet_directory_uri() . '/js/dga-endpoint-test.js', array('jquery'), '1.0.0', true);
+    wp_enqueue_script('dga-endpoint-test-js', get_stylesheet_directory_uri() . '/js/dga-endpoint-test.js', array('jquery'),  true);
     
     // Add AJAX URL to the script
     wp_localize_script('dga-endpoint-test-js', 'dgaEndpointTest', array(

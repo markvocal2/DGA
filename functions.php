@@ -87,7 +87,7 @@ function my_register_recaptcha_scripts() {
         'custom-recaptcha-style',
         get_stylesheet_directory_uri() . '/css/recaptcha.css',
         array(),
-        '1.0.0'
+         
     );
 }
 add_action('init', 'my_register_recaptcha_scripts');
@@ -711,7 +711,7 @@ class Post_Count_Widget {
             'widget-post-count-css', 
             get_stylesheet_directory_uri() . '/css/widget-post-count.css', 
             array(), 
-            '1.0.0'
+             
         );
         
         wp_localize_script('widget-post-count-js', 'postCountData', array(
@@ -3250,7 +3250,7 @@ function modern_auth_buttons_assets() {
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     
     // Enqueue custom styles and scripts from Child Theme
-    wp_enqueue_style('modern-auth-buttons', $child_theme_url . '/css/modern-auth-buttons.css', array(), '1.0.0');
+    wp_enqueue_style('modern-auth-buttons', $child_theme_url . '/css/modern-auth-buttons.css', array(),  );
     wp_enqueue_script('modern-auth-buttons', $child_theme_url . '/js/modern-auth-buttons.js', array('jquery'),  true);
 }
 
@@ -3357,7 +3357,7 @@ function edit_wpcontent_register_styles() {
         'edit-wpcontent-style', 
         get_stylesheet_directory_uri() . '/css/edit-wpcontent.css', 
         array(), 
-        '1.0.0'
+         
     );
 }
 add_action('wp_enqueue_scripts', 'edit_wpcontent_register_styles');
@@ -3753,7 +3753,7 @@ function simulate_css_validation($url) {
 
 // Enqueue necessary scripts and styles
 function wpml_language_switcher_assets() {
-    wp_enqueue_style('wpml-language-switcher', get_stylesheet_directory_uri() . '/css/wpml-language-switcher.css', array(), '1.0.0');
+    wp_enqueue_style('wpml-language-switcher', get_stylesheet_directory_uri() . '/css/wpml-language-switcher.css', array(),  );
     wp_enqueue_script('wpml-language-switcher', get_stylesheet_directory_uri() . '/js/wpml-language-switcher.js', array('jquery'),  true);
     
     // Pass AJAX URL and current language to JavaScript
@@ -4551,7 +4551,7 @@ add_action('elementor/query/article_more', function($query) {
 
 // 1. Enqueue necessary scripts and styles
 function profile_management_enqueue_scripts() {
-    $version = '1.0.0';
+    $version =  ;
     
     // Enqueue CSS
     wp_enqueue_style(
@@ -9212,7 +9212,7 @@ function enqueue_special_permissions_assets() {
         'special-permissions-css',
         $child_theme_url . '/css/special-permissions.css',
         array(),
-        '1.0.0'
+         
     );
     
     // โหลด JavaScript
@@ -9420,7 +9420,7 @@ function assign_admin_capabilities_to_role($role_name) {
 
 // Enqueue necessary scripts and styles
 function custom_ajax_search_enqueue_scripts() {
-    wp_enqueue_style('custom-ajax-search', get_stylesheet_directory_uri() . '/css/custom-ajax-search.css', array(), '1.0.0');
+    wp_enqueue_style('custom-ajax-search', get_stylesheet_directory_uri() . '/css/custom-ajax-search.css', array(),  );
     wp_enqueue_script('custom-ajax-search', get_stylesheet_directory_uri() . '/js/custom-ajax-search.js', array('jquery'),  true);
     wp_localize_script('custom-ajax-search', 'customAjaxSearch', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
@@ -9557,7 +9557,7 @@ function pplist_enqueue_assets() {
     $theme_path = get_stylesheet_directory_uri();
     
     // Enqueue CSS
-    wp_enqueue_style('pplist-styles', $theme_path . '/css/pplist.css', array(), '1.0.0');
+    wp_enqueue_style('pplist-styles', $theme_path . '/css/pplist.css', array(),  );
     
     // Enqueue JavaScript
     wp_enqueue_script('jquery-ui-autocomplete');
@@ -9887,7 +9887,7 @@ function ppgroup_editor_enqueue_scripts() {
         'ppgroup-editor-style',
         $child_theme_url . '/css/ppgroup-editor.css',
         array(),
-        '1.0.0'
+         
     );
     
     // Enqueue JavaScript
@@ -10286,7 +10286,7 @@ function thai_date_views_enqueue_scripts() {
     wp_enqueue_style('thai-date-views-style', 
         get_stylesheet_directory_uri() . '/css/thai-date-views.css', 
         array(), 
-        '1.0.0'
+         
     );
     
     wp_enqueue_script('thai-date-views-script', 
@@ -10443,7 +10443,7 @@ function enqueue_standard_documents_assets() {
         'standard-documents-style',
         get_stylesheet_directory_uri() . '/css/standard-documents.css',
         array(),
-        '1.0.0'
+         
     );
     
     wp_enqueue_script(
@@ -10536,7 +10536,7 @@ function display_standard_documents() {
 
 // Enqueue scripts and styles
 function tdep_cards_enqueue_assets() {
-    wp_enqueue_style('tdep-cards-style', get_stylesheet_directory_uri() . '/css/tdep-cards.css', array(), '1.0.0');
+    wp_enqueue_style('tdep-cards-style', get_stylesheet_directory_uri() . '/css/tdep-cards.css', array(),  );
     wp_enqueue_script('tdep-cards-script', get_stylesheet_directory_uri() . '/js/tdep-cards.js', array('jquery'),  true);
 }
 add_action('wp_enqueue_scripts', 'tdep_cards_enqueue_assets');
@@ -11018,7 +11018,7 @@ add_action('after_setup_theme', 'tdep_list_after_setup_theme');
 
 function register_category_editor_assets() {
     wp_enqueue_media(); // เพิ่ม WordPress Media Uploader
-    wp_enqueue_style('category-editor-style', get_stylesheet_directory_uri() . '/css/category-editor.css', array(), '1.0.0');
+    wp_enqueue_style('category-editor-style', get_stylesheet_directory_uri() . '/css/category-editor.css', array(),  );
     wp_enqueue_script('category-editor-script', get_stylesheet_directory_uri() . '/js/category-editor.js', array('jquery'),  true);
     wp_localize_script('category-editor-script', 'categoryEditorAjax', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
@@ -12145,7 +12145,7 @@ class UserPermissionController {
             'user-permission-styles', 
             $this->child_theme_directory . '/css/user-permission.css',
             array(),
-            '1.0.0'
+             
         );
 
         wp_enqueue_script('jquery');
@@ -13505,7 +13505,7 @@ function google_translate_button_shortcode() {
     wp_enqueue_script('custom-translate', get_stylesheet_directory_uri() . '/js/custom-translate.js', array('jquery'),  true);
     
     // Enqueue custom styles
-    wp_enqueue_style('custom-translate', get_stylesheet_directory_uri() . '/css/custom-translate.css', array(), '1.0.0');
+    wp_enqueue_style('custom-translate', get_stylesheet_directory_uri() . '/css/custom-translate.css', array(),  );
     
     // Add custom script and styles
     add_action('wp_footer', function() {
@@ -15573,7 +15573,7 @@ table_files_init();
 
 function egp_statistics_enqueue_scripts() {
     // ลงทะเบียน CSS
-    wp_enqueue_style('egp-statistics-style', get_stylesheet_directory_uri() . '/css/egp-statistics.css', array(), '1.0.0');
+    wp_enqueue_style('egp-statistics-style', get_stylesheet_directory_uri() . '/css/egp-statistics.css', array(),  );
     
     // ลงทะเบียน JavaScript libraries
     wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array('jquery'), '3.9.1', true);
@@ -18279,7 +18279,7 @@ add_action('init', 'register_oitform_shortcode');
 
 // Enqueue scripts และ styles
 function enqueue_oitform_scripts() {
-    wp_register_style('oitform-styles', get_stylesheet_directory_uri() . '/css/oitform.css', array(), '1.0.0');
+    wp_register_style('oitform-styles', get_stylesheet_directory_uri() . '/css/oitform.css', array(),  );
     wp_register_script('oitform-script', get_stylesheet_directory_uri() . '/js/oitform.js', array('jquery'),  true);
     
     // ส่งค่า AJAX URL ไปยัง JavaScript
@@ -19431,7 +19431,7 @@ function corg_enqueue_assets() {
     }
     
     wp_enqueue_script('corg-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('corg-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('corg-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('corg-add-taxo', 'corg_ajax', array(
@@ -19576,7 +19576,7 @@ function cgroup_enqueue_assets() {
     }
     
     wp_enqueue_script('cgroup-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('cgroup-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('cgroup-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('cgroup-add-taxo', 'cgroup_ajax', array(
@@ -19721,7 +19721,7 @@ function cdata_enqueue_assets() {
     }
     
     wp_enqueue_script('cdata-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('cdata-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('cdata-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('cdata-add-taxo', 'cdata_ajax', array(
@@ -19866,7 +19866,7 @@ function cgov_enqueue_assets() {
     }
     
     wp_enqueue_script('cgov-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('cgov-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('cgov-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('cgov-add-taxo', 'cgov_ajax', array(
@@ -20011,7 +20011,7 @@ function caccess_enqueue_assets() {
     }
     
     wp_enqueue_script('caccess-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('caccess-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('caccess-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('caccess-add-taxo', 'caccess_ajax', array(
@@ -20157,7 +20157,7 @@ function cformat_enqueue_assets() {
     }
     
     wp_enqueue_script('cformat-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('cformat-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('cformat-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('cformat-add-taxo', 'cformat_ajax', array(
@@ -20303,7 +20303,7 @@ function clicense_enqueue_assets() {
     }
     
     wp_enqueue_script('clicense-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('clicense-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('clicense-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('clicense-add-taxo', 'clicense_ajax', array(
@@ -20449,7 +20449,7 @@ function ctag_enqueue_assets() {
     }
     
     wp_enqueue_script('ctag-add-taxo', $js_path, array('jquery'),  true);
-    wp_enqueue_style('ctag-add-taxo', $css_path, array(), '1.0.0');
+    wp_enqueue_style('ctag-add-taxo', $css_path, array(),  );
     
     // Add the WordPress AJAX URL to our script
     wp_localize_script('ctag-add-taxo', 'ctag_ajax', array(
@@ -20990,7 +20990,7 @@ function ckan_list_init() {
     add_shortcode('ckan_list', 'ckan_list_shortcode');
     
     // Register scripts and styles
-    wp_register_style('ckan-list-css', get_stylesheet_directory_uri() . '/css/ckan-list.css', array(), '1.0.0');
+    wp_register_style('ckan-list-css', get_stylesheet_directory_uri() . '/css/ckan-list.css', array(),  );
     wp_register_script('ckan-list-js', get_stylesheet_directory_uri() . '/js/ckan-list.js', array('jquery'),  true);
     
     // Localize script with AJAX URL and nonce
@@ -21445,7 +21445,7 @@ function ckan_taxo_list_init() {
     add_shortcode('ckan_term', 'ckan_taxo_list_shortcode');
     
     // Register scripts and styles
-    wp_register_style('ckan-taxo-list-css', get_stylesheet_directory_uri() . '/css/ckan-taxo-list.css', array(), '1.0.0');
+    wp_register_style('ckan-taxo-list-css', get_stylesheet_directory_uri() . '/css/ckan-taxo-list.css', array(),  );
     wp_register_script('ckan-taxo-list-js', get_stylesheet_directory_uri() . '/js/ckan-taxo-list.js', array('jquery'),  true);
     
     // Localize script with AJAX URL and nonce
@@ -24209,7 +24209,7 @@ function at_status_toggle_enqueue_scripts() {
         'at-status-toggle-style',
         get_stylesheet_directory_uri() . '/css/at-status-toggle.css',
         array(),
-        '1.0.0'
+         
     );
     
     // ลงทะเบียน JavaScript
@@ -24342,7 +24342,7 @@ function at_inactive_news_list_enqueue_scripts() {
         'at-inactive-news-list-style',
         get_stylesheet_directory_uri() . '/css/at-inactive-news-list.css',
         array(),
-        '1.0.0'
+         
     );
     
     // ลงทะเบียน JavaScript
@@ -25399,7 +25399,7 @@ function ckan_save_revision_history($post_id, $new_data, $old_data = null) {
 
 function ckan_secret_shortcode($atts) {
     // Enqueue required scripts and styles จาก ChildTheme
-    wp_enqueue_style('ckan-secret-css', get_stylesheet_directory_uri() . '/css/ckan-secret.css', array(), '1.0.0');
+    wp_enqueue_style('ckan-secret-css', get_stylesheet_directory_uri() . '/css/ckan-secret.css', array(),  );
     wp_enqueue_script('ckan-secret-js', get_stylesheet_directory_uri() . '/js/ckan-secret.js', array('jquery'),  true);
     
     // Localize script สำหรับ AJAX URL และ nonce
@@ -26950,7 +26950,7 @@ function ckan_taxo_orglist_enqueue_scripts() {
         'ckan-taxo-orglist-style',
         $child_theme_dir . '/css/ckan-taxo-orglist.css',
         array(),
-        '1.0.0'
+         
     );
     
     // Enqueue JavaScript
@@ -28873,7 +28873,7 @@ function cpd_delete_post_button_shortcode() {
         'cpd-delete-dataset-css', 
         get_stylesheet_directory_uri() . '/css/ckan-delete-dataset.css', 
         array(), 
-        '1.0.0'
+         
     );
     
     // Pass post ID to JavaScript
@@ -29273,7 +29273,7 @@ function post_featured_images_enqueue_scripts() {
         'post-featured-images-css',
         $theme_uri . '/css/post-featured-images.css',
         array(),
-        '1.0.0'
+         
     );
 }
 add_action('wp_enqueue_scripts', 'post_featured_images_enqueue_scripts');
@@ -29862,7 +29862,7 @@ function news_statistics_enqueue_assets() {
         
         // Enqueue custom scripts and styles
         wp_enqueue_script('news-statistics-js', get_stylesheet_directory_uri() . '/js/news-statistics.js', array('jquery', 'chartjs', 'daterangepicker'),  true);
-        wp_enqueue_style('news-statistics-css', get_stylesheet_directory_uri() . '/css/news-statistics.css', array(), '1.0.0');
+        wp_enqueue_style('news-statistics-css', get_stylesheet_directory_uri() . '/css/news-statistics.css', array(),  );
         
         // Pass Ajax URL and nonce to JavaScript
         wp_localize_script('news-statistics-js', 'news_statistics_vars', array(
@@ -30901,7 +30901,7 @@ function std_looppost_enqueue_scripts() {
             'std-looppost-style',
             get_stylesheet_directory_uri() . '/css/std-looppost.css',
             array(),
-            '1.0.0'
+             
         );
         
         // Enqueue JavaScript
@@ -31555,7 +31555,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('DGA_TAG_VERSION', '1.0.0');
+define('DGA_TAG_VERSION',  );
 define('DGA_TAG_PATH', plugin_dir_path(__FILE__));
 define('DGA_TAG_URL', plugin_dir_url(__FILE__));
 
@@ -31758,7 +31758,7 @@ function dga_user_token_shortcode() {
     }
     
     // Enqueue required styles and scripts
-    wp_enqueue_style('dga-user-token-css', get_stylesheet_directory_uri() . '/css/dga-user-token.css', array(), '1.0.0');
+    wp_enqueue_style('dga-user-token-css', get_stylesheet_directory_uri() . '/css/dga-user-token.css', array(),  );
     wp_enqueue_script('dga-user-token-js', get_stylesheet_directory_uri() . '/js/dga-user-token.js', array('jquery'),  true);
     
     // Add AJAX URL to the script
@@ -31987,7 +31987,7 @@ function dga_endpoint_test_shortcode() {
     }
     
     // Enqueue required styles and scripts
-    wp_enqueue_style('dga-endpoint-test-css', get_stylesheet_directory_uri() . '/css/dga-endpoint-test.css', array(), '1.0.0');
+    wp_enqueue_style('dga-endpoint-test-css', get_stylesheet_directory_uri() . '/css/dga-endpoint-test.css', array(),  );
     wp_enqueue_script('dga-endpoint-test-js', get_stylesheet_directory_uri() . '/js/dga-endpoint-test.js', array('jquery'),  true);
     
     // Add AJAX URL to the script

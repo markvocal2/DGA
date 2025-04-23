@@ -77,7 +77,7 @@ function my_register_recaptcha_scripts() {
         'custom-recaptcha',
         get_stylesheet_directory_uri() . '/js/recaptcha.js',
         array('jquery', 'google-recaptcha'),
-        '1.0.0', // Add a version number
+          // Add a version number
         true
     );
 

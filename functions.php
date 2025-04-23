@@ -52,32 +52,37 @@ add_action('wp_head', 'enable_console_logging');
 
 /**
  * Google reCAPTCHA V3 Implementation for WordPress
- * 
+ *
  * เป็นฟังก์ชั่นที่พร้อมเรียกใช้สำหรับป้องกันฟอร์มด้วย reCAPTCHA V3
- * 
+ *
  */
+
+// Define a constant for the reCAPTCHA error message
+define('RECAPTCHA_ERROR_MESSAGE', 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง');
 
 // ลงทะเบียนสคริปต์ reCAPTCHA (แต่ยังไม่ได้โหลด)
 function my_register_recaptcha_scripts() {
     // ลงทะเบียน Google reCAPTCHA API
     wp_register_script(
         'google-recaptcha',
-        'https://www.google.com/recaptcha/api.js?render=6LcNePUqAAAAAHsRn5uSrOEaXUhAj9tOped3cM2D',
+        'https://www.google.com/recaptcha/api.js?render=6LcNePUqAAAAAHsRn5uSrOEaXUhAj9tOped3cM2D', // Replace with your Site Key
         array(),
         null,
         true
     );
-    
+
     // ลงทะเบียนสคริปต์ reCAPTCHA ที่กำหนดเอง
+    // Make sure the path '/js/recaptcha.js' exists in your theme or child theme
     wp_register_script(
         'custom-recaptcha',
         get_stylesheet_directory_uri() . '/js/recaptcha.js',
         array('jquery', 'google-recaptcha'),
-        
+        '1.0.0', // Add a version number
         true
     );
-    
+
     // ลงทะเบียนสไตล์สำหรับ reCAPTCHA badge
+    // Make sure the path '/css/recaptcha.css' exists in your theme or child theme
     wp_register_style(
         'custom-recaptcha-style',
         get_stylesheet_directory_uri() . '/css/recaptcha.css',
@@ -93,21 +98,21 @@ function my_enqueue_recaptcha_scripts() {
     if (!wp_script_is('google-recaptcha', 'registered')) {
         my_register_recaptcha_scripts();
     }
-    
+
     // โหลดสคริปต์
     wp_enqueue_script('google-recaptcha');
     wp_enqueue_script('custom-recaptcha');
     wp_enqueue_style('custom-recaptcha-style');
-    
+
     // ส่ง site key ไปยัง JavaScript
     wp_localize_script(
         'custom-recaptcha',
         'recaptcha_data',
         array(
-            'site_key' => '6LcNePUqAAAAAHsRn5uSrOEaXUhAj9tOped3cM2D'
+            'site_key' => '6LcNePUqAAAAAHsRn5uSrOEaXUhAj9tOped3cM2D' // Replace with your Site Key
         )
     );
-    
+
     // เพิ่มข้อความเกี่ยวกับ reCAPTCHA ในส่วนท้ายของเว็บไซต์
     add_action('wp_footer', 'add_recaptcha_notice');
 }
@@ -118,169 +123,236 @@ function verify_recaptcha($token = null) {
     if (empty($token) && isset($_POST['g-recaptcha-response'])) {
         $token = sanitize_text_field($_POST['g-recaptcha-response']);
     }
-    
+
     // ส่งคืน false ถ้ายังไม่มี token
     if (empty($token)) {
+        // Optionally log an error here if needed
         return false;
     }
-    
+
     // ตั้งค่าคำขอไปยัง API ตรวจสอบของ Google
-    $secret_key = '6LcNePUqAAAAAPi0ZHPmG4yYii4LmJkA3-191Zap';
+    $secret_key = '6LcNePUqAAAAAPi0ZHPmG4yYii4LmJkA3-191Zap'; // Replace with your Secret Key
     $response = wp_remote_post('https://www.google.com/recaptcha/api/siteverify', [
         'body' => [
-            'secret' => $secret_key,
+            'secret'   => $secret_key,
             'response' => $token,
-            'remoteip' => $_SERVER['REMOTE_ADDR']
+            'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '' // Use null coalescing operator for safety
         ]
     ]);
-    
+
     // ตรวจสอบข้อผิดพลาดในการตอบกลับ
     if (is_wp_error($response)) {
+        // Log the error for debugging
+        // error_log('reCAPTCHA API request failed: ' . $response->get_error_message());
         return false;
     }
-    
+
     // แยกวิเคราะห์การตอบกลับ
     $result = json_decode(wp_remote_retrieve_body($response), true);
-    
-    // ตรวจสอบความสำเร็จและคะแนน (0.5 เป็นเกณฑ์ที่ Google แนะนำ)
-    if (isset($result['success']) && $result['success'] === true && $result['score'] >= 0.5) {
-        return true;
+
+    // Check if JSON decoding was successful
+    if (json_last_error() !== JSON_ERROR_NONE) {
+         // error_log('reCAPTCHA API response JSON decoding failed: ' . json_last_error_msg());
+         return false;
     }
-    
-    return false;
+
+    // ตรวจสอบความสำเร็จและคะแนน (0.5 เป็นเกณฑ์ที่ Google แนะนำ)
+    // Consider making the score threshold configurable
+    if (isset($result['success']) && $result['success'] === true && isset($result['score']) && $result['score'] >= 0.5) {
+        return true;
+    } else {
+        // Log the failure details if needed (e.g., score, error codes)
+        // error_log('reCAPTCHA verification failed: ' . print_r($result, true));
+        return false;
+    }
 }
 
 // ฟังก์ชั่นเพิ่ม reCAPTCHA สำหรับฟอร์มความคิดเห็น WordPress
 function enable_recaptcha_for_comments() {
-    // โหลดสคริปต์ที่จำเป็น
-    my_enqueue_recaptcha_scripts();
-    
-    // เพิ่มตัวกรองสำหรับตรวจสอบความคิดเห็น
-    add_filter('preprocess_comment', 'verify_comment_recaptcha');
+    // Only enqueue scripts if comments are open for the post and user is not logged in (optional)
+    if ( comments_open() && !is_user_logged_in() ) {
+        my_enqueue_recaptcha_scripts();
+        // เพิ่มตัวกรองสำหรับตรวจสอบความคิดเห็น
+        add_filter('preprocess_comment', 'verify_comment_recaptcha');
+    }
 }
+// Hook later to ensure conditional logic works correctly
+add_action('wp_enqueue_scripts', 'enable_recaptcha_for_comments');
+
 
 // ฟังก์ชั่นเพิ่ม reCAPTCHA สำหรับฟอร์มเข้าสู่ระบบ WordPress
 function enable_recaptcha_for_login() {
-    // โหลดสคริปต์ที่จำเป็น
+    // โหลดสคริปต์ที่จำเป็นในหน้า login
     my_enqueue_recaptcha_scripts();
-    
+
     // เพิ่มตัวกรองสำหรับตรวจสอบการเข้าสู่ระบบ
     add_filter('wp_authenticate_user', 'verify_login_recaptcha', 10, 2);
 }
+add_action('login_enqueue_scripts', 'enable_recaptcha_for_login'); // Use the correct hook for login page
 
 // ฟังก์ชั่นเพิ่ม reCAPTCHA สำหรับฟอร์มลงทะเบียน WordPress
 function enable_recaptcha_for_registration() {
-    // โหลดสคริปต์ที่จำเป็น
+    // โหลดสคริปต์ที่จำเป็นในหน้า register
     my_enqueue_recaptcha_scripts();
-    
+
     // เพิ่มตัวกรองสำหรับตรวจสอบการลงทะเบียน
     add_filter('registration_errors', 'verify_registration_recaptcha', 10, 3);
 }
+// Use the correct hook for registration page, often login_enqueue_scripts works if registration is on the same page
+add_action('login_enqueue_scripts', 'enable_recaptcha_for_registration');
+// If using a separate registration page, find the appropriate hook or use wp_enqueue_scripts with conditional logic
 
 // ฟังก์ชั่นเพิ่ม reCAPTCHA สำหรับฟอร์มลืมรหัสผ่าน WordPress
 function enable_recaptcha_for_lostpassword() {
-    // โหลดสคริปต์ที่จำเป็น
+    // โหลดสคริปต์ที่จำเป็นในหน้า lost password
     my_enqueue_recaptcha_scripts();
-    
+
     // เพิ่มการดำเนินการสำหรับตรวจสอบฟอร์มลืมรหัสผ่าน
     add_action('lostpassword_post', 'verify_lostpassword_recaptcha');
 }
+// Use the correct hook for lost password page, often login_enqueue_scripts works
+add_action('login_enqueue_scripts', 'enable_recaptcha_for_lostpassword');
+
 
 // ฟังก์ชั่นเพิ่ม reCAPTCHA สำหรับ Contact Form 7
 function enable_recaptcha_for_cf7() {
-    // ตรวจสอบว่า Contact Form 7 ถูกติดตั้งหรือไม่
+    // ตรวจสอบว่า Contact Form 7 ถูกติดตั้งและใช้งานหรือไม่
     if (!function_exists('wpcf7_init')) {
         return;
     }
-    
-    // โหลดสคริปต์ที่จำเป็น
-    my_enqueue_recaptcha_scripts();
-    
+
+    // โหลดสคริปต์ที่จำเป็น (CF7 usually loads scripts on pages with forms)
+    // Consider adding a check if a CF7 form actually exists on the current page
+    if ( is_singular() ) { // Example: Only load if it's a single post/page
+        global $post;
+        if ( $post && has_shortcode( $post->post_content, 'contact-form-7' ) ) {
+             my_enqueue_recaptcha_scripts();
+        }
+    }
+
+
     // เพิ่มตัวกรองสำหรับตรวจสอบการส่ง Contact Form 7
-    add_filter('wpcf7_spam', 'verify_cf7_recaptcha', 10, 2);
+    add_filter('wpcf7_spam', 'verify_cf7_recaptcha', 10, 1); // CF7 passes only one argument now
 }
+add_action('wp_enqueue_scripts', 'enable_recaptcha_for_cf7'); // Hook to load scripts on frontend
 
 // ฟังก์ชั่นเพิ่ม reCAPTCHA สำหรับฟอร์มที่กำหนดเอง
+// This function just enqueues the scripts. You need to call verify_custom_form_recaptcha()
+// in your custom form's processing logic.
 function enable_recaptcha_for_custom_form() {
     // โหลดสคริปต์ที่จำเป็น
     my_enqueue_recaptcha_scripts();
-    
+
     // หมายเหตุ: คุณจะต้องเพิ่มโค้ดการตรวจสอบเอง
-    // สำหรับฟอร์มที่กำหนดเอง เมื่อมีการส่งฟอร์ม
+    // โดยเรียกใช้ verify_custom_form_recaptcha()
+    // เมื่อมีการส่งฟอร์มที่กำหนดเองของคุณ
+    // Example: add_action('your_custom_form_submit_hook', 'process_custom_form');
 }
+// You would call enable_recaptcha_for_custom_form() on the page where your custom form appears.
+// add_action('wp_enqueue_scripts', 'enable_recaptcha_for_custom_form'); // Example, adjust hook as needed
+
 
 // ฟังก์ชั่นตรวจสอบการส่งฟอร์มที่กำหนดเอง
+// Call this function from your custom form processing logic.
 function verify_custom_form_recaptcha() {
     if (!verify_recaptcha()) {
         // คุณสามารถจัดการกับข้อผิดพลาดที่นี่ตามที่คุณต้องการ
         // ตัวอย่าง:
-        wp_die('รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', 'reCAPTCHA Error', ['response' => 403]);
-        // หรือ return false; ถ้าคุณต้องการจัดการข้อผิดพลาดด้วยตัวเอง
+        wp_die(RECAPTCHA_ERROR_MESSAGE, 'reCAPTCHA Error', ['response' => 403, 'back_link' => true]); // Added back_link
+        // หรือ return false; ถ้าคุณต้องการจัดการข้อผิดพลาดด้วยตัวเองในโค้ดที่เรียกใช้
+        // return false;
     }
-    
+    // If verification passes, return true
     return true;
 }
 
 // ฟังก์ชั่นตรวจสอบความคิดเห็น
 function verify_comment_recaptcha($commentdata) {
     // ข้ามสำหรับผู้ใช้ที่เข้าสู่ระบบแล้ว (ตัวเลือก)
-    if (is_user_logged_in()) {
+    if (is_user_logged_in() && current_user_can('moderate_comments')) { // Be more specific, maybe skip only for moderators?
         return $commentdata;
     }
-    
+
     if (!verify_recaptcha()) {
-        wp_die('รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', 'reCAPTCHA Error', ['response' => 403]);
+        wp_die(RECAPTCHA_ERROR_MESSAGE, 'reCAPTCHA Error', ['response' => 403, 'back_link' => true]); // Added back_link
     }
-    
+
     return $commentdata;
 }
 
 // ฟังก์ชั่นตรวจสอบการเข้าสู่ระบบ
 function verify_login_recaptcha($user, $password) {
-    // ข้ามถ้าผู้ใช้เป็นข้อผิดพลาดแล้ว
+    // ข้ามถ้าผู้ใช้เป็นข้อผิดพลาดแล้ว (เช่น รหัสผ่านผิด)
     if (is_wp_error($user)) {
         return $user;
     }
-    
+
     if (!verify_recaptcha()) {
-        return new WP_Error('recaptcha_error', 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง');
+        // Return a WP_Error object for login form handling
+        return new WP_Error('recaptcha_error', RECAPTCHA_ERROR_MESSAGE);
     }
-    
+
     return $user;
 }
 
 // ฟังก์ชั่นตรวจสอบการลงทะเบียน
 function verify_registration_recaptcha($errors, $sanitized_user_login, $user_email) {
     if (!verify_recaptcha()) {
-        $errors->add('recaptcha_error', 'รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง');
+        // Add error to the WP_Error object for registration form
+        $errors->add('recaptcha_error', RECAPTCHA_ERROR_MESSAGE);
     }
-    
+
     return $errors;
 }
 
 // ฟังก์ชั่นตรวจสอบลืมรหัสผ่าน
 function verify_lostpassword_recaptcha() {
-    if (!verify_recaptcha()) {
-        wp_die('รหัสยืนยัน reCAPTCHA ไม่ถูกต้อง โปรดลองอีกครั้ง', 'reCAPTCHA Error', ['response' => 403]);
+    // Check if the request method is POST
+    if ('POST' !== $_SERVER['REQUEST_METHOD']) {
+        return;
     }
+
+    if (!verify_recaptcha()) {
+        // Use wp_redirect back to the form with an error query arg
+        $redirect_url = wp_lostpassword_url();
+        $redirect_url = add_query_arg('recaptcha', 'failed', $redirect_url);
+        wp_safe_redirect($redirect_url);
+        exit;
+        // Or use wp_die, but redirecting is often preferred for forms
+        // wp_die(RECAPTCHA_ERROR_MESSAGE, 'reCAPTCHA Error', ['response' => 403, 'back_link' => true]);
+    }
+    // You might need to add a check on the lost password page to display the error message
+    // based on the 'recaptcha=failed' query arg.
 }
 
+
 // ฟังก์ชั่นตรวจสอบการส่ง Contact Form 7
-function verify_cf7_recaptcha($spam, $submission) {
+// Note: CF7 v5.1+ has built-in reCAPTCHA v3 integration. This custom code might conflict
+// or be unnecessary if you configure it through CF7 settings.
+// If you *must* use this custom verification:
+function verify_cf7_recaptcha($spam) {
+    // If already marked as spam by other CF7 checks, return true
     if ($spam) {
         return $spam;
     }
-    
+
+    // Perform our reCAPTCHA check
     if (!verify_recaptcha()) {
         $spam = true;
+        // Optionally add a specific error message to the form response
+        // This requires interacting with the WPCF7_Submission object, which isn't passed here by default.
+        // You might need a different approach or hook if you want custom messages in CF7.
+        // For now, it will just mark as spam.
     }
-    
+
     return $spam;
 }
 
+
 // ฟังก์ชั่นเพิ่มข้อความเกี่ยวกับ reCAPTCHA ในส่วนท้ายของเว็บไซต์
 function add_recaptcha_notice() {
-    echo '<div class="recaptcha-notice">เว็บไซต์นี้ได้รับการปกป้องด้วย reCAPTCHA และ<a href="https://policies.google.com/privacy" target="_blank">นโยบายความเป็นส่วนตัว</a>และ<a href="https://policies.google.com/terms" target="_blank">ข้อกำหนดในการให้บริการ</a>ของ Google มีผลบังคับใช้</div>';
+    // Consider adding an option to disable this notice if the badge is hidden via CSS
+    echo '<p class="recaptcha-notice" style="font-size: small; color: #555;">This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.</p>';
 }
 
 

@@ -1620,10 +1620,10 @@ function post_social_enqueue_scripts() {
     }
     
     // ลงทะเบียน CSS
-    wp_enqueue_style('post-social-style', $css_path, array(), '1.0.1');
+    wp_enqueue_style('post-social-style', $css_path, array(),  );
     
     // ลงทะเบียน JavaScript
-    wp_enqueue_script('post-social-script', $js_path, array('jquery'), '1.0.1', true);
+    wp_enqueue_script('post-social-script', $js_path, array('jquery'),  , true);
     
     // Localize script with ajax url
     wp_localize_script('post-social-script', 'post_social_data', array(
@@ -2545,8 +2545,8 @@ function dga_team_shortcode($atts) {
     ), $atts);
     
     // เรียกใช้ CSS และ JS
-    wp_enqueue_style('dga-team-css', get_stylesheet_directory_uri() . '/css/dga-team.css', array(), '1.0.1');
-    wp_enqueue_script('dga-team-js', get_stylesheet_directory_uri() . '/js/dga-team.js', array('jquery'), '1.0.1', true);
+    wp_enqueue_style('dga-team-css', get_stylesheet_directory_uri() . '/css/dga-team.css', array(),  );
+    wp_enqueue_script('dga-team-js', get_stylesheet_directory_uri() . '/js/dga-team.js', array('jquery'),  , true);
     
     // ถ้ามี id ลองดึงข้อมูลจาก post
     if (!empty($attributes['id']) && is_numeric($attributes['id'])) {
@@ -2649,8 +2649,8 @@ add_shortcode('dga_team', 'dga_team_shortcode');
  */
 function dga_team_group_shortcode($atts, $content = null) {
     // เรียกใช้ CSS และ JS
-    wp_enqueue_style('dga-team-css', get_stylesheet_directory_uri() . '/css/dga-team.css', array(), '1.0.1');
-    wp_enqueue_script('dga-team-js', get_stylesheet_directory_uri() . '/js/dga-team.js', array('jquery'), '1.0.1', true);
+    wp_enqueue_style('dga-team-css', get_stylesheet_directory_uri() . '/css/dga-team.css', array(),  );
+    wp_enqueue_script('dga-team-js', get_stylesheet_directory_uri() . '/js/dga-team.js', array('jquery'),  , true);
     
     // ดึงค่า shortcode ข้างใน
     $output = '<div class="dga-team-grid">';
@@ -2974,7 +2974,7 @@ function dga_carousel_slide_enqueue_scripts() {
         'dga-carousel-slide-css',
         $theme_dir . '/css/dga-carousel-slide.css',
         array(),
-        '1.0.1'
+         
     );
     
     // Enqueue jQuery if not already loaded
@@ -2985,7 +2985,7 @@ function dga_carousel_slide_enqueue_scripts() {
         'dga-carousel-slide-js',
         $theme_dir . '/js/dga-carousel-slide.js',
         array('jquery'),
-        '1.0.1',
+         ,
         true
     );
 }
@@ -5132,7 +5132,7 @@ function complaint_form_enqueue_scripts() {
         'complaint-form-style',
         get_stylesheet_directory_uri() . '/css/complaint-form.css',
         array(),
-        '1.0.1'
+         
     );
     
     // Enqueue JS
@@ -5140,7 +5140,7 @@ function complaint_form_enqueue_scripts() {
         'complaint-form-script',
         get_stylesheet_directory_uri() . '/js/complaint-form.js',
         array('jquery'),
-        '1.0.1',
+         ,
         true
     );
 
@@ -7603,7 +7603,7 @@ function init_department_role_manager() {
             'department-role-script',
             $child_theme_uri . '/js/department-role.js',
             array('jquery'),
-            '1.0.1',
+             ,
             true
         );
 
@@ -7634,7 +7634,7 @@ function init_department_role_manager() {
             'department-role-styles',
             $child_theme_uri . '/css/department-role.css',
             array(),
-            '1.0.1'
+             
         );
     } else {
         error_log('Department Role Manager: ไม่พบไฟล์ CSS ในธีมลูก');
@@ -13646,14 +13646,14 @@ function pending_posts_cards_assets() {
         'pending-posts-cards',
         get_stylesheet_directory_uri() . '/css/pending-posts-cards.css',
         array(),
-        '1.0.1'
+         
     );
 
     wp_enqueue_script(
         'pending-posts-cards',
         get_stylesheet_directory_uri() . '/js/pending-posts-cards.js',
         array('jquery'),
-        '1.0.1',
+         ,
         true
     );
 
@@ -14430,8 +14430,8 @@ function pending_posts_cards_error_handler($callback) {
 // ลงทะเบียน shortcode
 function pdpa_cookie_consent_shortcode() {
     // เตรียม assets ทุกครั้ง ไม่ว่าจะมีความยินยอมแล้วหรือไม่
-    wp_enqueue_style('pdpa-cookie-consent-style', get_stylesheet_directory_uri() . '/css/pdpa-cookie-consent.css', array(), '1.0.1');
-    wp_enqueue_script('pdpa-cookie-consent-script', get_stylesheet_directory_uri() . '/js/pdpa-cookie-consent.js', array('jquery'), '1.0.1', true);
+    wp_enqueue_style('pdpa-cookie-consent-style', get_stylesheet_directory_uri() . '/css/pdpa-cookie-consent.css', array(),  );
+    wp_enqueue_script('pdpa-cookie-consent-script', get_stylesheet_directory_uri() . '/js/pdpa-cookie-consent.js', array('jquery'),  , true);
     
     // ตรวจสอบก่อนว่าเคยให้ความยินยอมไปแล้วหรือไม่
     $consent_given = isset($_COOKIE['pdpa_consent_given']) && $_COOKIE['pdpa_consent_given'] === 'yes';
@@ -15966,12 +15966,12 @@ function dynamic_table_shortcode($atts) {
     $can_edit = current_user_can('edit_posts');
     
     // Always enqueue viewer styles
-    wp_enqueue_style('dynamic-table-css', get_stylesheet_directory_uri() . '/css/dynamic-table.css', array(), '1.0.1');
+    wp_enqueue_style('dynamic-table-css', get_stylesheet_directory_uri() . '/css/dynamic-table.css', array(),  );
     
     // Only enqueue edit scripts if user has permissions
     if ($can_edit) {
         wp_enqueue_script('jquery');
-        wp_enqueue_script('dynamic-table-js', get_stylesheet_directory_uri() . '/js/dynamic-table.js', array('jquery'), '1.0.1', true);
+        wp_enqueue_script('dynamic-table-js', get_stylesheet_directory_uri() . '/js/dynamic-table.js', array('jquery'),  , true);
         
         // Localize script with AJAX URL and nonce
         wp_localize_script('dynamic-table-js', 'dynamic_table_params', array(
@@ -16399,7 +16399,7 @@ function user_posts_register_assets() {
         'user-posts-js',
         $child_theme_uri . '/js/user-posts.js',
         array('jquery'),
-        '1.0.1',
+         ,
         true
     );
     
@@ -16425,7 +16425,7 @@ function user_posts_register_assets() {
         'user-posts-css',
         $child_theme_uri . '/css/user-posts.css',
         array(),
-        '1.0.1'
+         
     );
 }
 add_action('wp_enqueue_scripts', 'user_posts_register_assets');
@@ -18674,19 +18674,19 @@ function org_links_enqueue_scripts() {
     
     // Enqueue styles for frontend and admin
     if (!is_admin() || $is_admin_page) {
-        wp_enqueue_style('org-links-style', get_stylesheet_directory_uri() . '/css/org-links.css', array(), '1.0.1');
-        wp_enqueue_style('org-links-modal-style', get_stylesheet_directory_uri() . '/css/org-links-modal.css', array(), '1.0.1');
+        wp_enqueue_style('org-links-style', get_stylesheet_directory_uri() . '/css/org-links.css', array(),  );
+        wp_enqueue_style('org-links-modal-style', get_stylesheet_directory_uri() . '/css/org-links-modal.css', array(),  );
     }
     
     // Admin only styles
     if ($is_admin_page) {
-        wp_enqueue_style('org-links-admin-style', get_stylesheet_directory_uri() . '/css/org-links-admin.css', array(), '1.0.1');
+        wp_enqueue_style('org-links-admin-style', get_stylesheet_directory_uri() . '/css/org-links-admin.css', array(),  );
     }
     
     // Enqueue main script for frontend and admin
     if (!is_admin() || $is_admin_page) {
         wp_enqueue_media(); // เพิ่ม media uploader ทั้งใน frontend และ admin
-        wp_enqueue_script('org-links-script', get_stylesheet_directory_uri() . '/js/organization-links.js', array('jquery', 'jquery-ui-sortable'), '1.0.1', true);
+        wp_enqueue_script('org-links-script', get_stylesheet_directory_uri() . '/js/organization-links.js', array('jquery', 'jquery-ui-sortable'),  , true);
         
         // Pass data to JavaScript
         wp_localize_script('org-links-script', 'org_links_data', array(
@@ -20580,11 +20580,11 @@ function ckan_fadd_init() {
     add_shortcode('ckan_fadd', 'ckan_fadd_shortcode');
     
     // Register scripts and styles
-    wp_register_style('ckan-fadd-css', get_stylesheet_directory_uri() . '/css/ckan-fadd.css', array(), '1.0.1');
+    wp_register_style('ckan-fadd-css', get_stylesheet_directory_uri() . '/css/ckan-fadd.css', array(),  );
     wp_register_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css', array(), '4.0.13');
     wp_register_script('jquery-ui-datepicker', '', array('jquery', 'jquery-ui-core'), '1.12.1', true);
     wp_register_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', array('jquery'), '4.0.13', true);
-    wp_register_script('ckan-fadd-js', get_stylesheet_directory_uri() . '/js/ckan-fadd.js', array('jquery', 'jquery-ui-datepicker', 'select2-js'), '1.0.1', true);
+    wp_register_script('ckan-fadd-js', get_stylesheet_directory_uri() . '/js/ckan-fadd.js', array('jquery', 'jquery-ui-datepicker', 'select2-js'),  , true);
     
     // Localize script with AJAX URL and nonce
     wp_localize_script('ckan-fadd-js', 'ckan_fadd_ajax', array(
@@ -22665,8 +22665,8 @@ function ckan_format_field_value($value, $type) {
  * Register and enqueue styles and scripts
  */
 function ckan_metafield_enqueue_scripts() {
-    wp_register_style('ckan-metafield-css', get_stylesheet_directory_uri() . '/css/ckan-metafield.css', array(), '1.0.1');
-    wp_register_script('ckan-metafield-js', get_stylesheet_directory_uri() . '/js/ckan-metafield.js', array('jquery'), '1.0.1', true);
+    wp_register_style('ckan-metafield-css', get_stylesheet_directory_uri() . '/css/ckan-metafield.css', array(),  );
+    wp_register_script('ckan-metafield-js', get_stylesheet_directory_uri() . '/js/ckan-metafield.js', array('jquery'),  , true);
     
     // เพิ่ม admin-specific JS และ localize script
     if (current_user_can('administrator')) {
@@ -31539,7 +31539,7 @@ function std_looppost_custom_styles() {
             'std-looppost-custom-style',
             get_stylesheet_directory_uri() . '/css/std-looppost-custom.css',
             array('std-looppost-style'), // ระบุว่าต้องโหลดหลัง CSS หลัก
-            '1.0.1'
+             
         );
     }
 }
